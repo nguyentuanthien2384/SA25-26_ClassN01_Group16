@@ -26,15 +26,15 @@
                     @foreach ($ratings as $rating)
                     <tr>
                         <td>{{$rating->id}}</td>
-                        <td>{{$rating->user->name}}</td>
-                        <td>{{$rating->user->phone}} </td>
-                        <td>{{ optional($rating->product)->pro_name }}</td>
-                        <td> {{$rating->ra_content}}</td>
+                        <td>{{ optional($rating->user)->name ?? '[N/A]' }}</td>
+                        <td>{{ optional($rating->user)->phone ?? '[N/A]' }}</td>
+                        <td>{{ optional($rating->product)->pro_name ?? '[N/A]' }}</td>
+                        <td>{{$rating->ra_content}}</td>
                         <td>{{$rating->ra_number}}</td>
                         <td>
                             <a style="padding: 5px 10px; border: 1px solid #995" href="{{route('admin.delete.rating',$rating->id)}}"><i class="fa-solid fa-trash" style="font-size:11px"></i>Xoá</a>
                         </td>
-                    </tr>  
+                    </tr>
                     @endforeach
                 @endif
             </tbody>

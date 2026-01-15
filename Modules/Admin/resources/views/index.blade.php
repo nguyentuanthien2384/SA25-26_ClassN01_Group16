@@ -59,11 +59,11 @@
                         @foreach ($ratings as $rating)
                         <tr>
                             <td>{{$rating->id}}</td>
-                            <td>{{$rating->user->name}}</td>
-                            <td>{{ optional($rating->product)->pro_name }}</td>
-                            <td> {{$rating->ra_content}}</td>
+                            <td>{{ optional($rating->user)->name ?? '[N/A]' }}</td>
+                            <td>{{ optional($rating->product)->pro_name ?? '[N/A]' }}</td>
+                            <td>{{$rating->ra_content}}</td>
                             <td>{{$rating->ra_number}}</td>
-                        </tr>  
+                        </tr>
                         @endforeach
                     @endif
                 </tbody>

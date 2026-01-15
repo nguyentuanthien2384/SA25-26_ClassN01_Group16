@@ -59,11 +59,11 @@
                         <?php $__currentLoopData = $ratings; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $rating): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr>
                             <td><?php echo e($rating->id); ?></td>
-                            <td><?php echo e($rating->user->name); ?></td>
-                            <td><?php echo e(optional($rating->product)->pro_name); ?></td>
-                            <td> <?php echo e($rating->ra_content); ?></td>
+                            <td><?php echo e(optional($rating->user)->name ?? '[N/A]'); ?></td>
+                            <td><?php echo e(optional($rating->product)->pro_name ?? '[N/A]'); ?></td>
+                            <td><?php echo e($rating->ra_content); ?></td>
                             <td><?php echo e($rating->ra_number); ?></td>
-                        </tr>  
+                        </tr>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     <?php endif; ?>
                 </tbody>
