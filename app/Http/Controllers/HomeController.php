@@ -7,6 +7,7 @@ use App\Models\Models\Banner;
 use App\Models\Models\Category;
 use App\Models\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 use DateInterval;
 use DatePeriod;
@@ -29,13 +30,19 @@ class HomeController extends FrontendController
             'pro_active' => Product::STATUS_PUBLIC,
         ])->limit(10)->get();
 
-        // Tin tức nổi bật: ưu tiên bài viết có lượt xem cao trong 30 ngày
-        $articleNews = Article::where([
-            'a_active' => Product::STATUS_PUBLIC,
-        ])->whereBetween('created_at', [$startOfPeriod, $endOfPeriod])
-          ->orderBy('a_view', 'DESC')
-          ->limit(10)
-          ->get();
+        // Tin tức nổi bật: dùng danh sách sản phẩm của bạn
+        $articleNews = Product::where('pro_active', Product::STATUS_PUBLIC)
+            ->whereBetween('created_at', [$startOfPeriod, $endOfPeriod])
+            ->orderBy('id', 'DESC')
+            ->limit(10)
+            ->get();
+
+        if ($articleNews->isEmpty()) {
+            $articleNews = Product::where('pro_active', Product::STATUS_PUBLIC)
+                ->orderBy('id', 'DESC')
+                ->limit(10)
+                ->get();
+        }
 
         // Sản phẩm mới (mặc định lấy theo id giảm dần)
         $productNew = Product::where('pro_active', Product::STATUS_PUBLIC)
@@ -50,6 +57,14 @@ class HomeController extends FrontendController
             ->orderBy('pro_pay', 'DESC')
             ->limit(10)
             ->get();
+
+        if ($productSelling->isEmpty()) {
+            $productSelling = Product::where('pro_active', Product::STATUS_PUBLIC)
+                ->where('pro_pay', '>', 0)
+                ->orderBy('pro_pay', 'DESC')
+                ->limit(10)
+                ->get();
+        }
 
         $viewData = [
             'productHot'     => $productHot,

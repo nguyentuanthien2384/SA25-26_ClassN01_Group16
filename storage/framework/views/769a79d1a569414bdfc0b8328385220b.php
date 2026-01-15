@@ -270,25 +270,39 @@
 							<div class="section-title text-center">
 								<h2 class="title-border">Tin tức nổi bật</h2>
 							</div>
+							<?php if($articleNews->isEmpty()): ?>
+								<div class="product-info clearfix" style="text-align:center; padding: 20px 0;">
+									<p>Chưa có tin tức nổi bật.</p>
+								</div>
+							<?php else: ?>
 							<div class="product-slider style-1 arrow-left-right">
 								<!-- Single-product start -->
 								<?php $__currentLoopData = $articleNews; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $articleNew): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 								<div class="single-product">
 									<div class="product-img">
-										<a href="<?php echo e(route('get.detail.article',[$articleNew->a_slug, $articleNew->id])); ?>"><img src="<?php echo e($articleNew->a_avatar); ?>" alt="" style="width: auto ; height:200px"/></a>
+										<a href="<?php echo e(route('get.detail.product',[$articleNew->pro_slug, $articleNew->id])); ?>">
+											<?php if(!empty($articleNew->pro_image)): ?>
+												<img src="<?php echo e($articleNew->pro_image); ?>" alt="" style="width: auto ; height:200px"/>
+											<?php else: ?>
+												<div style="height:200px; display:flex; align-items:center; justify-content:center; background:#f5f5f5;">
+													<span>Không có ảnh</span>
+												</div>
+											<?php endif; ?>
+										</a>
 									</div>
 									<div class="product-info clearfix">
 										<div class="fix">
-											<h4 class="post-title floatleft"><a href="<?php echo e(route('get.detail.article',[$articleNew->a_slug, $articleNew->id])); ?>"><?php echo e($articleNew->a_name); ?></a></h4>
+											<h4 class="post-title floatleft"><a href="<?php echo e(route('get.detail.product',[$articleNew->pro_slug, $articleNew->id])); ?>"><?php echo e($articleNew->pro_name); ?></a></h4>
 											<p class="floatright hidden-sm d-none d-md-block" style="color: #c87065"><?php echo e($articleNew->created_at->format('d-m-Y')); ?></p>
 										</div>
 
-										<a href="<?php echo e(route('get.detail.article',[$articleNew->a_slug, $articleNew->id])); ?>" class="button-2 text-dark-red">Xem thêm...</a>
+										<a href="<?php echo e(route('get.detail.product',[$articleNew->pro_slug, $articleNew->id])); ?>" class="button-2 text-dark-red">Xem thêm...</a>
 									</div>
 
 								</div>
 								<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 							</div>
+							<?php endif; ?>
 						</div>
 					</div>
 				</div>
