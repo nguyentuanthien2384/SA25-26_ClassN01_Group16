@@ -79,15 +79,25 @@ class CartController extends Controller
     }
     public function clear(){
         Cart::where([
-            
+            'user_id' => get_data_user('web'),
         ])->delete();
         return redirect()->back()->with('success', 'xoá thành công');
     }
     public function getPay(){
-        return view('layouts.pay');
+        $carts = Cart::with('product')
+            ->where('user_id', get_data_user('web'))
+            ->orderBy('id', 'DESC')
+            ->get();
+        return view('layouts.pay', compact('carts'));
     }
     public function saveCart(Request $request, User $user, Product $product){
-        $orders = Cart::all();
+        $paymentMethod = $request->input('payment_method', 'cod');
+        $allowedMethods = ['cod', 'momo', 'qrcode', 'paypal', 'vnpay'];
+        if (!in_array($paymentMethod, $allowedMethods, true)) {
+            $paymentMethod = 'cod';
+        }
+
+        $orders = Cart::where('user_id', get_data_user('web'))->get();
         $totalAmount = 0;
         foreach ($orders as $order) {
             $subtotal = $order->price * $order->quantity;
@@ -100,12 +110,14 @@ class CartController extends Controller
             'tr_note' => $request-> note,
             'tr_phone' => $request-> phone,
             'tr_address' => $request-> address,
+            'tr_payment_method' => $paymentMethod,
+            'tr_status' => $paymentMethod === 'cod' ? Transaction::STATUS_DEFAULT : Transaction::STATUS_WAIT,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
 
         ]);
         if ($transactionId){
-            $carts = Cart::all();
+            $carts = Cart::where('user_id', get_data_user('web'))->get();
             foreach($carts as $cart){
                 $product = Product::find($cart->pro_id); 
 
@@ -122,8 +134,15 @@ class CartController extends Controller
         ]);
     }
             }
-        }$this->clear($user);
+        }
+        if ($paymentMethod === 'cod') {
+            $this->clear();
+            return redirect()->route('home')->with('success', 'Đơn hàng của bạn đã được đặt thành công!');
+        }
 
-        return redirect()->route('home')->with('success', 'Đơn hàng của bạn đã được đặt thành công!');
+        return redirect()->route('payment.show', [
+            'method' => $paymentMethod,
+            'transaction' => $transactionId,
+        ])->with('success', 'Vui lòng hoàn tất thanh toán.');
     }
 }

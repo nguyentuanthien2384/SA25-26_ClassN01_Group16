@@ -73,7 +73,7 @@ class AdminController extends Controller
             'moneyDay' =>  $moneyDay,
             'moneyMonth' =>  $moneyMonth,
             'moneyYear' =>  $moneyYear,
-            'dataMoney'  => json_encode($dataMoney),
+            'dataMoney'  => $dataMoney,
             'profit' => $profit,
             'profitCost' => $profitCost,
             'transactionNews' => $transactionNews

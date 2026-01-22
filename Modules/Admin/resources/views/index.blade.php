@@ -2,10 +2,11 @@
 @section('content')
 <h1 class="page-header">Trang tổng quan</h1>
 <div class="row">
-    <!-- Có thể giữ lại các phần khác nếu cần, đã xóa phần biểu đồ doanh thu -->
-</div>
-<div class="row">
-    <div class="col-sm-6">
+    <div class="col-md-6">
+        <h3>Biểu đồ doanh thu</h3>
+        <div id="revenue-chart" style="height: 320px; background:#fff;"></div>
+    </div>
+    <div class="col-md-6">
         <h2>Danh sách đơn hàng mới</h2>
         <table class="table table-striped">
             <thead>
@@ -21,7 +22,7 @@
                 @foreach($transactionNews as $transaction)
                     <tr>
                         <td>{{$transaction->id}}</td>
-                        <td>{{isset($transaction->user->name) ? $transaction->user->name : '[N/A]'}}</td>
+                        <td>{{ optional($transaction->user)->name ?? '[N/A]' }}</td>
                         <td>{{$transaction->tr_phone}}</td>
                         <td>{{number_format($transaction->tr_total,0,',','.')}} VND</td>
                         <td>
@@ -39,6 +40,35 @@
                 @endforeach
             </tbody>
             {!!$transactionNews->links()!!}
+        </table>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <h2>Danh sách liên hệ mới nhất</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Họ tên</th>
+                    <th>Số điện thoại</th>
+                    <th>Email</th>
+                    <th>Tiêu đề</th>
+                    <th>Nội dung</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($contacts as $contact)
+                    <tr>
+                        <td>{{ $contact->id }}</td>
+                        <td>{{ $contact->con_name }}</td>
+                        <td>{{ $contact->con_phone }}</td>
+                        <td>{{ $contact->con_email }}</td>
+                        <td>{{ $contact->con_title }}</td>
+                        <td>{{ $contact->con_message }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
         </table>
     </div>
     <div class="col-sm-6">
@@ -72,4 +102,24 @@
     </div>
 </div>
 @stop
+
+@section('scripts')
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script>
+        (function () {
+            var dataMoney = @json($dataMoney);
+            Highcharts.chart('revenue-chart', {
+                chart: { type: 'column' },
+                title: { text: 'Biểu đồ doanh thu' },
+                xAxis: { type: 'category' },
+                yAxis: { title: { text: 'VND' } },
+                series: [{
+                    name: 'Giá trị',
+                    data: dataMoney
+                }],
+                credits: { enabled: false }
+            });
+        })();
+    </script>
+@endsection
  

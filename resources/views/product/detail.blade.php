@@ -164,7 +164,7 @@
                                                             <div class="fix">
                                                                 <div class="floatleft mbl-center">
                                                                     <h6 class="text-uppercase mb-0" style="paddin:  8px">
-                                                                        <strong>{{ $rating->user->name }}</strong>
+                                                                        <strong>{{ optional($rating->user)->name ?? '[N/A]' }}</strong>
                                                                     </h6>
                                                                     <p class="reply-date">{{ $rating->created_at }}</p>
                                                                 </div>

@@ -20,7 +20,10 @@ class ProductDetailController extends Controller
             $productimg = ProImage::where('product_id', $id)->get();
             $userDetails = User::find($productDetails->id);
             $ratings = Rating::where('ra_product_id', $id)->with('user')->orderBy('id',"DESC")->get();
-            $articleNews = Article::find($id);
+            $articleNews = Product::where('pro_active', Product::STATUS_PUBLIC)
+                ->orderBy('id', 'DESC')
+                ->limit(10)
+                ->get();
     
             $viewData = [
                 'productDetails' => $productDetails,

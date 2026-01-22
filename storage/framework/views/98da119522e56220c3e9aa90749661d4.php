@@ -165,7 +165,7 @@
                                                             <div class="fix">
                                                                 <div class="floatleft mbl-center">
                                                                     <h6 class="text-uppercase mb-0" style="paddin:  8px">
-                                                                        <strong><?php echo e($rating->user->name); ?></strong>
+                                                                        <strong><?php echo e(optional($rating->user)->name ?? '[N/A]'); ?></strong>
                                                                     </h6>
                                                                     <p class="reply-date"><?php echo e($rating->created_at); ?></p>
                                                                 </div>

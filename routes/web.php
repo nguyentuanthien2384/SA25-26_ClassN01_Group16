@@ -15,6 +15,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -58,6 +59,18 @@ Route::group(['prefix'=>'cart'], function(){
 Route::group(['prefix'=>'oder','middleware'=>'CheckLoginUser'],function(){
     Route::get('/pay',[CartController::class, 'getpay'])->name('form.pay');
     Route::post('/pay',[CartController::class, 'saveCart']);
+});
+
+Route::group(['prefix'=>'payment','middleware'=>'CheckLoginUser'],function(){
+    Route::get('/{method}/{transaction}', [PaymentController::class, 'show'])->name('payment.show');
+    Route::post('/{method}/{transaction}/init', [PaymentController::class, 'init'])->name('payment.init');
+    Route::get('/momo/return/{transaction}', [PaymentController::class, 'momoReturn'])->name('payment.momo.return');
+    Route::post('/momo/ipn/{transaction}', [PaymentController::class, 'momoIpn'])->name('payment.momo.ipn');
+    Route::get('/paypal/return/{transaction}', [PaymentController::class, 'paypalReturn'])->name('payment.paypal.return');
+    Route::get('/paypal/cancel/{transaction}', [PaymentController::class, 'paypalCancel'])->name('payment.paypal.cancel');
+    Route::post('/qrcode/{transaction}/confirm', [PaymentController::class, 'qrcodeConfirm'])->name('payment.qrcode.confirm');
+    Route::get('/vnpay/return/{transaction}', [PaymentController::class, 'vnpayReturn'])->name('payment.vnpay.return');
+    Route::get('/vnpay/ipn/{transaction}', [PaymentController::class, 'vnpayIpn'])->name('payment.vnpay.ipn');
 });
 
 Route::group(['prefix'=>'rating','middleware'=>'CheckLoginUser'],function(){

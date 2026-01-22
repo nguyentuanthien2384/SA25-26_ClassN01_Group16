@@ -1,8 +1,7 @@
-
 <?php $__env->startSection('content'); ?>
 
 
-                            <form action="#" method="POST">
+                            <form action="<?php echo e(url('oder/pay')); ?>" method="POST">
                                 <?php echo csrf_field(); ?>
                                 <div class="shop-cart-table check-out-wrap">
                                     <div class="row">
@@ -70,8 +69,29 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="payment-method mt-60  pl-20">
-                                                <div class="payment-accordion">
-                                                    <button class="button-one submit-button mt-15" data-text="place order" type="submit">Đặt hàng</button>			
+                                                <h4 class="title-1 title-border text-uppercase mb-20">Phương thức thanh toán</h4>
+                                                <div class="payment-accordion" style="color:black; font-size:15px">
+                                                    <label style="display:block; margin-bottom:8px;">
+                                                        <input type="radio" name="payment_method" value="cod" checked>
+                                                        Thanh toán khi nhận hàng (COD)
+                                                    </label>
+                                                    <label style="display:block; margin-bottom:8px;">
+                                                        <input type="radio" name="payment_method" value="momo">
+                                                        Ví MoMo (demo)
+                                                    </label>
+                                                    <label style="display:block; margin-bottom:8px;">
+                                                        <input type="radio" name="payment_method" value="qrcode">
+                                                        Thanh toán QR Code (demo)
+                                                    </label>
+                                                    <label style="display:block; margin-bottom:8px;">
+                                                        <input type="radio" name="payment_method" value="paypal">
+                                                        PayPal (demo)
+                                                    </label>
+                                                    <label style="display:block; margin-bottom:8px;">
+                                                        <input type="radio" name="payment_method" value="vnpay">
+                                                        VNPay (sandbox)
+                                                    </label>
+                                                    <button class="button-one submit-button mt-15" data-text="place order" type="submit">Đặt hàng</button>
                                                 </div>															
                                             </div>
                                         </div>
