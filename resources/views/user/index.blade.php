@@ -1,29 +1,31 @@
 @extends('user.layout')
 @section('content')
-<style>
-    .abc{
-    position: absolute;
-    top: 45%;
-    left: 50%;
-    transform: translateX(-50%) translateY(-50%);
-    color: white;
-    }
-</style>
 <h1 class="page-header">Trang tổng quan</h1>
-<div class="row placeholders">
-    <div class="col-xs-6 col-sm-4 placeholder">
-        <img src="{{ asset('img/a1.jpg') }}" width="200" height="200"  alt="Generic placeholder thumbnail">
-        <h4 class="abc">{{ $totalTransaction}} Đơn hàng</h4>
+<div class="row">
+    <div class="col-sm-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">Tổng đơn hàng</div>
+            <div class="panel-body">
+                <h3 style="margin:0;">{{ $totalTransaction }}</h3>
+            </div>
+        </div>
     </div>
-    <div class="col-xs-6 col-sm-4 placeholder">
-        <img src="{{ asset('img/a2.jpg') }}" width="200" height="200" alt="Generic placeholder thumbnail">
-        <h4 class="abc">{{$totalTransactionDone}} Đơn hàng đã xử lý</h4>
+    <div class="col-sm-4">
+        <div class="panel panel-success">
+            <div class="panel-heading">Đơn hàng đã xử lý</div>
+            <div class="panel-body">
+                <h3 style="margin:0;">{{ $totalTransactionDone }}</h3>
+            </div>
+        </div>
     </div>
-    <div class="col-xs-6 col-sm-4 placeholder">
-        <img src="{{ asset('img/a3.jpg') }}" width="200" height="200"  alt="Generic placeholder thumbnail">
-        <h4 class="abc">{{$totalTransaction - $totalTransactionDone}} Đơn hàng chưa xử lý</h4>
+    <div class="col-sm-4">
+        <div class="panel panel-warning">
+            <div class="panel-heading">Đơn hàng chưa xử lý</div>
+            <div class="panel-body">
+                <h3 style="margin:0;">{{ $totalTransaction - $totalTransactionDone }}</h3>
+            </div>
+        </div>
     </div>
-    
 </div>
 <div class="row">
     <div class="col-sm-12">
