@@ -7,6 +7,7 @@ use App\Http\Requests\RequestProduct;
 use App\Models\Models\Category;
 use App\Models\Models\Product;
 use App\Models\Models\ProImage;
+use App\Events\DashboardUpdated;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -86,6 +87,7 @@ class AdminProductController extends Controller
          $requestProduct->merge(['image' => $file_name]);
      }
      $product->save();
+     event(new DashboardUpdated('product'));
 
      // Lưu các hình ảnh chi tiết
      $product_id = $product->id;
@@ -117,6 +119,7 @@ class AdminProductController extends Controller
                   break;
        }
    }
+   event(new DashboardUpdated('product'));
    return redirect()->back()->with('success',$mesages);
 }
 }

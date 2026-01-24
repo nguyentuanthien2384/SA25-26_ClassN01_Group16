@@ -11,6 +11,7 @@ route::prefix('authenticate')->group(function () {
 });
 route::prefix('admin')->middleware('CheckLoginAdmin')->group(function () {
     Route::get('/', 'AdminController@index')->name('admin.home');
+    Route::get('/dashboard/data', 'AdminController@dashboardData')->name('admin.dashboard.data');
 
     route::group(['prefix' => 'category'], function () {
         route::get('/', 'AdminCategoryController@index')->name('admin.get.list.category');

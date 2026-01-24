@@ -25,15 +25,15 @@
                     <?php $__currentLoopData = $ratings; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $rating): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <tr>
                         <td><?php echo e($rating->id); ?></td>
-                        <td><?php echo e($rating->user->name); ?></td>
-                        <td><?php echo e($rating->user->phone); ?> </td>
-                        <td><?php echo e(optional($rating->product)->pro_name); ?></td>
-                        <td> <?php echo e($rating->ra_content); ?></td>
+                        <td><?php echo e(optional($rating->user)->name ?? '[N/A]'); ?></td>
+                        <td><?php echo e(optional($rating->user)->phone ?? '[N/A]'); ?></td>
+                        <td><?php echo e(optional($rating->product)->pro_name ?? '[N/A]'); ?></td>
+                        <td><?php echo e($rating->ra_content); ?></td>
                         <td><?php echo e($rating->ra_number); ?></td>
                         <td>
                             <a style="padding: 5px 10px; border: 1px solid #995" href="<?php echo e(route('admin.delete.rating',$rating->id)); ?>"><i class="fa-solid fa-trash" style="font-size:11px"></i>Xoá</a>
                         </td>
-                    </tr>  
+                    </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 <?php endif; ?>
             </tbody>

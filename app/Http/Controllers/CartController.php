@@ -10,6 +10,7 @@ use App\Models\Models\Transaction;
 use App\Models\Models\User;
 use Carbon\Carbon;
 use Illuminate\Validation\Rules\Can;
+use App\Events\DashboardUpdated;
 
 class CartController extends Controller
 {   
@@ -21,6 +22,7 @@ class CartController extends Controller
         if($product->quantity == 0){
             return redirect()->back()->with('warning',"Sản phẩm tạm hết hàng");
         }
+        $buyNow = (bool)$request->query('buy_now', false);
         $quantity = $request->quantity ? $request->quantity:1;
         $cartExit = Cart::where([
             'user_id' =>get_data_user('web'),
@@ -33,7 +35,10 @@ class CartController extends Controller
                 'pro_id' =>$product->id,
                 'name' => $product->pro_name,
             ])->increment('quantity',$quantity);
-             return redirect()->route('cart.index')->with('success', 'Thành công');
+            if ($buyNow) {
+                return redirect()->route('form.pay')->with('success', 'Thành công');
+            }
+            return redirect()->route('cart.index')->with('success', 'Thành công');
         
         }else{
             $datas=[
@@ -47,6 +52,9 @@ class CartController extends Controller
             ];
             
             if(Cart:: create($datas)){
+                if ($buyNow) {
+                    return redirect()->route('form.pay')->with('success', "Thêm giỏ hàng thành công");
+                }
                 return redirect()->route('cart.index')->with('success', "Thêm giỏ hàng thành công");
         }
         }
@@ -137,6 +145,7 @@ class CartController extends Controller
         }
         if ($paymentMethod === 'cod') {
             $this->clear();
+            event(new DashboardUpdated('order'));
             return redirect()->route('home')->with('success', 'Đơn hàng của bạn đã được đặt thành công!');
         }
 

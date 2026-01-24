@@ -18,53 +18,60 @@ class HomeController extends FrontendController
     {
         parent::__construct();
     }
-    public function index()
+    public function index(Request $request)
     {
+        $capPerPage = function ($value, $default) {
+            $perPage = (int) $value;
+            if ($perPage <= 0) {
+                $perPage = $default;
+            }
+            if ($perPage > 60) {
+                $perPage = 60;
+            }
+            return $perPage;
+        };
+        $hotPerPage = $capPerPage($request->input('hot_per_page', 8), 8);
+        $newPerPage = $capPerPage($request->input('new_per_page', 8), 8);
+        $sellingPerPage = $capPerPage($request->input('selling_per_page', 8), 8);
+        $newsPerPage = $capPerPage($request->input('news_per_page', 8), 8);
+
         // Khung thời gian 30 ngày gần nhất
         $startOfPeriod = Carbon::now()->subDays(30)->startOfDay();
         $endOfPeriod   = Carbon::now()->endOfDay();
 
         // Sản phẩm nổi bật (đã có sẵn)
-        $productHot = Product::where([
+        $productHotQuery = Product::where([
             'pro_hot'    => Product::HOT_ON,
             'pro_active' => Product::STATUS_PUBLIC,
-        ])->limit(10)->get();
+        ]);
+        $productHot = $productHotQuery->paginate($hotPerPage, ['*'], 'hot_page');
 
         // Tin tức nổi bật: dùng danh sách sản phẩm của bạn
-        $articleNews = Product::where('pro_active', Product::STATUS_PUBLIC)
+        $articleNewsQuery = Product::where('pro_active', Product::STATUS_PUBLIC)
             ->whereBetween('created_at', [$startOfPeriod, $endOfPeriod])
-            ->orderBy('id', 'DESC')
-            ->limit(10)
-            ->get();
-
-        if ($articleNews->isEmpty()) {
-            $articleNews = Product::where('pro_active', Product::STATUS_PUBLIC)
-                ->orderBy('id', 'DESC')
-                ->limit(10)
-                ->get();
+            ->orderBy('id', 'DESC');
+        if (!$articleNewsQuery->exists()) {
+            $articleNewsQuery = Product::where('pro_active', Product::STATUS_PUBLIC)
+                ->orderBy('id', 'DESC');
         }
+        $articleNews = $articleNewsQuery->paginate($newsPerPage, ['*'], 'news_page');
 
         // Sản phẩm mới (mặc định lấy theo id giảm dần)
         $productNew = Product::where('pro_active', Product::STATUS_PUBLIC)
             ->orderBy('id', 'DESC')
-            ->limit(20)
-            ->get();
+            ->paginate($newPerPage, ['*'], 'new_page');
 
         // Sản phẩm bán nhiều nhất trong 30 ngày (dựa theo số lần mua)
-        $productSelling = Product::where('pro_active', Product::STATUS_PUBLIC)
+        $productSellingQuery = Product::where('pro_active', Product::STATUS_PUBLIC)
             ->whereBetween('created_at', [$startOfPeriod, $endOfPeriod])
             ->where('pro_pay', '>', 0) // chỉ lấy những sản phẩm đã có đơn hàng
-            ->orderBy('pro_pay', 'DESC')
-            ->limit(10)
-            ->get();
-
-        if ($productSelling->isEmpty()) {
-            $productSelling = Product::where('pro_active', Product::STATUS_PUBLIC)
+            ->orderBy('pro_pay', 'DESC');
+        if (!$productSellingQuery->exists()) {
+            $productSellingQuery = Product::where('pro_active', Product::STATUS_PUBLIC)
                 ->where('pro_pay', '>', 0)
-                ->orderBy('pro_pay', 'DESC')
-                ->limit(10)
-                ->get();
+                ->orderBy('pro_pay', 'DESC');
         }
+        $productSelling = $productSellingQuery->paginate($sellingPerPage, ['*'], 'selling_page');
 
         $viewData = [
             'productHot'     => $productHot,

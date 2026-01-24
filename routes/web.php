@@ -36,6 +36,9 @@ Route::get('san-pham',[CategoryController::class, 'getListProduct'])->name('get.
 
 Route::get('bai-viet', [ArticleController::class, 'getArticle'])->name('get.list.article');
 Route::get('bai-viet/{slug}-{id}', [ArticleController::class, 'getDetailArticle'])->name('get.detail.article');
+Route::get('wishlist', function () {
+    return view('wishlist');
+})->name('wishlist.index');
 
 Route::group(['prefix' => 'laravel-filemanager', 'middleware' => []], function () {
     \UniSharp\LaravelFilemanager\Lfm::routes();
@@ -82,4 +85,11 @@ Route::post('lien-he', [ContactController::class,'postContact']);
 
 Route::group(['prefix'=>'user','middleware'=>'CheckLoginUser'],function(){
     Route::get('user',[UserController::class, 'index'])->name('user.index');
+});
+
+Route::group(['prefix' => 'wishlist', 'middleware' => 'CheckLoginUser'], function () {
+    Route::get('/', [\App\Http\Controllers\WishlistController::class, 'index'])->name('wishlist.index');
+    Route::get('/toggle/{product}', [\App\Http\Controllers\WishlistController::class, 'toggle'])->name('wishlist.toggle');
+    Route::post('/toggle/{product}', [\App\Http\Controllers\WishlistController::class, 'toggle'])->name('wishlist.toggle.ajax');
+    Route::get('/remove/{product}', [\App\Http\Controllers\WishlistController::class, 'remove'])->name('wishlist.remove');
 });

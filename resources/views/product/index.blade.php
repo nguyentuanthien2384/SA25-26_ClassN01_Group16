@@ -1,5 +1,100 @@
 @extends('layouts.app')
 @section('content')
+<style>
+    .p-card {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+        padding: 12px 12px 16px;
+        position: relative;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .p-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: #e53935;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 4px 8px;
+        border-radius: 6px;
+    }
+    .p-badge--installment {
+        left: auto;
+        right: 10px;
+        background: #e3f2fd;
+        color: #1e88e5;
+        font-weight: 700;
+    }
+    .p-img {
+        display: block;
+        width: 100%;
+        height: 200px;
+        object-fit: contain;
+    }
+    .p-title {
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.4;
+        margin: 8px 0 6px;
+        color: #111;
+        min-height: 40px;
+    }
+    .p-price {
+        font-size: 16px;
+        font-weight: 800;
+        color: #d32f2f;
+    }
+    .p-price-old {
+        font-size: 13px;
+        color: #9e9e9e;
+        text-decoration: line-through;
+        margin-left: 6px;
+    }
+    .p-note {
+        background: #f5f5f5;
+        border-radius: 6px;
+        padding: 6px 8px;
+        font-size: 12px;
+        color: #555;
+        margin-top: 6px;
+    }
+    .p-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 10px;
+        font-size: 13px;
+        margin-top: auto;
+    }
+    .p-rating {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #f5a623;
+        font-weight: 700;
+    }
+    .p-wishlist {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #1e88e5;
+        font-weight: 600;
+    }
+    .p-wishlist i {
+        font-size: 18px;
+    }
+    .p-out {
+        color: #e91e63;
+        font-size: 12px;
+        font-weight: 700;
+        margin-top: 6px;
+        min-height: 18px;
+    }
+</style>
 <div class="heading-banner-area overlay-bg">
     <div class="container">
         <div class="row">
@@ -49,57 +144,66 @@
                         <div class="tab-pane active" id="grid-view">
                             <div class="row">
                                 @foreach($products as $product)
-                                <div class="col-lg-4 col-md-3">
-                        
-                                    <div class="single-product">
-                                        <div class="product-img">
-                                            @if($product->quantity == 0)
-										<span class="pro-label new-label" style="position:absolute; background:#e91e63; left:0px ">Tạm hết hàng</span>
-										@endif
-                                            <div class="center"><a href="{{route('get.detail.product',[$product->pro_slug,$product->id])}}"><img src="{{$product->pro_image}}" alt="" style="width: 230px;
-                                                height: 150px;
-                                                margin-left: auto;
-                                                margin-right: auto;
-                                                display: block;"/></a></div>
-                                            {{-- <span class="pro-price-2">{{number_format($product->pro_price,0,',','.')}} Đ</span> --}}
+                                @php
+                                    $salePercent = 0;
+                                    if ($product->pro_sale > 0 && $product->pro_sale < $product->pro_price) {
+                                        $salePercent = round((($product->pro_price - $product->pro_sale) / $product->pro_price) * 100);
+                                    }
+                                    $totalReviews = $product->pro_total_number ?? 0;
+                                    $totalStars = $product->pro_total ?? 0;
+                                    $avgRating = $totalReviews > 0 ? round($totalStars / $totalReviews, 1) : 0;
+                                @endphp
+                                <div class="col-lg-3 col-md-4 col-sm-6 mb-30">
+                                    <div class="p-card">
+                                        @if($salePercent > 0)
+                                            <span class="p-badge">Giảm {{ $salePercent }}%</span>
+                                        @endif
+                                        <span class="p-badge p-badge--installment">Trả góp 0%</span>
+                                        <a href="{{route('get.detail.product',[$product->pro_slug,$product->id])}}">
+                                            <img src="{{$product->pro_image}}" alt="" class="p-img"/>
+                                        </a>
+                                        <div class="p-title">
+                                            <a href="{{route('get.detail.product',[$product->pro_slug,$product->id])}}">{{$product->pro_name}}</a>
                                         </div>
-                                        <div class="product-info clearfix text-center">
-                                            <div class="fix">
-                                                <h4 class="post-title"><a href="{{route('get.detail.product',[$product->pro_slug,$product->id])}}">{{$product->pro_name}}</a></h4>
+                                        <div>
+                                            @if($product->pro_sale > 0 && $product->pro_sale < $product->pro_price)
+                                                <span class="p-price">{{ number_format($product->pro_sale,0,',','.') }}đ</span>
+                                                <span class="p-price-old">{{ number_format($product->pro_price,0,',','.') }}đ</span>
+                                            @else
+                                                <span class="p-price">{{ number_format($product->pro_price,0,',','.') }}đ</span>
+                                            @endif
+                                        </div>
+                                        <div class="p-note">Trả góp 0% - 0đ phụ thu - 0đ trả trước - kỳ hạn đến 6 tháng</div>
+                                        <div class="p-out">
+                                            @if($product->quantity == 0)
+                                                Tạm hết hàng
+                                            @else
+                                                &nbsp;
+                                            @endif
+                                        </div>
+                                        <div class="p-meta">
+                                            <div class="p-rating">
+                                                <i class="zmdi zmdi-star"></i>{{ $avgRating }}
                                             </div>
-                                            <div class="fix">
-                                                <del><h6 class="" style="color: darkorange">Giá: {{number_format($product->pro_price,0,',','.')}} Đ</h6></del>
-                                                <h6 class="" style="color: darkorange">Giá khuyễn mãi: {{number_format($product->pro_sale,0,',','.')}} Đ</h6>
-                                            </div>
-                                            <div class="fix">
-                                                <span class="pro-rating">
-                                                    <a href="#"><i class="zmdi zmdi-star"></i></a>
-                                                    <a href="#"><i class="zmdi zmdi-star"></i></a>
-                                                    <a href="#"><i class="zmdi zmdi-star"></i></a>
-                                                    <a href="#"><i class="zmdi zmdi-star-half"></i></a>
-                                                    <a href="#"><i class="zmdi zmdi-star-half"></i></a>
-                                                </span>
-                                            </div>
-                                            <div class="product-action clearfix">
-                                                <a href="wishlist.html" data-bs-toggle="tooltip" data-placement="top" title="Wishlist"><i class="zmdi zmdi-favorite-outline"></i></a>
-                                                <a href="#" data-bs-toggle="modal"  data-bs-target="#productModal" title="Quick View"><i class="zmdi zmdi-zoom-in"></i></a>
-                                                <a href="#" data-bs-toggle="tooltip" data-placement="top" title="Compare"><i class="zmdi zmdi-refresh"></i></a>
-                                                <a href="{{route('cart.add',$product->id)}}" data-bs-toggle="tooltip" data-placement="top" title="Add To Cart"><i class="zmdi zmdi-shopping-cart-plus"></i></a>
-                                            </div>
+                                            <a href="{{ route('wishlist.toggle', $product->id) }}" class="p-wishlist js-wishlist-toggle" data-product-id="{{ $product->id }}">
+                                                <i class="zmdi {{ in_array($product->id, $wishlistIds ?? []) ? 'zmdi-favorite' : 'zmdi-favorite-outline' }}"></i>Yêu thích
+                                            </a>
                                         </div>
                                     </div>
-                                    
                                 </div>
                                 @endforeach
                             </div>
                         </div>
                     </div>  
                 </div>
-                    <!-- Pagination end -->
-                    <div class="shop-pagination  text-center">
-                        <div class="pagination">
-                            {!!$products->links()!!}
-                        </div>
+                    @php
+                        $perPage = (int) request()->get('per_page', 9);
+                    @endphp
+                    <div class="pagination-wrap text-center">
+                        @if($perPage < 24 && $products->currentPage() === 1)
+                            <a class="btn-view-all" href="{{ request()->fullUrlWithQuery(['per_page' => 24, 'page' => 1]) }}">Xem tất cả</a>
+                        @endif
+                        {!! $products->appends(request()->query())->links('components.pagination') !!}
                     </div>
                 <!-- Shop-Content End -->
             </div>

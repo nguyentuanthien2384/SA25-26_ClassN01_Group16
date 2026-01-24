@@ -17,7 +17,7 @@
                     <th>Trạng thái</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="transactions-body">
                 <?php $__currentLoopData = $transactionNews; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $transaction): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <tr>
                         <td><?php echo e($transaction->id); ?></td>
@@ -57,7 +57,7 @@
                     <th>Nội dung</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="contacts-body">
                 <?php $__currentLoopData = $contacts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $contact): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <tr>
                         <td><?php echo e($contact->id); ?></td>
@@ -84,7 +84,7 @@
                         <th>Rating</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="ratings-body">
                     <?php if(isset($ratings)): ?>
                         <?php $__currentLoopData = $ratings; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $rating): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr>
@@ -104,11 +104,12 @@
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('scripts'); ?>
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script>
         (function () {
             var dataMoney = <?php echo json_encode($dataMoney, 15, 512) ?>;
-            Highcharts.chart('revenue-chart', {
+            window.revenueChart = Highcharts.chart('revenue-chart', {
                 chart: { type: 'column' },
                 title: { text: 'Biểu đồ doanh thu' },
                 xAxis: { type: 'category' },
@@ -118,6 +119,70 @@
                     data: dataMoney
                 }],
                 credits: { enabled: false }
+            });
+        })();
+    </script>
+    <script>
+        (function () {
+            var key = "<?php echo e(env('PUSHER_APP_KEY')); ?>";
+            var cluster = "<?php echo e(env('PUSHER_APP_CLUSTER', 'mt1')); ?>";
+            if (!key) return;
+
+            var pusher = new Pusher(key, {
+                cluster: cluster,
+                forceTLS: true
+            });
+            var channel = pusher.subscribe('dashboard');
+            channel.bind('dashboard.updated', function () {
+                fetch("<?php echo e(route('admin.dashboard.data')); ?>", {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (window.revenueChart) {
+                        window.revenueChart.series[0].setData(data.dataMoney, true);
+                    }
+
+                    var transactionsHtml = '';
+                    data.transactions.forEach(function (item) {
+                        var statusHtml = item.status_url
+                            ? '<a href="' + item.status_url + '" class="label ' + item.status_class + '">Đang chờ</a>'
+                            : '<a href="" class="label ' + item.status_class + '">' + item.status_text + '</a>';
+                        transactionsHtml += '<tr>'
+                            + '<td>' + item.id + '</td>'
+                            + '<td>' + item.name + '</td>'
+                            + '<td>' + (item.phone || '') + '</td>'
+                            + '<td>' + item.total + '</td>'
+                            + '<td>' + statusHtml + '</td>'
+                            + '</tr>';
+                    });
+                    document.getElementById('transactions-body').innerHTML = transactionsHtml;
+
+                    var contactsHtml = '';
+                    data.contacts.forEach(function (item) {
+                        contactsHtml += '<tr>'
+                            + '<td>' + item.id + '</td>'
+                            + '<td>' + (item.name || '') + '</td>'
+                            + '<td>' + (item.phone || '') + '</td>'
+                            + '<td>' + (item.email || '') + '</td>'
+                            + '<td>' + (item.title || '') + '</td>'
+                            + '<td>' + (item.message || '') + '</td>'
+                            + '</tr>';
+                    });
+                    document.getElementById('contacts-body').innerHTML = contactsHtml;
+
+                    var ratingsHtml = '';
+                    data.ratings.forEach(function (item) {
+                        ratingsHtml += '<tr>'
+                            + '<td>' + item.id + '</td>'
+                            + '<td>' + item.name + '</td>'
+                            + '<td>' + item.product + '</td>'
+                            + '<td>' + (item.content || '') + '</td>'
+                            + '<td>' + item.number + '</td>'
+                            + '</tr>';
+                    });
+                    document.getElementById('ratings-body').innerHTML = ratingsHtml;
+                });
             });
         })();
     </script>

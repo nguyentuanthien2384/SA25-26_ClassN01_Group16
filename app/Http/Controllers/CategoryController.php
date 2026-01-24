@@ -57,7 +57,14 @@ class CategoryController extends Controller
                         break;
                 }
             }
-            $products = $products->simplePaginate(9);
+            $perPage = (int) $request->input('per_page', 9);
+            if ($perPage <= 0) {
+                $perPage = 9;
+            }
+            if ($perPage > 60) {
+                $perPage = 60;
+            }
+            $products = $products->paginate($perPage);
             $cateProduct = Category::find($id);
             $viewData =[
                 'products' => $products,
@@ -69,7 +76,14 @@ class CategoryController extends Controller
             $products = Product::where([
                 'pro_active' => Product::STATUS_PUBLIC 
             ])->where('pro_name','like','%'.$request->k.'%');
-            $products = $products->paginate(3);
+            $perPage = (int) $request->input('per_page', 9);
+            if ($perPage <= 0) {
+                $perPage = 9;
+            }
+            if ($perPage > 60) {
+                $perPage = 60;
+            }
+            $products = $products->paginate($perPage);
             $viewData = [
                 'products'=> $products
             ];

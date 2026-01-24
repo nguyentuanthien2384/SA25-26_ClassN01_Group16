@@ -8,6 +8,49 @@
             border-radius: 1px;
             border: 1px solid #dfd4d4;
         }
+        .product-buy {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+        }
+        .product-qty {
+            min-width: 160px;
+        }
+        .product-qty .cart-plus-minus-box {
+            width: 100%;
+            height: 44px;
+            line-height: 44px;
+            text-align: center;
+        }
+        .product-action {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .product-action a {
+            height: 46px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 22px;
+            border-radius: 4px;
+            font-weight: 600;
+            min-width: 190px;
+            white-space: nowrap;
+            line-height: 1;
+            gap: 8px;
+        }
+        .product-action a.btn-add-cart {
+            border: 1px solid #f2583e;
+            color: #f2583e;
+            background: #fff;
+        }
+        .product-action a.btn-buy-now {
+            border: 1px solid #f2583e;
+            color: #fff;
+            background: #f2583e;
+        }
         .star-rating {
     unicode-bidi: bidi-override;
     direction: rtl;
@@ -90,23 +133,32 @@
                                 <label for="">
                                     <H5>Giá bán: </H5>
                                 </label> 
-                                <del style=" font-size: 17px"><span class="pro-price">{{ number_format($productDetails->pro_price, 0, ',', '.') }}</span></del> <br>
-                                <label for="">
-                                    <H5>Giá khuyễn mãi: </H5>
-                                </label>
-                                <span class="pro-price">{{ number_format($productDetails->pro_sale, 0, ',', '.') }}</span>
+                                @if($productDetails->pro_sale > 0 && $productDetails->pro_sale < $productDetails->pro_price)
+                                    <del style=" font-size: 17px">
+                                        <span class="pro-price">{{ number_format($productDetails->pro_price, 0, ',', '.') }} Đ</span>
+                                    </del> <br>
+                                    <label for="">
+                                        <H5>Giá khuyến mãi: </H5>
+                                    </label>
+                                    <span class="pro-price">{{ number_format($productDetails->pro_sale, 0, ',', '.') }} Đ</span>
+                                @else
+                                    <span class="pro-price">{{ number_format($productDetails->pro_price, 0, ',', '.') }} Đ</span>
+                                @endif
                             </div>
                             <div class="product-description" style="font-size: 14px">
                                 {!!$productDetails->pro_description !!}
                             </div>
-                             <div class="clearfix">
-                                    <input style="color: black" type="text" value=" Số lượng: {{ $productDetails->quantity }}" name="qtybutton"
-                                        class="cart-plus-minus-box">
-                                
-                                <div class="product-action clearfix">
+                             <div class="product-buy">
+                                <div class="product-qty">
+                                    <input style="color: black" type="text" value="Số lượng: {{ $productDetails->quantity }}" name="qtybutton"
+                                        class="cart-plus-minus-box" readonly>
+                                </div>
+                                <div class="product-action">
                                     <a href="{{ route('cart.add', $productDetails->id) }}" data-bs-toggle="tooltip"
-                                        data-placement="top" title="Add To Cart" style="width: 200px;">Thêm vào giỏ hàng <i
+                                        data-placement="top" title="Add To Cart" class="btn-add-cart">Thêm vào giỏ hàng <i
                                             class="zmdi zmdi-shopping-cart-plus"></i></a>
+                                    <a href="{{ route('cart.add', ['product' => $productDetails->id, 'buy_now' => 1]) }}" data-bs-toggle="tooltip"
+                                        data-placement="top" title="Buy Now" class="btn-buy-now">Mua ngay</a>
                                 </div>
                             </div>
                             <!-- Single-pro-slider Small-photo start -->

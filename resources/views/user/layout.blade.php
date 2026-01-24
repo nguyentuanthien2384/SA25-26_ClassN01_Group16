@@ -29,6 +29,54 @@
         <link href="../../assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet"> --}}
     <!-- Custom styles for this template -->
     <link href="{{ asset('theme_admin/css/dashboard.css') }}" rel="stylesheet">
+    <style>
+        .pagination-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+            margin-top: 20px;
+        }
+        .btn-view-all {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 160px;
+            padding: 12px 24px;
+            background: #4b3b7a;
+            color: #fff;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        .pagination-custom {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+        .pagination-custom ul {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .pagination-custom li span,
+        .pagination-custom li a {
+            color: #5a57c6;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 4px 2px;
+        }
+        .pagination-custom li.active span {
+            color: #4b3b7a;
+            border-bottom: 2px solid #4b3b7a;
+            padding-bottom: 6px;
+        }
+        .pagination-custom li.disabled span {
+            color: #999;
+        }
+    </style>
 </head>
 
 <body>

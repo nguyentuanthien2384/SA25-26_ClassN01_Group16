@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 class ArticleController extends Controller
 {
     public function getArticle(){
-        $articles = Article::orderBy('id','DESC')->simplePaginate(6);
+        $articles = Article::orderBy('id','DESC')->paginate(6);
 
         return view('article.index',compact('articles'));
     }

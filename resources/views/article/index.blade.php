@@ -40,7 +40,9 @@
                         </div>
                         
                         @endforeach
-                        {!!$articles->links()!!}
+                        <div class="pagination-wrap text-center">
+                            {!! $articles->appends(request()->query())->links('components.pagination') !!}
+                        </div>
                     </div>
                 </div>                             
             </div> 

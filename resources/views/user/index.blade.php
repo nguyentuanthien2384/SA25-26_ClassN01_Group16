@@ -62,8 +62,16 @@
                     </tr>
                 @endforeach
             </tbody>
-            {!!$transactions->links()!!}
         </table>
+        @php
+            $perPage = (int) request()->get('per_page', 8);
+        @endphp
+        <div class="pagination-wrap text-center">
+            @if($perPage < 24 && $transactions->currentPage() === 1)
+                <a class="btn-view-all" href="{{ request()->fullUrlWithQuery(['per_page' => 24, 'page' => 1]) }}">Xem tất cả</a>
+            @endif
+            {!! $transactions->appends(request()->query())->links('components.pagination') !!}
+        </div>
     </div>
 </div>
 {{-- <div class="row">
