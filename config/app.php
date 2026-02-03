@@ -168,6 +168,8 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        App\Providers\CircuitBreakerServiceProvider::class,
+        App\Providers\ServiceDiscoveryProvider::class,
         Barryvdh\Debugbar\ServiceProvider::class,
     ])->toArray(),
 

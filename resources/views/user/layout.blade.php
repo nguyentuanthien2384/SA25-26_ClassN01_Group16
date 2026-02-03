@@ -56,25 +56,105 @@
         .pagination-custom ul {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 14px;
             list-style: none;
             margin: 0;
             padding: 0;
         }
         .pagination-custom li span,
         .pagination-custom li a {
-            color: #5a57c6;
-            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 24px;
+            height: 24px;
+            padding: 0 4px;
+            border: none;
+            border-radius: 0;
+            background: transparent;
+            color: #3a476a;
+            font-weight: 500;
             text-decoration: none;
-            padding: 4px 2px;
+        }
+        .pagination-custom li a:hover {
+            color: #2f3f75;
         }
         .pagination-custom li.active span {
-            color: #4b3b7a;
-            border-bottom: 2px solid #4b3b7a;
-            padding-bottom: 6px;
+            color: #2f3f75;
+            border-bottom: 2px solid #4b5bff;
+            padding-bottom: 4px;
         }
         .pagination-custom li.disabled span {
-            color: #999;
+            color: #c0c6d4;
+        }
+        .pagination-custom .pagination-prev span,
+        .pagination-custom .pagination-prev a,
+        .pagination-custom .pagination-next span,
+        .pagination-custom .pagination-next a {
+            width: 34px;
+            height: 34px;
+            min-width: 34px;
+            border-radius: 50%;
+            background: #eaf1ff;
+            color: #6a7bb6;
+            font-size: 16px;
+        }
+        .pagination-custom .pagination-prev a:hover,
+        .pagination-custom .pagination-next a:hover {
+            background: #dfe9ff;
+        }
+        .js-ajax-section {
+            transition: opacity 180ms ease;
+            position: relative;
+        }
+        .js-ajax-section.is-loading {
+            opacity: 0.6;
+        }
+        .js-ajax-section.is-fade-in {
+            opacity: 0;
+        }
+        .js-ajax-section.is-fixed-height {
+            overflow: hidden;
+        }
+        .js-ajax-section .ajax-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            backdrop-filter: blur(2px);
+        }
+        .js-ajax-section .ajax-skeleton-lines {
+            width: 90%;
+            max-width: 560px;
+            display: grid;
+            gap: 10px;
+        }
+        .js-ajax-section .skeleton-block {
+            position: relative;
+            overflow: hidden;
+            background: #edf1f7;
+            border-radius: 8px;
+            height: 12px;
+        }
+        .js-ajax-section .skeleton-block::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0) 100%);
+            transform: translateX(-100%);
+            animation: shimmer 1.1s infinite;
+        }
+        .js-ajax-section .skeleton-block.wide {
+            height: 14px;
+        }
+        .js-ajax-section .skeleton-block.short {
+            width: 65%;
+        }
+        @keyframes shimmer {
+            100% { transform: translateX(100%); }
         }
     </style>
 </head>
@@ -139,6 +219,67 @@
    
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
     @yield('scripts')
+    <script>
+        $(document).on('click', 'a[data-confirm], a[href*="delete"], a[href*="remove"]', function (e) {
+            var message = $(this).data('confirm') || 'Bạn có chắc muốn xoá?';
+            if (!confirm(message)) {
+                e.preventDefault();
+            }
+        });
+    </script>
+    <script>
+        (function () {
+            function buildSkeletonLines() {
+                return '<div class="ajax-overlay"><div class="ajax-skeleton-lines">' +
+                    '<div class="skeleton-block wide"></div>' +
+                    '<div class="skeleton-block"></div>' +
+                    '<div class="skeleton-block"></div>' +
+                    '<div class="skeleton-block short"></div>' +
+                '</div></div>';
+            }
+
+            function loadSection($trigger) {
+                var $section = $trigger.closest('.js-ajax-section');
+                if (!$section.length) return;
+
+                var url = $trigger.attr('href');
+                if (!url) return;
+
+                var sectionId = $section.data('section');
+                var fixedHeight = $section.outerHeight();
+                $section.addClass('is-loading is-fixed-height').css('min-height', fixedHeight);
+                if (!$section.find('.ajax-overlay').length) {
+                    $section.append(buildSkeletonLines());
+                }
+                $.get(url, function (html) {
+                    var $newSection = $(html)
+                        .find('.js-ajax-section[data-section="' + sectionId + '"]')
+                        .first();
+
+                    if (!$newSection.length) {
+                        window.location.href = url;
+                        return;
+                    }
+
+                    $newSection.addClass('is-fade-in').css('min-height', fixedHeight);
+                    $section.replaceWith($newSection);
+                    if (window.history && window.history.pushState) {
+                        window.history.pushState({ section: sectionId }, '', url);
+                    }
+                    requestAnimationFrame(function () {
+                        $newSection.removeClass('is-fade-in is-fixed-height').css('min-height', '');
+                    });
+                }).fail(function () {
+                    window.location.href = url;
+                });
+            }
+
+            $(document).on('click', '.js-ajax-section .btn-view-all, .js-ajax-section .pagination-custom a', function (e) {
+                e.preventDefault();
+                loadSection($(this));
+            });
+        })();
+    </script>
     
 </body>
 

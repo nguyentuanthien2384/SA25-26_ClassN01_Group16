@@ -1,3 +1,10 @@
 {
-    "Admin": true
+    "Admin": true,
+    "Catalog": true,
+    "Content": true,
+    "Customer": true,
+    "Cart": true,
+    "Payment": true,
+    "Review": true,
+    "Support": true
 }

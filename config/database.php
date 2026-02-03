@@ -63,6 +63,74 @@ return [
             ]) : [],
         ],
 
+        // Catalog Service Database
+        'catalog' => [
+            'driver' => 'mysql',
+            'host' => env('CATALOG_DB_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('CATALOG_DB_PORT', env('DB_PORT', '3306')),
+            'database' => env('CATALOG_DB_DATABASE', 'catalog_db'),
+            'username' => env('CATALOG_DB_USERNAME', env('DB_USERNAME', 'root')),
+            'password' => env('CATALOG_DB_PASSWORD', env('DB_PASSWORD', '')),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+        ],
+
+        // Customer Service Database
+        'customer' => [
+            'driver' => 'mysql',
+            'host' => env('CUSTOMER_DB_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('CUSTOMER_DB_PORT', env('DB_PORT', '3306')),
+            'database' => env('CUSTOMER_DB_DATABASE', 'customer_db'),
+            'username' => env('CUSTOMER_DB_USERNAME', env('DB_USERNAME', 'root')),
+            'password' => env('CUSTOMER_DB_PASSWORD', env('DB_PASSWORD', '')),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+        ],
+
+        // Order Service Database
+        'order' => [
+            'driver' => 'mysql',
+            'host' => env('ORDER_DB_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('ORDER_DB_PORT', env('DB_PORT', '3306')),
+            'database' => env('ORDER_DB_DATABASE', 'order_db'),
+            'username' => env('ORDER_DB_USERNAME', env('DB_USERNAME', 'root')),
+            'password' => env('ORDER_DB_PASSWORD', env('DB_PASSWORD', '')),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+        ],
+
+        // Content Service Database
+        'content' => [
+            'driver' => 'mysql',
+            'host' => env('CONTENT_DB_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('CONTENT_DB_PORT', env('DB_PORT', '3306')),
+            'database' => env('CONTENT_DB_DATABASE', 'content_db'),
+            'username' => env('CONTENT_DB_USERNAME', env('DB_USERNAME', 'root')),
+            'password' => env('CONTENT_DB_PASSWORD', env('DB_PASSWORD', '')),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+        ],
+
         'pgsql' => [
             'driver' => 'pgsql',
             'url' => env('DATABASE_URL'),

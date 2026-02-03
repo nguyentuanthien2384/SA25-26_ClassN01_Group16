@@ -57,18 +57,20 @@ class CategoryController extends Controller
                         break;
                 }
             }
-            $perPage = (int) $request->input('per_page', 9);
+            $paginate = $request->boolean('paginate', true);
+            $perPage = (int) $request->input('per_page', 4);
             if ($perPage <= 0) {
-                $perPage = 9;
+                $perPage = 4;
             }
             if ($perPage > 60) {
                 $perPage = 60;
             }
-            $products = $products->paginate($perPage);
+            $products = $paginate ? $products->paginate($perPage) : $products->get();
             $cateProduct = Category::find($id);
             $viewData =[
                 'products' => $products,
-                'cateProduct' => $cateProduct
+                'cateProduct' => $cateProduct,
+                'isPaginated' => $paginate,
             ];
             return view('product.index',$viewData);
         }
@@ -76,16 +78,11 @@ class CategoryController extends Controller
             $products = Product::where([
                 'pro_active' => Product::STATUS_PUBLIC 
             ])->where('pro_name','like','%'.$request->k.'%');
-            $perPage = (int) $request->input('per_page', 9);
-            if ($perPage <= 0) {
-                $perPage = 9;
-            }
-            if ($perPage > 60) {
-                $perPage = 60;
-            }
-            $products = $products->paginate($perPage);
+            $paginate = false;
+            $products = $products->get();
             $viewData = [
-                'products'=> $products
+                'products'=> $products,
+                'isPaginated' => $paginate,
             ];
             return view('product.index',$viewData);
         }

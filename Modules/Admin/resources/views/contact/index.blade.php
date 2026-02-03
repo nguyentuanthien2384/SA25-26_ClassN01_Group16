@@ -32,9 +32,10 @@
                         <td>{{$contact->con_title}}</td>
                         <td>{{$contact->con_message}}</td>
                         
-                        <td>
-                            
-                            <a style="padding: 5px 10px; border: 1px solid #995" href="{{route('admin.get.action.product',['delete',$contact->id])}}"><i class="fa-solid fa-trash" style="font-size:11px"></i>Xoá</a>
+                        <td class="action-cell">
+                            <div class="action-buttons">
+                                <a href="{{route('admin.get.delete.contact',$contact->id)}}" onclick="return confirm('Bạn có chắc muốn xoá liên hệ này?')"><i class="fa-solid fa-trash"></i>Xoá</a>
+                            </div>
                         </td>
                     </tr>  
                     @endforeach

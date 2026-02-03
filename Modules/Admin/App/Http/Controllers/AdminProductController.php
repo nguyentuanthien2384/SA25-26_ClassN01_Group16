@@ -104,6 +104,9 @@ class AdminProductController extends Controller
    $mesages = '';
    if($action){
        $product = Product::find($id);
+       if (!$product) {
+           return redirect()->back()->with('danger', 'Sản phẩm không tồn tại.');
+       }
        switch($action){
            case 'delete':
                $product->delete();

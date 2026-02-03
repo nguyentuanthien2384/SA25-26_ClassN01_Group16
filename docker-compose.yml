@@ -1,0 +1,146 @@
+version: '3.8'
+
+# ============================================================================
+# Full Stack Docker Compose - Laravel Microservices
+# ============================================================================
+# Includes: Laravel App, MySQL, Redis
+# Run: docker-compose up -d
+# ============================================================================
+
+networks:
+  microservices:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:
+
+services:
+  # ==========================================================================
+  # MYSQL DATABASE (Port 3308 để tránh conflict với MySQL local)
+  # ==========================================================================
+  
+  mysql:
+    image: mysql:8.0
+    container_name: electroshop_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: duan
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: laravel_password
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - microservices
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: --default-authentication-plugin=mysql_native_password
+
+  # ==========================================================================
+  # REDIS (Port 6380 để tránh conflict)
+  # ==========================================================================
+  
+  redis:
+    image: redis:7-alpine
+    container_name: electroshop_redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - microservices
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # ==========================================================================
+  # LARAVEL APPLICATION
+  # ==========================================================================
+  
+  laravel-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: electroshop_app
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/var/www
+      - ./storage:/var/www/storage
+      - ./bootstrap/cache:/var/www/bootstrap/cache
+    environment:
+      - APP_NAME=ElectroShop
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_KEY=base64:dTFWdRBdLwSKx88VE5hXUnXIF7cJEDQoD5fu+8pqR4I=
+      - APP_URL=http://localhost:8000
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=duan
+      - DB_USERNAME=root
+      - DB_PASSWORD=root_password
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_CLIENT=predis
+      - QUEUE_CONNECTION=sync
+      - CACHE_DRIVER=file
+      - SESSION_DRIVER=file
+    networks:
+      - microservices
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "
+        echo 'Waiting for services...' &&
+        sleep 10 &&
+        php artisan key:generate --force 2>/dev/null || true &&
+        php artisan config:clear 2>/dev/null || true &&
+        php artisan cache:clear 2>/dev/null || true &&
+        php artisan migrate --force 2>/dev/null || echo 'Migration skipped' &&
+        /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+      "
+
+  # ==========================================================================
+  # REDIS COMMANDER - Redis GUI (Port 8082)
+  # ==========================================================================
+  
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: electroshop_redis_commander
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8082:8081"
+    networks:
+      - microservices
+    depends_on:
+      - redis
+
+  # ==========================================================================
+  # PHPMYADMIN - MySQL GUI (Port 8083)
+  # ==========================================================================
+  
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: electroshop_phpmyadmin
+    environment:
+      - PMA_HOST=mysql
+      - PMA_USER=root
+      - PMA_PASSWORD=root_password
+    ports:
+      - "8083:80"
+    networks:
+      - microservices
+    depends_on:
+      - mysql

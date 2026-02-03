@@ -100,11 +100,28 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="heading-banner">
-                    @if(isset($cateProducts))
+                    @if(isset($searchKeyword))
+                    <div class="breadcumbs pb-15">
+                        <ul>
+                            <li><a href="/">Trang chủ</a></li>
+                            <li>Tìm kiếm: "{{ $searchKeyword }}"</li>
+                        </ul>
+                        <div style="color: #fff; margin-top: 10px; font-size: 16px;">
+                            <i class="zmdi zmdi-search"></i> Tìm thấy <strong>{{ $totalResults ?? 0 }}</strong> sản phẩm
+                        </div>
+                    </div>
+                    @elseif(isset($cateProduct))
+                    <div class="breadcumbs pb-15">
+                        <ul>
+                            <li><a href="/">Trang chủ</a></li>
+                            <li>{{ $cateProduct->c_name ?? 'Danh mục' }}</li>
+                        </ul>
+                    </div>
+                    @elseif(isset($cateProducts))
                     <div class="breadcumbs pb-15">
                         @foreach($cateProducts as $cateProduct)
                         <ul>
-                            <li><a href="#">Home</a></li>
+                            <li><a href="/">Trang chủ</a></li>
                             <li>{{$cateProduct->c_name}}</li>
                         </ul>
                         @endforeach
@@ -117,7 +134,7 @@
 </div>
 <!-- HEADING-BANNER END -->
 <!-- PRODUCT-AREA START -->
-<div class="product-area pt-80 pb-80 product-style-2">
+<div class="product-area pt-80 pb-80 product-style-2 js-ajax-section" data-section="product-index">
     <div class="container">
         
         <div class="row">
@@ -126,14 +143,26 @@
                     <div class="product-option mb-30 clearfix">
                         <div class="widget widget-categories  mb-30">
                             <form class="tree-most" id="form_order" method="get">
+                                @if(isset($searchKeyword))
+                                    <input type="hidden" name="k" value="{{ $searchKeyword }}">
+                                @endif
                             <div class="widget-title">
                                 <button type="submit"><h4>Sắp xếp</h4></button>
                                 <select name="orderby" class="orderby">
-                                    <option {{Request::get('orderby') == "md" || !Request::get('orderby') ? "selected = 'selected'" : ""}} value="md" selected= "selected"> Mặc định</option>
-                                    <option {{Request::get('orderby') == "desc" ? "selected = 'selected'" : ""}} value="desc"> Mới nhất</option>
-                                    <option {{Request::get('orderby') == "asc" ? "selected = 'selected'" : ""}} value="asc"> Sản phẩm cũ</option>
-                                    <option {{Request::get('orderby') == "price_max" ? "selected = 'selected'" : ""}} value="price_max"> Giá tăng dần</option>
-                                    <option {{Request::get('orderby') == "price_min" ? "selected = 'selected'" : ""}} value="price_min"> Giá giảm dần</option>
+                                    @if(isset($searchKeyword))
+                                        <option {{Request::get('orderby') == "relevance" || !Request::get('orderby') ? "selected = 'selected'" : ""}} value="relevance" selected= "selected">Liên quan nhất</option>
+                                        <option {{Request::get('orderby') == "newest" ? "selected = 'selected'" : ""}} value="newest">Mới nhất</option>
+                                        <option {{Request::get('orderby') == "name_asc" ? "selected = 'selected'" : ""}} value="name_asc">Tên A-Z</option>
+                                        <option {{Request::get('orderby') == "name_desc" ? "selected = 'selected'" : ""}} value="name_desc">Tên Z-A</option>
+                                        <option {{Request::get('orderby') == "price_asc" ? "selected = 'selected'" : ""}} value="price_asc">Giá tăng dần</option>
+                                        <option {{Request::get('orderby') == "price_desc" ? "selected = 'selected'" : ""}} value="price_desc">Giá giảm dần</option>
+                                    @else
+                                        <option {{Request::get('orderby') == "md" || !Request::get('orderby') ? "selected = 'selected'" : ""}} value="md" selected= "selected">Mặc định</option>
+                                        <option {{Request::get('orderby') == "desc" ? "selected = 'selected'" : ""}} value="desc">Mới nhất</option>
+                                        <option {{Request::get('orderby') == "asc" ? "selected = 'selected'" : ""}} value="asc">Sản phẩm cũ</option>
+                                        <option {{Request::get('orderby') == "price_max" ? "selected = 'selected'" : ""}} value="price_max">Giá tăng dần</option>
+                                        <option {{Request::get('orderby') == "price_min" ? "selected = 'selected'" : ""}} value="price_min">Giá giảm dần</option>
+                                    @endif
                                 </select>
                             </div>
                             </form>
@@ -196,22 +225,26 @@
                         </div>
                     </div>  
                 </div>
-                    @php
-                        $perPage = (int) request()->get('per_page', 9);
-                    @endphp
+                    @if($isPaginated ?? false)
                     <div class="pagination-wrap text-center">
-                        @if($perPage < 24 && $products->currentPage() === 1)
-                            <a class="btn-view-all" href="{{ request()->fullUrlWithQuery(['per_page' => 24, 'page' => 1]) }}">Xem tất cả</a>
+                        @if(method_exists($products, 'appends'))
+                            {!! $products->appends(request()->query())->links('components.pagination') !!}
                         @endif
-                        {!! $products->appends(request()->query())->links('components.pagination') !!}
                     </div>
+                    @elseif(isset($searchKeyword) && $products->count() == 0)
+                    <div class="alert alert-info text-center" style="padding: 40px; margin: 20px 0;">
+                        <i class="zmdi zmdi-search" style="font-size: 48px; color: #999; margin-bottom: 10px;"></i>
+                        <h4>Không tìm thấy sản phẩm nào cho "{{ $searchKeyword }}"</h4>
+                        <p>Vui lòng thử lại với từ khóa khác hoặc <a href="/">quay về trang chủ</a></p>
+                    </div>
+                    @endif
                 <!-- Shop-Content End -->
             </div>
             <div class="col-md-3 ">
                 <!-- Widget-Search start -->
                 <div class="widget widget-search mb-30">
-                    <form action="#">
-                        <input type="text" placeholder="Search here..." />
+                    <form action="{{route('get.product.list')}}" method="GET">
+                        <input type="text" name="k" placeholder="Tìm kiếm sản phẩm..." value="{{ $searchKeyword ?? '' }}" />
                         <button type="submit">
                             <i class="zmdi zmdi-search"></i>
                         </button>

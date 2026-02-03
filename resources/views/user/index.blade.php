@@ -1,6 +1,7 @@
 @extends('user.layout')
 @section('content')
 <h1 class="page-header">Trang tổng quan</h1>
+<div class="js-ajax-section" data-section="user-transactions">
 <div class="row">
     <div class="col-sm-4">
         <div class="panel panel-default">
@@ -63,16 +64,11 @@
                 @endforeach
             </tbody>
         </table>
-        @php
-            $perPage = (int) request()->get('per_page', 8);
-        @endphp
         <div class="pagination-wrap text-center">
-            @if($perPage < 24 && $transactions->currentPage() === 1)
-                <a class="btn-view-all" href="{{ request()->fullUrlWithQuery(['per_page' => 24, 'page' => 1]) }}">Xem tất cả</a>
-            @endif
             {!! $transactions->appends(request()->query())->links('components.pagination') !!}
         </div>
     </div>
+</div>
 </div>
 {{-- <div class="row">
     <div class="col-sm-6">

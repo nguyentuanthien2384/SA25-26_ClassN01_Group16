@@ -18,6 +18,27 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
+        \App\Events\OrderPlaced::class => [
+            \App\Listeners\SaveOrderPlacedToOutbox::class,
+        ],
+        \App\Events\ProductCreated::class => [
+            \App\Listeners\IndexProductToElasticsearch::class . '@handleProductCreated',
+        ],
+        \App\Events\ProductUpdated::class => [
+            \App\Listeners\IndexProductToElasticsearch::class . '@handleProductUpdated',
+        ],
+        \App\Events\ProductDeleted::class => [
+            \App\Listeners\IndexProductToElasticsearch::class . '@handleProductDeleted',
+        ],
+    ];
+
+    /**
+     * The subscriber classes to register.
+     *
+     * @var array
+     */
+    protected $subscribe = [
+        \App\Listeners\IndexProductToElasticsearch::class,
     ];
 
     /**

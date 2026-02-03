@@ -31,13 +31,17 @@
                         <td>{{ optional($rating->product)->pro_name ?? '[N/A]' }}</td>
                         <td>{{$rating->ra_content}}</td>
                         <td>{{$rating->ra_number}}</td>
-                        <td>
-                            <a style="padding: 5px 10px; border: 1px solid #995" href="{{route('admin.delete.rating',$rating->id)}}"><i class="fa-solid fa-trash" style="font-size:11px"></i>Xoá</a>
+                        <td class="action-cell">
+                            <div class="action-buttons">
+                                <a href="{{route('admin.delete.rating',$rating->id)}}"><i class="fa-solid fa-trash"></i>Xoá</a>
+                            </div>
                         </td>
                     </tr>
                     @endforeach
                 @endif
             </tbody>
-            {!!$ratings->links()!!}
         </table>
+        <div class="pagination-wrap">
+            {!! $ratings->links('components.pagination') !!}
+        </div>
 @stop

@@ -1,0 +1,1 @@
+<?php /**PATH D:\Web_Ban_Do_Dien_Tu\resources\views\mail\mail_order.blade.php ENDPATH**/ ?>

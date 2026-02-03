@@ -1,0 +1,28 @@
+@startuml C4_Context
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_WITH_LEGEND()
+
+title System Context Diagram - ElectroShop E-Commerce Platform
+
+Person(customer, "Customer", "End user who browses and purchases electronic products online")
+Person(admin, "Administrator", "Manages products, orders, users, and system settings")
+Person(guest, "Guest User", "Browses products without creating an account")
+
+System(electroshop, "ElectroShop Platform", "E-commerce platform for electronic products built with Laravel Microservices Architecture")
+
+System_Ext(payment, "Payment Gateways", "External payment processors: VNPay, MoMo, PayPal")
+System_Ext(email, "Email Service", "SMTP service for sending notifications: Gmail, SendGrid")
+System_Ext(sms, "SMS Gateway", "SMS notification service (Future): Twilio, Nexmo")
+
+Rel(customer, electroshop, "Browse products, search, add to cart, checkout, track orders", "HTTPS/Web Browser")
+Rel(admin, electroshop, "Manage products, categories, orders, users, view analytics", "HTTPS/Admin Panel")
+Rel(guest, electroshop, "Browse and search products (read-only access)", "HTTPS/Web Browser")
+
+Rel(electroshop, payment, "Process payment transactions, handle webhooks", "HTTPS/REST API")
+Rel(electroshop, email, "Send order confirmations, shipping notifications, promotional emails", "SMTP/Email")
+Rel_Back(payment, electroshop, "Payment status callbacks, webhook notifications", "HTTPS/Webhook")
+
+SHOW_LEGEND()
+
+@enduml

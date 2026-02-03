@@ -1,0 +1,86 @@
+@startuml C4_Container
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_TOP_DOWN()
+LAYOUT_WITH_LEGEND()
+
+title Container Diagram - ElectroShop Microservices Architecture
+
+Person(customer, "Customer", "Web user")
+Person(admin, "Administrator", "System admin")
+
+System_Boundary(electroshop, "ElectroShop Platform") {
+    Container(web, "Web Frontend", "Laravel Blade, Vue.js, Tailwind", "Customer-facing web application with product browsing, cart, checkout")
+    Container(adminPanel, "Admin Panel", "Laravel Blade, Bootstrap 5", "Admin management interface for products, orders, users")
+    
+    Container(apiGateway, "Kong API Gateway", "Kong 3.4", "Single entry point for all APIs with rate limiting (100 req/min), CORS, authentication, logging")
+    
+    Container(catalogSvc, "Catalog Service", "Laravel 10, PHP 8.2", "Manages products, categories, search, reviews")
+    Container(orderSvc, "Order Service", "Laravel 10, PHP 8.2", "Handles shopping cart, checkout, orders, order tracking")
+    Container(paymentSvc, "Payment Service", "Laravel 10, PHP 8.2", "Processes payments via VNPay, MoMo, PayPal, handles webhooks")
+    Container(notifSvc, "Notification Service", "Laravel 10, Symfony Mailer", "Sends email, SMS, push notifications (Strangler Pattern)")
+    Container(customerSvc, "Customer Service", "Laravel 10, PHP 8.2", "User authentication, profile management, wishlist, order history")
+    
+    ContainerDb(mysql, "MySQL Database", "MySQL 8.0", "Primary relational database storing products, orders, users, transactions")
+    ContainerDb(redis, "Redis Cache", "Redis 7", "Distributed cache, session storage, job queue (5-min TTL for API responses)")
+    ContainerDb(elasticsearch, "Elasticsearch", "Elasticsearch 8.11", "Search engine and CQRS read model for product catalog")
+    
+    Container(consul, "Consul", "Consul 1.17", "Service discovery and health checking")
+    Container(jaeger, "Jaeger", "Jaeger 1.52", "Distributed tracing and request tracking")
+    Container(prometheus, "Prometheus", "Prometheus 2.48", "Metrics collection and monitoring")
+    Container(grafana, "Grafana", "Grafana 10.2", "Monitoring dashboards and visualizations")
+    
+    Container(elk, "ELK Stack", "Elasticsearch, Logstash, Kibana", "Centralized logging infrastructure")
+}
+
+System_Ext(payment, "Payment Gateways", "VNPay, MoMo, PayPal")
+System_Ext(email, "Email Service", "Gmail SMTP, SendGrid")
+
+Rel(customer, web, "Uses", "HTTPS")
+Rel(admin, adminPanel, "Uses", "HTTPS")
+
+Rel(web, apiGateway, "Makes API calls", "HTTP/REST/JSON")
+Rel(adminPanel, apiGateway, "Makes API calls", "HTTP/REST/JSON")
+
+Rel(apiGateway, catalogSvc, "Routes /api/products/*", "HTTP/JSON")
+Rel(apiGateway, orderSvc, "Routes /api/orders/*", "HTTP/JSON")
+Rel(apiGateway, paymentSvc, "Routes /api/payments/*", "HTTP/JSON")
+Rel(apiGateway, customerSvc, "Routes /api/customers/*", "HTTP/JSON")
+
+Rel(catalogSvc, mysql, "Read/Write products, categories", "SQL/PDO")
+Rel(catalogSvc, redis, "Cache product data (5 min)", "Redis Protocol")
+Rel(catalogSvc, elasticsearch, "Index and search products", "HTTP/REST")
+
+Rel(orderSvc, mysql, "Read/Write orders, carts", "SQL/PDO")
+Rel(orderSvc, redis, "Queue jobs, cache cart", "Redis Protocol")
+Rel(orderSvc, notifSvc, "Publish OrderCreated event", "Event Bus/Redis")
+
+Rel(paymentSvc, mysql, "Store transactions", "SQL/PDO")
+Rel(paymentSvc, payment, "Process payments", "HTTPS/REST")
+Rel(paymentSvc, notifSvc, "Publish PaymentCompleted event", "Event Bus/Redis")
+
+Rel(customerSvc, mysql, "Read/Write user data", "SQL/PDO")
+Rel(customerSvc, redis, "Session storage", "Redis Protocol")
+
+Rel(notifSvc, email, "Send emails", "SMTP")
+
+Rel(catalogSvc, consul, "Register service, health check", "HTTP")
+Rel(orderSvc, consul, "Register service, health check", "HTTP")
+Rel(paymentSvc, consul, "Register service, health check", "HTTP")
+
+Rel(catalogSvc, jaeger, "Send traces", "UDP/Thrift")
+Rel(orderSvc, jaeger, "Send traces", "UDP/Thrift")
+Rel(paymentSvc, jaeger, "Send traces", "UDP/Thrift")
+
+Rel(apiGateway, prometheus, "Expose metrics", "HTTP/Prometheus")
+Rel(catalogSvc, prometheus, "Expose metrics", "HTTP/Prometheus")
+Rel(orderSvc, prometheus, "Expose metrics", "HTTP/Prometheus")
+
+Rel(grafana, prometheus, "Query metrics", "PromQL")
+
+Rel(catalogSvc, elk, "Send logs", "Filebeat/Logstash")
+Rel(orderSvc, elk, "Send logs", "Filebeat/Logstash")
+
+SHOW_LEGEND()
+
+@enduml

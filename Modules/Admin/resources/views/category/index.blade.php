@@ -27,9 +27,11 @@
                         <td>
                             <a href="{{route('admin.get.action.category',['active',$category->id])}}"class="label {{$category->getStatus($category->c_active)['class']}}">{{$category->getStatus($category->c_active)['name']}}</a>
                         </td>
-                        <td>
-                            <a style="padding: 5px 10px; border: 1px solid #995" href="{{route('admin.get.edit.category',$category->id)}}"><i class="fa-solid fa-pen" style="font-size:11px"></i>Chỉnh sửa</a>
-                            <a style="padding: 5px 10px; border: 1px solid #995" href="{{route('admin.get.action.category',['delete',$category->id])}}"><i class="fa-solid fa-trash" style="font-size:11px"></i>Xoá</a>
+                        <td class="action-cell">
+                            <div class="action-buttons">
+                                <a href="{{route('admin.get.edit.category',$category->id)}}"><i class="fa-solid fa-pen"></i>Chỉnh sửa</a>
+                                <a href="{{route('admin.get.action.category',['delete',$category->id])}}"><i class="fa-solid fa-trash"></i>Xoá</a>
+                            </div>
                         </td>
                     </tr>                
                     @endforeach

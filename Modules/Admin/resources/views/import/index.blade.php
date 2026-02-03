@@ -31,13 +31,17 @@
                         <td>{{isset($importgood->supplier->s_name) ? $importgood->supplier->s_name :'[N\A]'}}</td>
                         <td>{{$importgood->price}}</td>
                         <td>{{$importgood->quantity}}</td>
-                        <td>
-                            <a style="padding: 5px 10px; border: 1px solid #995" href="{{route('admin.get.delete.importdood',$importgood->id)}}"><i class="fa-solid fa-trash" style="font-size:11px"></i>Xoá</a>
+                        <td class="action-cell">
+                            <div class="action-buttons">
+                                <a href="{{route('admin.get.delete.importdood',$importgood->id)}}"><i class="fa-solid fa-trash"></i>Xoá</a>
+                            </div>
                         </td>
                     </tr>                
                     @endforeach
                     @endif
-                    {!!$importgoods->links()!!}
             </tbody>
         </table>
+        <div class="pagination-wrap">
+            {!! $importgoods->links('components.pagination') !!}
+        </div>
 @stop

@@ -42,6 +42,8 @@
         <link rel="stylesheet" href="{{asset('css/shortcode.css')}}">
 		<!-- responsive css -->
 		<link rel="stylesheet" href="{{asset('css/responsive.css')}}">
+		<!-- Fast Pagination CSS - Load nhanh như chớp -->
+		<link rel="stylesheet" href="{{asset('css/fast-pagination.css')}}">
 		<!-- modernizr css -->
 		<script src="{{asset('js/vendor/modernizr-3.11.2.min.js')}}"></script>
 		<style>
@@ -179,6 +181,54 @@
 				margin-top: 6px;
 				min-height: 18px;
 			}
+			.widget-categories {
+				background: #fff;
+				border: 1px solid #eef0f5;
+				border-radius: 12px;
+				padding: 16px;
+				box-shadow: 0 10px 24px rgba(0, 0, 0, 0.04);
+			}
+			.widget-categories .widget-title h4 {
+				font-size: 14px;
+				font-weight: 700;
+				color: #1f2a44;
+				margin-bottom: 12px;
+			}
+			.product-cat ul {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 8px;
+				list-style: none;
+				margin: 0;
+				padding: 0;
+			}
+			.product-cat li {
+				margin: 0;
+			}
+			.product-cat a {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				padding: 8px 12px;
+				border-radius: 999px;
+				border: 1px solid #e5e8f0;
+				background: #f7f8fb;
+				color: #27304a;
+				font-size: 12px;
+				font-weight: 600;
+				transition: all 0.2s ease;
+				white-space: nowrap;
+			}
+			.product-cat a:hover {
+				border-color: #e30019;
+				color: #e30019;
+				background: #fff1f2;
+			}
+			.product-cat a.active {
+				border-color: #e30019;
+				background: #e30019;
+				color: #fff;
+			}
 			.pagination-wrap {
 				display: flex;
 				flex-direction: column;
@@ -205,25 +255,145 @@
 			.pagination-custom ul {
 				display: flex;
 				align-items: center;
-				gap: 16px;
+				gap: 14px;
 				list-style: none;
 				margin: 0;
 				padding: 0;
 			}
 			.pagination-custom li span,
 			.pagination-custom li a {
-				color: #5a57c6;
-				font-weight: 600;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				min-width: 24px;
+				height: 24px;
+				padding: 0 4px;
+				border: none;
+				border-radius: 0;
+				background: transparent;
+				color: #3a476a;
+				font-weight: 500;
 				text-decoration: none;
-				padding: 4px 2px;
+			}
+			.pagination-custom li a:hover {
+				color: #2f3f75;
 			}
 			.pagination-custom li.active span {
-				color: #4b3b7a;
-				border-bottom: 2px solid #4b3b7a;
-				padding-bottom: 6px;
+				color: #2f3f75;
+				border-bottom: 2px solid #4b5bff;
+				padding-bottom: 4px;
 			}
 			.pagination-custom li.disabled span {
-				color: #999;
+				color: #c0c6d4;
+			}
+			.pagination-custom .pagination-prev span,
+			.pagination-custom .pagination-prev a,
+			.pagination-custom .pagination-next span,
+			.pagination-custom .pagination-next a {
+				width: 34px;
+				height: 34px;
+				min-width: 34px;
+				border-radius: 50%;
+				background: #eaf1ff;
+				color: #6a7bb6;
+				font-size: 16px;
+			}
+			.pagination-custom .pagination-prev a:hover,
+			.pagination-custom .pagination-next a:hover {
+				background: #dfe9ff;
+			}
+			.js-ajax-section {
+				transition: opacity 180ms ease;
+				position: relative;
+			}
+			.js-ajax-section.is-loading {
+				opacity: 0.6;
+			}
+			.js-ajax-section.is-fade-in {
+				opacity: 0;
+			}
+			.js-ajax-section.is-fixed-height {
+				overflow: hidden;
+			}
+			.js-ajax-section .ajax-overlay {
+				position: absolute;
+				inset: 0;
+				background: rgba(255, 255, 255, 0.75);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				z-index: 2;
+				backdrop-filter: blur(2px);
+			}
+			.js-ajax-section .ajax-skeleton-grid {
+				display: grid;
+				grid-template-columns: repeat(4, minmax(0, 1fr));
+				gap: 20px;
+				width: 100%;
+				max-width: 1200px;
+				padding: 0 15px;
+			}
+			@media (max-width: 1199px) {
+				.js-ajax-section .ajax-skeleton-grid {
+					grid-template-columns: repeat(3, minmax(0, 1fr));
+				}
+			}
+			@media (max-width: 991px) {
+				.js-ajax-section .ajax-skeleton-grid {
+					grid-template-columns: repeat(2, minmax(0, 1fr));
+				}
+			}
+			@media (max-width: 767px) {
+				.js-ajax-section .ajax-skeleton-grid {
+					grid-template-columns: repeat(1, minmax(0, 1fr));
+				}
+			}
+			.js-ajax-section .ajax-skeleton-card {
+				background: #fff;
+				border-radius: 14px;
+				box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+				padding: 12px 12px 16px;
+			}
+			.js-ajax-section .skeleton-block {
+				position: relative;
+				overflow: hidden;
+				background: #edf1f7;
+				border-radius: 8px;
+			}
+			.js-ajax-section .skeleton-block::after {
+				content: '';
+				position: absolute;
+				inset: 0;
+				background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0) 100%);
+				transform: translateX(-100%);
+				animation: shimmer 1.1s infinite;
+			}
+			.js-ajax-section .skeleton-img {
+				height: 180px;
+				border-radius: 10px;
+				margin-bottom: 10px;
+			}
+			.js-ajax-section .skeleton-line {
+				height: 12px;
+				margin-bottom: 8px;
+			}
+			.js-ajax-section .skeleton-line.short {
+				width: 60%;
+			}
+			.js-ajax-section .skeleton-line.tiny {
+				width: 40%;
+			}
+			.js-ajax-section .skeleton-line.price {
+				height: 14px;
+				width: 45%;
+			}
+			.js-ajax-section .skeleton-line.meta {
+				height: 10px;
+				width: 30%;
+				margin-bottom: 0;
+			}
+			@keyframes shimmer {
+				100% { transform: translateX(100%); }
 			}
 			.slick-prev,
 			.slick-next {
@@ -289,14 +459,14 @@
                     @endif
 			@yield('content')
 			@if(isset($productHot))
-				<div class="product-area pt-80 pb-35">
+				<div class="product-area pt-80 pb-35 js-ajax-section" data-section="hot">
 					<div class="container">
 						<div class="row">
 							<div class="col-lg-12">
 								<div class="section-title text-center">
 									<h2 class="title-border">Sản phẩm nổi bật</h2>
 								</div>
-								<div class="product-slider style-1 arrow-left-right">
+								<div class="row">
 									<!-- Single-product start -->
 									@foreach( $productHot as $proHot)
 									@php
@@ -308,7 +478,7 @@
 										$totalStars = $proHot->pro_total ?? 0;
 										$avgRating = $totalReviews > 0 ? round($totalStars / $totalReviews, 1) : 0;
 									@endphp
-									<div class="single-product">
+									<div class="col-lg-3 col-md-4 col-sm-6 mb-30">
 										<div class="p-card">
 											@if($salePercent > 0)
 												<span class="p-badge">Giảm {{ $salePercent }}%</span>
@@ -348,15 +518,11 @@
 									</div>
 									@endforeach
 								</div>
-								@php
-									$hotPerPage = (int) request()->get('hot_per_page', 8);
-								@endphp
-								<div class="pagination-wrap text-center">
-									@if($hotPerPage < 24 && $productHot->currentPage() === 1)
-										<a class="btn-view-all" href="{{ request()->fullUrlWithQuery(['hot_per_page' => 24, 'hot_page' => 1]) }}">Xem tất cả</a>
-									@endif
+							<div class="pagination-wrap text-center">
+								@if(method_exists($productHot, 'appends'))
 									{!! $productHot->appends(request()->query())->links('components.pagination') !!}
-								</div>
+								@endif
+							</div>
 							</div>
 						</div>
 					</div>
@@ -392,14 +558,14 @@
 			</div>
 			@endif
 			@if(isset($productNew))
-			<div class="product-area pt-80 pb-35">
+			<div class="product-area pt-80 pb-35 js-ajax-section" data-section="new">
 				<div class="container">
 					<div class="row">
 						<div class="col-lg-12">
 							<div class="section-title text-center">
 								<h2 class="title-border">Sản phẩm mới </h2>
 							</div>
-							<div class="product-slider style-1 arrow-left-right">
+							<div class="row">
 								<!-- Single-product start -->
 								@foreach( $productNew as $proHot)
 								@php
@@ -411,7 +577,7 @@
 									$totalStars = $proHot->pro_total ?? 0;
 									$avgRating = $totalReviews > 0 ? round($totalStars / $totalReviews, 1) : 0;
 								@endphp
-								<div class="single-product">
+								<div class="col-lg-3 col-md-4 col-sm-6 mb-30">
 									<div class="p-card">
 										@if($salePercent > 0)
 											<span class="p-badge">Giảm {{ $salePercent }}%</span>
@@ -451,14 +617,10 @@
 								</div>
 								@endforeach
 							</div>
-							@php
-								$newPerPage = (int) request()->get('new_per_page', 8);
-							@endphp
 							<div class="pagination-wrap text-center">
-								@if($newPerPage < 24 && $productNew->currentPage() === 1)
-									<a class="btn-view-all" href="{{ request()->fullUrlWithQuery(['new_per_page' => 24, 'new_page' => 1]) }}">Xem tất cả</a>
+								@if(method_exists($productNew, 'appends'))
+									{!! $productNew->appends(request()->query())->links('components.pagination') !!}
 								@endif
-								{!! $productNew->appends(request()->query())->links('components.pagination') !!}
 							</div>
 						</div>
 					</div>
@@ -466,14 +628,14 @@
 			</div>
 			@endif
 			@if(isset($productSelling))
-			<div class="product-area pt-80 pb-35">
+			<div class="product-area pt-80 pb-35 js-ajax-section" data-section="selling">
 				<div class="container">
 					<div class="row">
 						<div class="col-lg-12">
 							<div class="section-title text-center">
 								<h2 class="title-border">Sản phẩm bán nhiều nhất</h2>
 							</div>
-							<div class="product-slider style-1 arrow-left-right">
+							<div class="row">
 								<!-- Single-product start -->
 								@foreach( $productSelling as $proHot)
 								@php
@@ -485,7 +647,7 @@
 									$totalStars = $proHot->pro_total ?? 0;
 									$avgRating = $totalReviews > 0 ? round($totalStars / $totalReviews, 1) : 0;
 								@endphp
-								<div class="single-product">
+								<div class="col-lg-3 col-md-4 col-sm-6 mb-30">
 									<div class="p-card">
 										@if($salePercent > 0)
 											<span class="p-badge">Giảm {{ $salePercent }}%</span>
@@ -528,14 +690,10 @@
 								</div>
 								@endforeach
 							</div>
-							@php
-								$sellingPerPage = (int) request()->get('selling_per_page', 8);
-							@endphp
 							<div class="pagination-wrap text-center">
-								@if($sellingPerPage < 24 && $productSelling->currentPage() === 1)
-									<a class="btn-view-all" href="{{ request()->fullUrlWithQuery(['selling_per_page' => 24, 'selling_page' => 1]) }}">Xem tất cả</a>
+								@if(method_exists($productSelling, 'appends'))
+									{!! $productSelling->appends(request()->query())->links('components.pagination') !!}
 								@endif
-								{!! $productSelling->appends(request()->query())->links('components.pagination') !!}
 							</div>
 						</div>
 					</div>
@@ -544,7 +702,7 @@
 			@endif
 
 			@if(isset($articleNews))
-			<div class="product-area pt-80 pb-35">
+			<div class="product-area pt-80 pb-35 js-ajax-section" data-section="news">
 				<div class="container">
 					<div class="row">
 						<div class="col-lg-12">
@@ -556,7 +714,7 @@
 									<p>Chưa có tin tức nổi bật.</p>
 								</div>
 							@else
-							<div class="product-slider style-1 arrow-left-right">
+							<div class="row">
 								<!-- Single-product start -->
 								@foreach( $articleNews as $articleNew)
 								@php
@@ -568,7 +726,7 @@
 									$totalStars = $articleNew->pro_total ?? 0;
 									$avgRating = $totalReviews > 0 ? round($totalStars / $totalReviews, 1) : 0;
 								@endphp
-								<div class="single-product">
+								<div class="col-lg-3 col-md-4 col-sm-6 mb-30">
 									<div class="p-card">
 										@if($salePercent > 0)
 											<span class="p-badge">Giảm {{ $salePercent }}%</span>
@@ -608,14 +766,10 @@
 								</div>
 								@endforeach
 							</div>
-							@php
-								$newsPerPage = (int) request()->get('news_per_page', 8);
-							@endphp
 							<div class="pagination-wrap text-center">
-								@if($newsPerPage < 24 && $articleNews->currentPage() === 1)
-									<a class="btn-view-all" href="{{ request()->fullUrlWithQuery(['news_per_page' => 24, 'news_page' => 1]) }}">Xem tất cả</a>
+								@if(method_exists($articleNews, 'appends'))
+									{!! $articleNews->appends(request()->query())->links('components.pagination') !!}
 								@endif
-								{!! $articleNews->appends(request()->query())->links('components.pagination') !!}
 							</div>
 							@endif
 						</div>
@@ -714,6 +868,134 @@
 					});
 				});
 			})();
+		</script>
+		<script>
+			$(document).on('click', 'a[data-confirm], a[href*="delete"], a[href*="remove"]', function (e) {
+				var message = $(this).data('confirm') || 'Bạn có chắc muốn xoá?';
+				if (!confirm(message)) {
+					e.preventDefault();
+				}
+			});
+		</script>
+		<script>
+			(function () {
+				function buildSkeletonGrid(count) {
+					var items = [];
+					for (var i = 0; i < count; i++) {
+						items.push(
+							'<div class="ajax-skeleton-card">' +
+								'<div class="skeleton-block skeleton-img"></div>' +
+								'<div class="skeleton-block skeleton-line"></div>' +
+								'<div class="skeleton-block skeleton-line short"></div>' +
+								'<div class="skeleton-block skeleton-line price"></div>' +
+								'<div class="skeleton-block skeleton-line meta"></div>' +
+							'</div>'
+						);
+					}
+					return '<div class="ajax-overlay"><div class="ajax-skeleton-grid">' + items.join('') + '</div></div>';
+				}
+
+				function initProductSlider($scope) {
+					var $sliders = $scope.find('.product-slider');
+					if (!$sliders.length || typeof $.fn.slick !== 'function') return;
+					$sliders.each(function () {
+						var $slider = $(this);
+						if ($slider.hasClass('slick-initialized')) {
+							$slider.slick('unslick');
+						}
+						$slider.slick({
+							speed: 300,
+							slidesToShow: 4,
+							slidesToScroll: 1,
+							prevArrow: '<button type="button" class="slick-prev">p<br />r<br />e<br />v</button>',
+							nextArrow: '<button type="button" class="slick-next">n<br />e<br />x<br />t</button>',
+							responsive: [
+								{ breakpoint: 1200, settings: { slidesToShow: 3 } },
+								{ breakpoint: 992, settings: { slidesToShow: 2 } },
+								{ breakpoint: 768, settings: { slidesToShow: 1 } }
+							]
+						});
+					});
+				}
+
+				function loadSection($trigger) {
+					var $section = $trigger.closest('.js-ajax-section');
+					if (!$section.length) return;
+
+					var url = $trigger.attr('href');
+					if (!url) return;
+
+					var sectionId = $section.data('section');
+					var fixedHeight = $section.outerHeight();
+					$section.addClass('is-loading is-fixed-height').css('min-height', fixedHeight);
+					if (!$section.find('.ajax-overlay').length) {
+						$section.append(buildSkeletonGrid(4));
+					}
+
+					$.get(url, function (html) {
+						var $newSection = $(html)
+							.find('.js-ajax-section[data-section="' + sectionId + '"]')
+							.first();
+
+						if (!$newSection.length) {
+							window.location.href = url;
+							return;
+						}
+
+						$newSection.addClass('is-fade-in');
+						$newSection.addClass('is-fade-in').css('min-height', fixedHeight);
+						$section.replaceWith($newSection);
+						initProductSlider($newSection);
+						if (window.history && window.history.pushState) {
+							window.history.pushState({ section: sectionId }, '', url);
+						}
+						requestAnimationFrame(function () {
+							$newSection.removeClass('is-fade-in is-fixed-height').css('min-height', '');
+						});
+					}).fail(function () {
+						window.location.href = url;
+					});
+				}
+
+				$(document).on('click', '.js-ajax-section .btn-view-all, .js-ajax-section .pagination-custom a', function (e) {
+					e.preventDefault();
+					loadSection($(this));
+				});
+			})();
+		</script>
+		
+		<!-- Fast Pagination JS - AJAX super nhanh -->
+		<script src="{{asset('js/fast-pagination.js')}}"></script>
+		<script>
+			// Initialize Fast Pagination cho các sections
+			document.addEventListener('DOMContentLoaded', function() {
+				// Khởi tạo cho sản phẩm nổi bật
+				if (document.querySelector('.products-hot-container')) {
+					window.productsHotPagination = new FastPagination({
+						container: '.products-hot-container',
+						endpoint: '/api/products/hot',
+						perPage: 4
+					});
+				}
+				
+				// Khởi tạo cho sản phẩm mới
+				if (document.querySelector('.products-new-container')) {
+					window.productsNewPagination = new FastPagination({
+						container: '.products-new-container',
+						endpoint: '/api/products/new',
+						perPage: 4
+					});
+				}
+				
+				// Khởi tạo cho sản phẩm bán chạy
+				if (document.querySelector('.products-selling-container')) {
+					window.productsSellingPagination = new FastPagination({
+						container: '.products-selling-container',
+						endpoint: '/api/products/selling',
+						perPage: 4
+					});
+				}
+			});
 		</script>
 	</body>
 </html>

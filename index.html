@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="vi">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Website Hoa Tết</title>
+
+        <!-- =============================== -->
+        <!-- CSS TẾT -->
+        <!-- =============================== -->
+        <style>
+            body {
+                font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                background-color: #fffdf7;
+                color: #333;
+                line-height: 1.6;
+                margin: 0;
+                padding: 0;
+            }
+
+            :root {
+                --tet-red: #d0021b;
+                --tet-gold: #f4c542;
+                --tet-bg: #fff7e6;
+            }
+
+            h1,
+            h2,
+            h3 {
+                color: var(--tet-red);
+                font-weight: 700;
+                letter-spacing: 0.5px;
+            }
+
+            h1 {
+                font-size: 36px;
+            }
+            h2 {
+                font-size: 28px;
+            }
+            h3 {
+                font-size: 22px;
+            }
+
+            .btn-tet {
+                background: var(--tet-red);
+                color: white !important;
+                padding: 12px 24px;
+                border-radius: 6px;
+                font-weight: bold;
+                text-decoration: none;
+                transition: 0.3s;
+                display: inline-block;
+            }
+            .btn-tet:hover {
+                background: #a80015;
+                transform: translateY(-2px);
+            }
+
+            .tet-banner {
+                background:
+                    linear-gradient(
+                        rgba(208, 2, 27, 0.7),
+                        rgba(208, 2, 27, 0.7)
+                    ),
+                    url("https://i.imgur.com/1xQwY8G.jpeg");
+                background-size: cover;
+                background-position: center;
+                padding: 80px 20px;
+                text-align: center;
+                color: white;
+                border-bottom: 5px solid var(--tet-gold);
+            }
+
+            .tet-banner h1 {
+                font-size: 48px;
+                margin-bottom: 10px;
+            }
+
+            .tet-banner p {
+                font-size: 18px;
+                max-width: 700px;
+                margin: auto;
+            }
+
+            .product-card {
+                background: white;
+                border: 2px solid var(--tet-gold);
+                border-radius: 10px;
+                padding: 20px;
+                transition: 0.3s;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            .product-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            }
+            .product-card img {
+                width: 100%;
+                border-radius: 10px;
+                margin-bottom: 15px;
+            }
+
+            .category-box {
+                background: var(--tet-bg);
+                border-left: 5px solid var(--tet-red);
+                padding: 15px 20px;
+                margin-bottom: 15px;
+                border-radius: 6px;
+            }
+
+            .footer-tet {
+                background: var(--tet-red);
+                color: white;
+                padding: 30px;
+                text-align: center;
+                margin-top: 40px;
+                border-top: 5px solid var(--tet-gold);
+            }
+
+            @keyframes hoaRoi {
+                0% {
+                    transform: translateY(-50px) rotate(0deg);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(600px) rotate(360deg);
+                    opacity: 0;
+                }
+            }
+
+            .hoa {
+                position: fixed;
+                top: -50px;
+                font-size: 20px;
+                animation: hoaRoi 6s linear infinite;
+                z-index: 9999;
+                pointer-events: none;
+            }
+            .hoa:nth-child(odd) {
+                animation-duration: 8s;
+            }
+            .hoa:nth-child(even) {
+                animation-duration: 5s;
+            }
+        </style>
+    </head>
+
+    <body>
+        <!-- =============================== -->
+        <!-- BANNER TRANG CHỦ -->
+        <!-- =============================== -->
+        <div class="tet-banner">
+            <h1>🌸 Cửa Hàng Hoa Tết – Đón Lộc Đầu Năm 🌸</h1>
+            <p>
+                Hoa mai – hoa đào – lan hồ điệp – hoa ly – hoa cúc. Giao nhanh –
+                trang trí theo yêu cầu – giá tốt.
+            </p>
+            <a href="#products" class="btn-tet">Xem sản phẩm</a>
+        </div>
+
+        <!-- =============================== -->
+        <!-- DANH MỤC -->
+        <!-- =============================== -->
+        <section style="padding: 40px">
+            <h2>🌸 Danh Mục Hoa Tết</h2>
+
+            <div class="category-box">🌼 Hoa Mai – Biểu tượng tài lộc</div>
+            <div class="category-box">🌸 Hoa Đào – Sắc xuân truyền thống</div>
+            <div class="category-box">
+                💮 Lan Hồ Điệp – Sang trọng & tinh tế
+            </div>
+            <div class="category-box">🌺 Hoa Ly – Hương thơm nhẹ nhàng</div>
+            <div class="category-box">🌼 Hoa Cúc – Sắc vàng thịnh vượng</div>
+        </section>
+
+        <!-- =============================== -->
+        <!-- SẢN PHẨM -->
+        <!-- =============================== -->
+        <section id="products" style="padding: 40px">
+            <h2>🌺 Sản Phẩm Hoa Tết</h2>
+
+            <!-- 1 -->
+            <div class="product-card">
+                <h3>🌼 Hoa Mai Vàng – Chậu Sứ Cao Cấp</h3>
+                <p>Chậu mai vàng rực rỡ, tượng trưng tài lộc – may mắn.</p>
+            </div>
+
+            <!-- 2 -->
+            <div class="product-card">
+                <h3>🌸 Hoa Đào Nhật Tân – Chậu Lớn</h3>
+                <p>
+                    Cành đào hồng rực, nụ nhiều, mang lại không khí Tết truyền
+                    thống.
+                </p>
+            </div>
+
+            <!-- 3 -->
+            <div class="product-card">
+                <h3>💮 Lan Hồ Điệp – 5 Cành</h3>
+                <p>Lan hồ điệp sang trọng, thích hợp làm quà tặng cao cấp.</p>
+            </div>
+
+            <!-- 4 -->
+            <div class="product-card">
+                <h3>🌺 Hoa Ly Kép – 10 Bông</h3>
+                <p>Hoa ly kép thơm nhẹ, bông to, nở lâu.</p>
+            </div>
+
+            <!-- 5 -->
+            <div class="product-card">
+                <h3>🌼 Cúc Đại Đóa – Chậu Lớn</h3>
+                <p>Chậu cúc vàng rực rỡ, tượng trưng thịnh vượng.</p>
+            </div>
+        </section>
+
+        <!-- =============================== -->
+        <!-- FOOTER -->
+        <!-- =============================== -->
+        <div class="footer-tet">
+            © 2026 – Cửa Hàng Hoa Tết. Chúc bạn năm mới an khang – thịnh vượng.
+        </div>
+
+        <!-- =============================== -->
+        <!-- JS HIỆU ỨNG HOA RƠI -->
+        <!-- =============================== -->
+        <script>
+            function taoHoaRoi() {
+                const hoa = document.createElement("div");
+                hoa.classList.add("hoa");
+                hoa.innerHTML = "🌸";
+                hoa.style.left = Math.random() * window.innerWidth + "px";
+                hoa.style.animationDuration = Math.random() * 3 + 5 + "s";
+                document.body.appendChild(hoa);
+
+                setTimeout(() => hoa.remove(), 8000);
+            }
+
+            setInterval(taoHoaRoi, 500);
+        </script>
+    </body>
+</html>

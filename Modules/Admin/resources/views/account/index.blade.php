@@ -36,9 +36,12 @@
                         
                         </td>
                         
-                        <td>
-                            <a style="padding: 5px 10px; border: 1px solid #995" href="{{route('account.update',$users->id)}}"><i class="fa-solid fa-pen" style="font-size:11px"></i>Chỉnh sửa</a>
-                            <a style="padding: 5px 10px; border: 1px solid #995" href="{{route('account.delete',$users->id)}}"><i class="fa-solid fa-trash" style="font-size:11px"></i>Xoá</a>
+                        <td class="action-cell">
+                            <div class="action-buttons">
+                                <a href="{{route('account.update',$users->id)}}"><i class="fa-solid fa-pen"></i>Chỉnh sửa</a>
+                                <a href="{{route('account.delete',$users->id)}}"><i class="fa-solid fa-trash"></i>Xoá</a>
+                            </div>
+                        </td>
                     </tr>  
                     @endforeach
                 @endif

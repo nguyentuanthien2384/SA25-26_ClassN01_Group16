@@ -39,8 +39,10 @@
                     </tr>
                 @endforeach
             </tbody>
-            {!!$transactionNews->links()!!}
         </table>
+        <div class="pagination-wrap">
+            {!! $transactionNews->links('components.pagination') !!}
+        </div>
     </div>
 </div>
 <div class="row">

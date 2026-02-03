@@ -25,14 +25,17 @@
                     <tr>
                         <td>{{$supplier->id}}</td>
                         <td>{{isset($supplier->s_name) ? $supplier->s_name :'[N\A]'}}</td>
-                        <td>
-                         
-                            <a style="padding: 5px 10px; border: 1px solid #995" href="{{route('admin.get.delete.supplier',$supplier->id)}}"><i class="fa-solid fa-trash" style="font-size:11px"></i>Xoá</a>
+                        <td class="action-cell">
+                            <div class="action-buttons">
+                                <a href="{{route('admin.get.delete.supplier',$supplier->id)}}"><i class="fa-solid fa-trash"></i>Xoá</a>
+                            </div>
                         </td>
                     </tr>                
                     @endforeach
                     @endif
-                    {!!$suppliers->links()!!}
             </tbody>
         </table>
+        <div class="pagination-wrap">
+            {!! $suppliers->links('components.pagination') !!}
+        </div>
 @stop

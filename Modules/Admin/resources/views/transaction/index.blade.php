@@ -52,16 +52,20 @@
 
                                 @endif
                             </td>
-                             <td>
-                                <a style="padding: 5px 10px; border: 1px solid #995" href="{{route('update.transaction',$transaction->id)}}"><i class="fa-solid fa-pen" style="font-size:11px"></i>Chỉnh sửa</a>
-                                <a style="padding: 5px 10px; border: 1px solid #995" href="{{route('admin.get.delete.transaction',$transaction->id)}}"><i class="fa-solid fa-trash" style="font-size:11px"></i>Xoá</a>
-                                <a style="padding: 5px 10px; border: 1px solid #995" class="js_order_item" data-id="{{$transaction->id}}" href="{{route('admin.get.view.order',$transaction->id)}}"><i class="fa-solid fa-eye" style="font-size:11px"></i></a>
+                             <td class="action-cell">
+                                <div class="action-buttons">
+                                    <a href="{{route('update.transaction',$transaction->id)}}"><i class="fa-solid fa-pen"></i>Chỉnh sửa</a>
+                                    <a href="{{route('admin.get.delete.transaction',$transaction->id)}}"><i class="fa-solid fa-trash"></i>Xoá</a>
+                                    <a class="js_order_item" data-id="{{$transaction->id}}" href="{{route('admin.get.view.order',$transaction->id)}}"><i class="fa-solid fa-eye"></i></a>
+                                </div>
                             </td>
                         </tr>
                     @endforeach
                 </tbody>
-                {!!$transactions->links()!!};
             </table>
+            <div class="pagination-wrap">
+                {!! $transactions->links('components.pagination') !!}
+            </div>
         </div>
         <div id="myModalOrder" class="modal fade" role="dialog">
             <div class="modal-dialog">

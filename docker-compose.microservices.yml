@@ -1,0 +1,502 @@
+version: '3.8'
+
+# ============================================================================
+# FULL MICROSERVICES ARCHITECTURE - ElectroShop
+# ============================================================================
+# Bao gồm:
+# - API Gateway (Kong)
+# - Message Broker (RabbitMQ)
+# - Service Discovery (Consul)
+# - Distributed Tracing (Jaeger)
+# - Multiple Databases (Database per Service)
+# - Monitoring (Prometheus + Grafana)
+# ============================================================================
+
+networks:
+  ms_network:
+    driver: bridge
+
+volumes:
+  mysql_catalog_data:
+  mysql_order_data:
+  mysql_user_data:
+  redis_data:
+  rabbitmq_data:
+  consul_data:
+  prometheus_data:
+  grafana_data:
+  kong_data:
+
+services:
+
+  # ==========================================================================
+  # 1. API GATEWAY - KONG
+  # ==========================================================================
+  # Single entry point for all clients
+  # Handles: Routing, Authentication, Rate Limiting, Load Balancing
+  # ==========================================================================
+  
+  kong-database:
+    image: postgres:13-alpine
+    container_name: kong_database
+    environment:
+      POSTGRES_USER: kong
+      POSTGRES_DB: kong
+      POSTGRES_PASSWORD: kongpass
+    volumes:
+      - kong_data:/var/lib/postgresql/data
+    networks:
+      - ms_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kong"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kong-migration:
+    image: kong:3.4
+    container_name: kong_migration
+    command: kong migrations bootstrap
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-database
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: kongpass
+    networks:
+      - ms_network
+    depends_on:
+      kong-database:
+        condition: service_healthy
+    restart: on-failure
+
+  kong:
+    image: kong:3.4
+    container_name: kong_gateway
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-database
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: kongpass
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      KONG_PROXY_LISTEN: 0.0.0.0:8000
+    ports:
+      - "9000:8000"   # Proxy (Client access) - Changed from 8000
+      - "9001:8001"   # Admin API - Changed from 8001
+      - "9443:8443"   # Proxy SSL
+      - "9444:8444"   # Admin SSL
+    networks:
+      - ms_network
+    depends_on:
+      kong-database:
+        condition: service_healthy
+      kong-migration:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Kong Admin GUI
+  konga:
+    image: pantsel/konga:latest
+    container_name: konga_gui
+    environment:
+      NODE_ENV: production
+      TOKEN_SECRET: some-secret-token
+    ports:
+      - "1337:1337"
+    networks:
+      - ms_network
+    depends_on:
+      - kong
+
+  # ==========================================================================
+  # 2. MESSAGE BROKER - RABBITMQ
+  # ==========================================================================
+  # Async communication between services
+  # Patterns: Pub/Sub, Event-Driven, Queue
+  # ==========================================================================
+  
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq_broker
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+      RABBITMQ_DEFAULT_VHOST: electroshop
+    ports:
+      - "5672:5672"    # AMQP protocol
+      - "15672:15672"  # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - ms_network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==========================================================================
+  # 3. SERVICE DISCOVERY - CONSUL
+  # ==========================================================================
+  # Service registration and discovery
+  # Health checking for all services
+  # ==========================================================================
+  
+  consul:
+    image: consul:1.15
+    container_name: consul_discovery
+    command: agent -server -ui -bootstrap-expect=1 -client=0.0.0.0
+    ports:
+      - "8500:8500"   # HTTP API & UI
+      - "8600:8600"   # DNS
+    volumes:
+      - consul_data:/consul/data
+    networks:
+      - ms_network
+    healthcheck:
+      test: ["CMD", "consul", "members"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==========================================================================
+  # 4. DISTRIBUTED TRACING - JAEGER
+  # ==========================================================================
+  # Trace requests across services
+  # Debug and performance monitoring
+  # ==========================================================================
+  
+  jaeger:
+    image: jaegertracing/all-in-one:1.50
+    container_name: jaeger_tracing
+    environment:
+      COLLECTOR_ZIPKIN_HOST_PORT: 9411
+    ports:
+      - "5775:5775/udp"   # Zipkin Thrift
+      - "6831:6831/udp"   # Jaeger Thrift
+      - "6832:6832/udp"   # Jaeger Thrift
+      - "5778:5778"       # Config
+      - "16686:16686"     # UI
+      - "14268:14268"     # Collector HTTP
+      - "14250:14250"     # Collector gRPC
+      - "9411:9411"       # Zipkin
+    networks:
+      - ms_network
+
+  # ==========================================================================
+  # 5. DATABASES - DATABASE PER SERVICE
+  # ==========================================================================
+  
+  # Catalog Service Database
+  mysql-catalog:
+    image: mysql:8.0
+    container_name: mysql_catalog
+    environment:
+      MYSQL_ROOT_PASSWORD: catalog_root_pass
+      MYSQL_DATABASE: catalog_db
+      MYSQL_USER: catalog_user
+      MYSQL_PASSWORD: catalog_pass
+    ports:
+      - "3310:3306"
+    volumes:
+      - mysql_catalog_data:/var/lib/mysql
+    networks:
+      - ms_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: --default-authentication-plugin=mysql_native_password
+
+  # Order Service Database
+  mysql-order:
+    image: mysql:8.0
+    container_name: mysql_order
+    environment:
+      MYSQL_ROOT_PASSWORD: order_root_pass
+      MYSQL_DATABASE: order_db
+      MYSQL_USER: order_user
+      MYSQL_PASSWORD: order_pass
+    ports:
+      - "3311:3306"
+    volumes:
+      - mysql_order_data:/var/lib/mysql
+    networks:
+      - ms_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: --default-authentication-plugin=mysql_native_password
+
+  # User Service Database
+  mysql-user:
+    image: mysql:8.0
+    container_name: mysql_user
+    environment:
+      MYSQL_ROOT_PASSWORD: user_root_pass
+      MYSQL_DATABASE: user_db
+      MYSQL_USER: user_user
+      MYSQL_PASSWORD: user_pass
+    ports:
+      - "3312:3306"
+    volumes:
+      - mysql_user_data:/var/lib/mysql
+    networks:
+      - ms_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: --default-authentication-plugin=mysql_native_password
+
+  # ==========================================================================
+  # 6. CACHE - REDIS
+  # ==========================================================================
+  
+  redis:
+    image: redis:7-alpine
+    container_name: ms_redis_cache
+    ports:
+      - "6381:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ms_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # ==========================================================================
+  # 7. MONITORING - PROMETHEUS + GRAFANA
+  # ==========================================================================
+  
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - ms_network
+
+  grafana:
+    image: grafana/grafana:10.1.0
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin123
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./docker/grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - ms_network
+    depends_on:
+      - prometheus
+
+  # ==========================================================================
+  # 8. MICROSERVICES - LARAVEL APPLICATIONS
+  # ==========================================================================
+  
+  # Catalog Service (Products, Categories)
+  catalog-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: catalog_service
+    environment:
+      - APP_NAME=CatalogService
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_KEY=base64:dTFWdRBdLwSKx88VE5hXUnXIF7cJEDQoD5fu+8pqR4I=
+      - APP_URL=http://catalog-service:9005
+      - SERVICE_NAME=catalog-service
+      - SERVICE_PORT=9005
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql-catalog
+      - DB_PORT=3306
+      - DB_DATABASE=catalog_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=catalog_root_pass
+      - REDIS_HOST=redis
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=admin
+      - RABBITMQ_PASSWORD=admin123
+      - RABBITMQ_VHOST=electroshop
+      - CONSUL_HOST=consul
+      - JAEGER_HOST=jaeger
+    ports:
+      - "9005:9005"
+    networks:
+      - ms_network
+    depends_on:
+      mysql-catalog:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  # Order Service (Orders, Cart, Transactions)
+  order-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: order_service
+    environment:
+      - APP_NAME=OrderService
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_KEY=base64:dTFWdRBdLwSKx88VE5hXUnXIF7cJEDQoD5fu+8pqR4I=
+      - APP_URL=http://order-service:9002
+      - SERVICE_NAME=order-service
+      - SERVICE_PORT=9002
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql-order
+      - DB_PORT=3306
+      - DB_DATABASE=order_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=order_root_pass
+      - REDIS_HOST=redis
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=admin
+      - RABBITMQ_PASSWORD=admin123
+      - RABBITMQ_VHOST=electroshop
+      - CONSUL_HOST=consul
+      - JAEGER_HOST=jaeger
+      - CATALOG_SERVICE_URL=http://catalog-service:9005
+    ports:
+      - "9002:9002"
+    networks:
+      - ms_network
+    depends_on:
+      mysql-order:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  # User Service (Authentication, Users, Profiles)
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: user_service
+    environment:
+      - APP_NAME=UserService
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_KEY=base64:dTFWdRBdLwSKx88VE5hXUnXIF7cJEDQoD5fu+8pqR4I=
+      - APP_URL=http://user-service:9003
+      - SERVICE_NAME=user-service
+      - SERVICE_PORT=9003
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql-user
+      - DB_PORT=3306
+      - DB_DATABASE=user_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=user_root_pass
+      - REDIS_HOST=redis
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=admin
+      - RABBITMQ_PASSWORD=admin123
+      - RABBITMQ_VHOST=electroshop
+      - CONSUL_HOST=consul
+      - JAEGER_HOST=jaeger
+    ports:
+      - "9003:9003"
+    networks:
+      - ms_network
+    depends_on:
+      mysql-user:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  # Notification Service (Email, SMS, Push)
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: notification_service
+    environment:
+      - SERVICE_NAME=notification-service
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=admin
+      - RABBITMQ_PASSWORD=admin123
+      - RABBITMQ_VHOST=electroshop
+      - SMTP_HOST=mailhog
+      - SMTP_PORT=1025
+    ports:
+      - "9004:9004"
+    networks:
+      - ms_network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  # ==========================================================================
+  # 9. MAIL SERVER (Development)
+  # ==========================================================================
+  
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: mailhog
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI
+    networks:
+      - ms_network
+
+  # ==========================================================================
+  # 10. ADMIN TOOLS
+  # ==========================================================================
+  
+  # phpMyAdmin for all databases
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: ms_phpmyadmin
+    environment:
+      - PMA_HOSTS=mysql-catalog,mysql-order,mysql-user
+      - PMA_USER=root
+      - PMA_PASSWORD=catalog_root_pass
+    ports:
+      - "9083:80"
+    networks:
+      - ms_network
+
+  # Redis Commander
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: ms_redis_commander
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "9082:8081"
+    networks:
+      - ms_network
+    depends_on:
+      - redis

@@ -28,6 +28,86 @@
         <link href="../../assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet"> --}}
     <!-- Custom styles for this template -->
     <link href="{{ asset('theme_admin/css/dashboard.css') }}" rel="stylesheet">
+    <style>
+        .action-cell {
+            white-space: nowrap;
+        }
+        .action-buttons {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .action-buttons a,
+        .action-buttons button {
+            padding: 4px 10px;
+            border: 1px solid #c9b56f;
+            background: #fff;
+            border-radius: 4px;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .action-buttons i {
+            font-size: 11px;
+        }
+        .pagination-wrap {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .pagination-custom {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+        .pagination-custom ul {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .pagination-custom li span,
+        .pagination-custom li a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 32px;
+            padding: 0 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #fff;
+            color: #333;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .pagination-custom li a:hover {
+            border-color: #4b3b7a;
+            color: #4b3b7a;
+            background: #f8f8f8;
+        }
+        .pagination-custom li.active span {
+            background: #4b3b7a;
+            border-color: #4b3b7a;
+            color: #fff;
+        }
+        .pagination-custom li.disabled span {
+            color: #bbb;
+            background: #f5f5f5;
+            border-color: #e8e8e8;
+            cursor: not-allowed;
+        }
+        .pagination-custom .pagination-prev,
+        .pagination-custom .pagination-next {
+            font-weight: 700;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -140,6 +220,14 @@
             $('.alert').fadeOut('fast');
         }, 5000); // 5 giây
 
+    </script>
+    <script>
+        $(document).on('click', 'a[data-confirm], a[href*="delete"]', function (e) {
+            var message = $(this).data('confirm') || 'Bạn có chắc muốn xoá?';
+            if (!confirm(message)) {
+                e.preventDefault();
+            }
+        });
     </script>
 </body>
 

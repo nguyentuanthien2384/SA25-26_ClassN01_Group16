@@ -1,0 +1,21 @@
+{
+    "name": "web-ban-hang/notification-service",
+    "description": "Notification microservice for Web Ban Hang - Handles email notifications",
+    "type": "project",
+    "require": {
+        "php": "^8.0",
+        "predis/predis": "^2.0",
+        "symfony/mailer": "^6.0",
+        "vlucas/phpdotenv": "^5.5",
+        "monolog/monolog": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "NotificationService\\": "src/"
+        }
+    },
+    "scripts": {
+        "start": "php consumer.php"
+    },
+    "minimum-stability": "stable"
+}

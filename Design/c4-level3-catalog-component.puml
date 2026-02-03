@@ -1,0 +1,73 @@
+@startuml C4_Component_Catalog
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Component Diagram - Catalog Service Internal Structure
+
+Container_Boundary(catalogSvc, "Catalog Service (Laravel 10)") {
+    
+    Component(productCtrl, "ProductController", "Laravel Controller", "Handles HTTP requests for products: CRUD, listing, filtering")
+    Component(categoryCtrl, "CategoryController", "Laravel Controller", "Handles category requests: listing, tree structure, products by category")
+    Component(searchCtrl, "SearchController", "Laravel Controller", "Handles search requests: keyword search, filters, facets")
+    Component(reviewCtrl, "ReviewController", "Laravel Controller", "Handles product reviews and ratings")
+    
+    Component(productSvc, "ProductService", "Service Class", "Product business logic: validation, pricing, inventory checks, event publishing")
+    Component(categorySvc, "CategoryService", "Service Class", "Category management: tree structure, hierarchy, path resolution")
+    Component(searchSvc, "SearchService", "Service Class", "Full-text search with Elasticsearch: indexing, querying, faceted search")
+    Component(cacheSvc, "CacheService", "Service Class", "Cache management: Redis cache with 5-min TTL, cache warming, invalidation")
+    Component(eventPublisher, "EventPublisher", "Service Class", "Publishes domain events: ProductCreated, ProductUpdated, ProductDeleted")
+    
+    Component(productRepo, "ProductRepository", "Repository Pattern", "Product data access: CRUD, queries, transactions, eager loading")
+    Component(categoryRepo, "CategoryRepository", "Repository Pattern", "Category data access: tree queries, hierarchical fetching")
+    Component(reviewRepo, "ReviewRepository", "Repository Pattern", "Review data access: user reviews, ratings aggregation")
+    
+    ComponentDb(productModel, "Product", "Eloquent ORM Model", "Product entity with relationships to Category, Reviews, Images")
+    ComponentDb(categoryModel, "Category", "Eloquent ORM Model", "Category entity with hierarchical self-reference and Products")
+    ComponentDb(reviewModel, "Review", "Eloquent ORM Model", "Product review entity with User and Product relationships")
+    ComponentDb(imageModel, "ProImage", "Eloquent ORM Model", "Product image entity")
+}
+
+ContainerDb_Ext(mysql, "MySQL Database", "MySQL 8.0", "products, categories, reviews tables")
+ContainerDb_Ext(redis, "Redis Cache", "Redis 7", "Cached product data, search results")
+ContainerDb_Ext(elasticsearch, "Elasticsearch", "Elasticsearch 8.11", "Product search index")
+Container_Ext(eventBus, "Event Bus", "Redis Pub/Sub", "Domain event distribution")
+
+' API Layer to Business Logic
+Rel(productCtrl, productSvc, "Uses", "PHP")
+Rel(categoryCtrl, categorySvc, "Uses", "PHP")
+Rel(searchCtrl, searchSvc, "Uses", "PHP")
+Rel(reviewCtrl, productSvc, "Uses", "PHP")
+
+' Business Logic to Data Access
+Rel(productSvc, productRepo, "Uses", "PHP")
+Rel(productSvc, cacheSvc, "Uses", "PHP")
+Rel(productSvc, eventPublisher, "Publishes events", "PHP")
+
+Rel(categorySvc, categoryRepo, "Uses", "PHP")
+Rel(categorySvc, cacheSvc, "Uses", "PHP")
+
+Rel(searchSvc, searchSvc, "Indexes products", "PHP")
+Rel(searchSvc, productRepo, "Reads product data", "PHP")
+
+' Data Access to Models
+Rel(productRepo, productModel, "Uses ORM", "Eloquent")
+Rel(categoryRepo, categoryModel, "Uses ORM", "Eloquent")
+Rel(reviewRepo, reviewModel, "Uses ORM", "Eloquent")
+
+' Models to Databases
+Rel(productModel, mysql, "Read/Write", "SQL/PDO")
+Rel(categoryModel, mysql, "Read/Write", "SQL/PDO")
+Rel(reviewModel, mysql, "Read/Write", "SQL/PDO")
+Rel(imageModel, mysql, "Read/Write", "SQL/PDO")
+
+' Cache and Search
+Rel(cacheSvc, redis, "Cache operations", "Redis Protocol")
+Rel(searchSvc, elasticsearch, "Index/Query", "HTTP/REST")
+
+' Event Publishing
+Rel(eventPublisher, eventBus, "Publish events", "Redis Pub/Sub")
+
+SHOW_LEGEND()
+
+@enduml

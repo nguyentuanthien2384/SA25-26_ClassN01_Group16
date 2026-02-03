@@ -54,8 +54,20 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['single'],
+            'channels' => env('LOG_STACK_CHANNELS', 'single,elk') === 'single' 
+                ? ['single'] 
+                : explode(',', env('LOG_STACK_CHANNELS', 'single,elk')),
             'ignore_exceptions' => false,
+        ],
+
+        // ELK Stack Channel - Structured logging for Elasticsearch
+        'elk' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/laravel.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 7,
+            'replace_placeholders' => true,
+            'permission' => 0664,
         ],
 
         'single' => [

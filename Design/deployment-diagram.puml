@@ -1,0 +1,164 @@
+@startuml ElectroShop_Deployment_Diagram
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Deployment.puml
+
+title UML Deployment Diagram - ElectroShop E-Commerce Platform
+caption Deployment View showing physical allocation of software components to execution environments
+
+LAYOUT_WITH_LEGEND()
+
+' ==================== DEPLOYMENT NODES ====================
+
+' Client Tier
+Deployment_Node(client, "Client Device", "Web Browser / Mobile App") {
+    Container(browser, "Web Browser", "Chrome, Firefox, Safari", "User interface for browsing products and placing orders")
+}
+
+' Edge Tier - Load Balancer
+Deployment_Node(edge, "Edge Tier", "Cloud Load Balancer") {
+    Deployment_Node(nginx_lb, "Nginx Load Balancer", "Nginx 1.24") {
+        Container(lb, "Load Balancer", "Nginx / AWS ALB", "Distributes incoming traffic across application instances")
+    }
+}
+
+' Application Cluster
+Deployment_Node(app_cluster, "Application Cluster", "Kubernetes / Docker Swarm") {
+    
+    ' API Gateway Node
+    Deployment_Node(gateway_node, "Gateway Node", "Docker Container") {
+        Container(kong, "API Gateway", "Kong 3.x", "Routes requests, rate limiting, authentication, CORS")
+    }
+    
+    ' Catalog Service Node
+    Deployment_Node(catalog_node, "Catalog Service Node", "Docker Container") {
+        Container(catalog_svc, "Catalog Service", "Laravel/PHP 8.2", "Product management, categories, search, reviews")
+    }
+    
+    ' Order Service Node
+    Deployment_Node(order_node, "Order Service Node", "Docker Container") {
+        Container(order_svc, "Order Service", "Laravel/PHP 8.2", "Cart, checkout, order processing, transactions")
+    }
+    
+    ' Payment Service Node
+    Deployment_Node(payment_node, "Payment Service Node", "Docker Container") {
+        Container(payment_svc, "Payment Service", "Laravel/PHP 8.2", "Payment processing: VNPay, MoMo, PayPal, QR")
+    }
+    
+    ' Notification Service Node
+    Deployment_Node(notif_node, "Notification Service Node", "Docker Container") {
+        Container(notif_svc, "Notification Service", "PHP 8.2 / Symfony Mailer", "Email notifications, order confirmations")
+    }
+    
+    ' Customer Service Node
+    Deployment_Node(customer_node, "Customer Service Node", "Docker Container") {
+        Container(customer_svc, "Customer Service", "Laravel/PHP 8.2", "User authentication, profiles, wishlists")
+    }
+    
+    ' Message Broker Node
+    Deployment_Node(broker_node, "Message Broker Node", "Docker Container") {
+        ContainerDb(redis_queue, "Message Broker", "Redis 7.x", "Async message queue for event-driven communication")
+    }
+}
+
+' Data Tier - Separate Databases per Service
+Deployment_Node(data_tier, "Data Tier", "Database Cluster") {
+    
+    Deployment_Node(catalog_db_node, "Catalog DB Node", "MySQL 8.0") {
+        ContainerDb(catalog_db, "Catalog Database", "MySQL", "Products, Categories, Reviews, Images")
+    }
+    
+    Deployment_Node(order_db_node, "Order DB Node", "MySQL 8.0") {
+        ContainerDb(order_db, "Order Database", "MySQL", "Orders, Transactions, Order Details, Cart")
+    }
+    
+    Deployment_Node(customer_db_node, "Customer DB Node", "MySQL 8.0") {
+        ContainerDb(customer_db, "Customer Database", "MySQL", "Users, Wishlists, Addresses")
+    }
+    
+    Deployment_Node(content_db_node, "Content DB Node", "MySQL 8.0") {
+        ContainerDb(content_db, "Content Database", "MySQL", "Articles, Contacts, Pages")
+    }
+    
+    Deployment_Node(cache_node, "Cache Node", "Redis 7.x") {
+        ContainerDb(redis_cache, "Cache", "Redis", "Session, product cache, query cache")
+    }
+    
+    Deployment_Node(search_node, "Search Node", "Elasticsearch 8.x") {
+        ContainerDb(elasticsearch, "Search Engine", "Elasticsearch", "Full-text search, product indexing")
+    }
+}
+
+' Infrastructure / Monitoring Tier
+Deployment_Node(infra_tier, "Infrastructure Tier", "Monitoring & Observability") {
+    
+    Deployment_Node(discovery_node, "Service Discovery", "Docker Container") {
+        Container(consul, "Service Registry", "Consul", "Service registration and discovery")
+    }
+    
+    Deployment_Node(tracing_node, "Distributed Tracing", "Docker Container") {
+        Container(jaeger, "Tracing", "Jaeger", "Request tracing across services")
+    }
+    
+    Deployment_Node(metrics_node, "Metrics", "Docker Container") {
+        Container(prometheus, "Metrics Collector", "Prometheus", "Collects and stores metrics")
+        Container(grafana, "Dashboard", "Grafana", "Visualizes metrics and alerts")
+    }
+    
+    Deployment_Node(logging_node, "Centralized Logging", "Docker Containers") {
+        Container(logstash, "Log Processor", "Logstash", "Parses and transforms logs")
+        ContainerDb(elastic_logs, "Log Storage", "Elasticsearch", "Stores logs for analysis")
+        Container(kibana, "Log Viewer", "Kibana", "Log visualization and search")
+    }
+}
+
+' ==================== RELATIONSHIPS ====================
+
+' Client to Edge
+Rel(browser, lb, "HTTPS", "HTTP/1.1, HTTP/2")
+
+' Edge to Gateway
+Rel(lb, kong, "HTTP", "Routes traffic")
+
+' Gateway to Services
+Rel(kong, catalog_svc, "HTTP/REST", "/api/products, /api/categories")
+Rel(kong, order_svc, "HTTP/REST", "/api/orders, /api/cart")
+Rel(kong, payment_svc, "HTTP/REST", "/api/payment")
+Rel(kong, customer_svc, "HTTP/REST", "/api/users, /api/auth")
+
+' Services to Message Broker (Event-Driven)
+Rel(order_svc, redis_queue, "RESP", "Publishes OrderPlaced events")
+Rel(redis_queue, notif_svc, "RESP", "Consumes notification events")
+Rel(payment_svc, redis_queue, "RESP", "Publishes PaymentCompleted events")
+
+' Services to Databases (Database Per Service)
+Rel(catalog_svc, catalog_db, "MySQL Protocol", "Read/Write products")
+Rel(order_svc, order_db, "MySQL Protocol", "Read/Write orders")
+Rel(customer_svc, customer_db, "MySQL Protocol", "Read/Write users")
+Rel(catalog_svc, content_db, "MySQL Protocol", "Read articles")
+
+' Services to Cache
+Rel(catalog_svc, redis_cache, "RESP", "Cache products")
+Rel(order_svc, redis_cache, "RESP", "Cache sessions")
+Rel(customer_svc, redis_cache, "RESP", "Cache user data")
+
+' Services to Search
+Rel(catalog_svc, elasticsearch, "HTTP/REST", "Index & search products")
+
+' Services to Infrastructure
+Rel(catalog_svc, consul, "HTTP", "Register/Discover")
+Rel(order_svc, consul, "HTTP", "Register/Discover")
+Rel(payment_svc, consul, "HTTP", "Register/Discover")
+Rel(customer_svc, consul, "HTTP", "Register/Discover")
+Rel(notif_svc, consul, "HTTP", "Register/Discover")
+
+Rel(catalog_svc, jaeger, "UDP", "Send traces")
+Rel(order_svc, jaeger, "UDP", "Send traces")
+
+Rel(catalog_svc, prometheus, "HTTP", "Expose metrics")
+Rel(order_svc, prometheus, "HTTP", "Expose metrics")
+
+Rel(catalog_svc, logstash, "File/Syslog", "Send logs")
+Rel(order_svc, logstash, "File/Syslog", "Send logs")
+Rel(logstash, elastic_logs, "HTTP", "Store logs")
+Rel(kibana, elastic_logs, "HTTP", "Query logs")
+
+@enduml

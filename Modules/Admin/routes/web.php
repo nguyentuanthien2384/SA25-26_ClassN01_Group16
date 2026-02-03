@@ -74,6 +74,7 @@ route::prefix('admin')->middleware('CheckLoginAdmin')->group(function () {
     });
     route::group(['prefix' => 'contact'], function () {
         route::get('/', 'AdminContactController@index')->name('admin.get.list.contact');
+        route::get('/delete/{id}', 'AdminContactController@delete')->name('admin.get.delete.contact');
     });
     route::group(['prefix' => 'supplier'], function () {
         route::get('/', 'AdminSupplierController@index')->name('admin.get.list.supplier');

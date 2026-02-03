@@ -1,0 +1,296 @@
+[2026-02-03 01:30:26] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 01:30:29] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 01:30:31] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 01:30:32] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 01:30:34] local.ERROR: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'duan.categories' doesn't exist (Connection: mysql, SQL: ALTER TABLE categories COMMENT 'SERVICE_OWNER: Catalog') {"exception":"[object] (Illuminate\\Database\\QueryException(code: 42S02): SQLSTATE[42S02]: Base table or view not found: 1146 Table 'duan.categories' doesn't exist (Connection: mysql, SQL: ALTER TABLE categories COMMENT 'SERVICE_OWNER: Catalog') at /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php:829)
+[stacktrace]
+#0 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(783): Illuminate\\Database\\Connection->runQueryCallback('ALTER TABLE cat...', Array, Object(Closure))
+#1 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(576): Illuminate\\Database\\Connection->run('ALTER TABLE cat...', Array, Object(Closure))
+#2 /var/www/vendor/laravel/framework/src/Illuminate/Database/DatabaseManager.php(509): Illuminate\\Database\\Connection->statement('ALTER TABLE cat...')
+#3 /var/www/vendor/laravel/framework/src/Illuminate/Support/Facades/Facade.php(355): Illuminate\\Database\\DatabaseManager->__call('statement', Array)
+#4 /var/www/database/migrations/2026_01_28_100000_add_table_ownership_comments.php(17): Illuminate\\Support\\Facades\\Facade::__callStatic('statement', Array)
+#5 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(493): Illuminate\\Database\\Migrations\\Migration@anonymous->up()
+#6 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(410): Illuminate\\Database\\Migrations\\Migrator->runMethod(Object(Illuminate\\Database\\MySqlConnection), Object(Illuminate\\Database\\Migrations\\Migration@anonymous), 'up')
+#7 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(419): Illuminate\\Database\\Migrations\\Migrator->Illuminate\\Database\\Migrations\\{closure}()
+#8 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(216): Illuminate\\Database\\Migrations\\Migrator->runMigration(Object(Illuminate\\Database\\Migrations\\Migration@anonymous), 'up')
+#9 /var/www/vendor/laravel/framework/src/Illuminate/Console/View/Components/Task.php(37): Illuminate\\Database\\Migrations\\Migrator->Illuminate\\Database\\Migrations\\{closure}()
+#10 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(756): Illuminate\\Console\\View\\Components\\Task->render('2026_01_28_1000...', Object(Closure))
+#11 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(216): Illuminate\\Database\\Migrations\\Migrator->write('Illuminate\\\\Cons...', '2026_01_28_1000...', Object(Closure))
+#12 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(181): Illuminate\\Database\\Migrations\\Migrator->runUp('/var/www/databa...', 24, false)
+#13 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(124): Illuminate\\Database\\Migrations\\Migrator->runPending(Array, Array)
+#14 /var/www/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(90): Illuminate\\Database\\Migrations\\Migrator->run(Array, Array)
+#15 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(633): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->Illuminate\\Database\\Console\\Migrations\\{closure}()
+#16 /var/www/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(83): Illuminate\\Database\\Migrations\\Migrator->usingConnection(NULL, Object(Closure))
+#17 /var/www/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->handle()
+#18 /var/www/vendor/laravel/framework/src/Illuminate/Container/Util.php(41): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+#19 /var/www/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(93): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+#20 /var/www/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+#21 /var/www/vendor/laravel/framework/src/Illuminate/Container/Container.php(662): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+#22 /var/www/vendor/laravel/framework/src/Illuminate/Console/Command.php(211): Illuminate\\Container\\Container->call(Array)
+#23 /var/www/vendor/symfony/console/Command/Command.php(326): Illuminate\\Console\\Command->execute(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#24 /var/www/vendor/laravel/framework/src/Illuminate/Console/Command.php(180): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#25 /var/www/vendor/symfony/console/Application.php(1096): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#26 /var/www/vendor/symfony/console/Application.php(324): Symfony\\Component\\Console\\Application->doRunCommand(Object(Illuminate\\Database\\Console\\Migrations\\MigrateCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#27 /var/www/vendor/symfony/console/Application.php(175): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#28 /var/www/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(201): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#29 /var/www/artisan(35): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#30 {main}
+
+[previous exception] [object] (PDOException(code: 42S02): SQLSTATE[42S02]: Base table or view not found: 1146 Table 'duan.categories' doesn't exist at /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php:587)
+[stacktrace]
+#0 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(587): PDOStatement->execute()
+#1 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(816): Illuminate\\Database\\Connection->Illuminate\\Database\\{closure}('ALTER TABLE cat...', Array)
+#2 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(783): Illuminate\\Database\\Connection->runQueryCallback('ALTER TABLE cat...', Array, Object(Closure))
+#3 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(576): Illuminate\\Database\\Connection->run('ALTER TABLE cat...', Array, Object(Closure))
+#4 /var/www/vendor/laravel/framework/src/Illuminate/Database/DatabaseManager.php(509): Illuminate\\Database\\Connection->statement('ALTER TABLE cat...')
+#5 /var/www/vendor/laravel/framework/src/Illuminate/Support/Facades/Facade.php(355): Illuminate\\Database\\DatabaseManager->__call('statement', Array)
+#6 /var/www/database/migrations/2026_01_28_100000_add_table_ownership_comments.php(17): Illuminate\\Support\\Facades\\Facade::__callStatic('statement', Array)
+#7 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(493): Illuminate\\Database\\Migrations\\Migration@anonymous->up()
+#8 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(410): Illuminate\\Database\\Migrations\\Migrator->runMethod(Object(Illuminate\\Database\\MySqlConnection), Object(Illuminate\\Database\\Migrations\\Migration@anonymous), 'up')
+#9 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(419): Illuminate\\Database\\Migrations\\Migrator->Illuminate\\Database\\Migrations\\{closure}()
+#10 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(216): Illuminate\\Database\\Migrations\\Migrator->runMigration(Object(Illuminate\\Database\\Migrations\\Migration@anonymous), 'up')
+#11 /var/www/vendor/laravel/framework/src/Illuminate/Console/View/Components/Task.php(37): Illuminate\\Database\\Migrations\\Migrator->Illuminate\\Database\\Migrations\\{closure}()
+#12 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(756): Illuminate\\Console\\View\\Components\\Task->render('2026_01_28_1000...', Object(Closure))
+#13 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(216): Illuminate\\Database\\Migrations\\Migrator->write('Illuminate\\\\Cons...', '2026_01_28_1000...', Object(Closure))
+#14 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(181): Illuminate\\Database\\Migrations\\Migrator->runUp('/var/www/databa...', 24, false)
+#15 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(124): Illuminate\\Database\\Migrations\\Migrator->runPending(Array, Array)
+#16 /var/www/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(90): Illuminate\\Database\\Migrations\\Migrator->run(Array, Array)
+#17 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(633): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->Illuminate\\Database\\Console\\Migrations\\{closure}()
+#18 /var/www/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(83): Illuminate\\Database\\Migrations\\Migrator->usingConnection(NULL, Object(Closure))
+#19 /var/www/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->handle()
+#20 /var/www/vendor/laravel/framework/src/Illuminate/Container/Util.php(41): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+#21 /var/www/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(93): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+#22 /var/www/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+#23 /var/www/vendor/laravel/framework/src/Illuminate/Container/Container.php(662): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+#24 /var/www/vendor/laravel/framework/src/Illuminate/Console/Command.php(211): Illuminate\\Container\\Container->call(Array)
+#25 /var/www/vendor/symfony/console/Command/Command.php(326): Illuminate\\Console\\Command->execute(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#26 /var/www/vendor/laravel/framework/src/Illuminate/Console/Command.php(180): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#27 /var/www/vendor/symfony/console/Application.php(1096): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#28 /var/www/vendor/symfony/console/Application.php(324): Symfony\\Component\\Console\\Application->doRunCommand(Object(Illuminate\\Database\\Console\\Migrations\\MigrateCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#29 /var/www/vendor/symfony/console/Application.php(175): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#30 /var/www/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(201): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#31 /var/www/artisan(35): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#32 {main}
+"} 
+[2026-02-03 01:30:36] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 01:30:36] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:11:40] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:11:43] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:11:45] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:11:47] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:12:28] local.ERROR: SQLSTATE[HY000] [2002] php_network_getaddresses: getaddrinfo for mysql failed: Temporary failure in name resolution (Connection: mysql, SQL: select table_name as `name`, (data_length + index_length) as `size`, table_comment as `comment`, engine as `engine`, table_collation as `collation` from information_schema.tables where table_schema = 'duan' and table_type in ('BASE TABLE', 'SYSTEM VERSIONED') order by table_name) {"exception":"[object] (Illuminate\\Database\\QueryException(code: 2002): SQLSTATE[HY000] [2002] php_network_getaddresses: getaddrinfo for mysql failed: Temporary failure in name resolution (Connection: mysql, SQL: select table_name as `name`, (data_length + index_length) as `size`, table_comment as `comment`, engine as `engine`, table_collation as `collation` from information_schema.tables where table_schema = 'duan' and table_type in ('BASE TABLE', 'SYSTEM VERSIONED') order by table_name) at /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php:829)
+[stacktrace]
+#0 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(983): Illuminate\\Database\\Connection->runQueryCallback('select table_na...', Array, Object(Closure))
+#1 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(962): Illuminate\\Database\\Connection->tryAgainIfCausedByLostConnection(Object(Illuminate\\Database\\QueryException), 'select table_na...', Array, Object(Closure))
+#2 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(785): Illuminate\\Database\\Connection->handleQueryException(Object(Illuminate\\Database\\QueryException), 'select table_na...', Array, Object(Closure))
+#3 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(414): Illuminate\\Database\\Connection->run('select table_na...', Array, Object(Closure))
+#4 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(401): Illuminate\\Database\\Connection->select('select table_na...', Array, false)
+#5 /var/www/vendor/laravel/framework/src/Illuminate/Database/Schema/MySqlBuilder.php(41): Illuminate\\Database\\Connection->selectFromWriteConnection('select table_na...')
+#6 /var/www/vendor/laravel/framework/src/Illuminate/Database/Schema/Builder.php(165): Illuminate\\Database\\Schema\\MySqlBuilder->getTables(false)
+#7 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/DatabaseMigrationRepository.php(184): Illuminate\\Database\\Schema\\Builder->hasTable('migrations')
+#8 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(700): Illuminate\\Database\\Migrations\\DatabaseMigrationRepository->repositoryExists()
+#9 /var/www/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(140): Illuminate\\Database\\Migrations\\Migrator->repositoryExists()
+#10 /var/www/vendor/laravel/framework/src/Illuminate/Support/helpers.php(248): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->Illuminate\\Database\\Console\\Migrations\\{closure}(1)
+#11 /var/www/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(140): retry(1, Object(Closure), 0, Object(Closure))
+#12 /var/www/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(116): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->repositoryExists()
+#13 /var/www/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(84): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->prepareDatabase()
+#14 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(633): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->Illuminate\\Database\\Console\\Migrations\\{closure}()
+#15 /var/www/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(83): Illuminate\\Database\\Migrations\\Migrator->usingConnection(NULL, Object(Closure))
+#16 /var/www/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->handle()
+#17 /var/www/vendor/laravel/framework/src/Illuminate/Container/Util.php(41): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+#18 /var/www/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(93): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+#19 /var/www/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+#20 /var/www/vendor/laravel/framework/src/Illuminate/Container/Container.php(662): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+#21 /var/www/vendor/laravel/framework/src/Illuminate/Console/Command.php(211): Illuminate\\Container\\Container->call(Array)
+#22 /var/www/vendor/symfony/console/Command/Command.php(326): Illuminate\\Console\\Command->execute(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#23 /var/www/vendor/laravel/framework/src/Illuminate/Console/Command.php(180): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#24 /var/www/vendor/symfony/console/Application.php(1096): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#25 /var/www/vendor/symfony/console/Application.php(324): Symfony\\Component\\Console\\Application->doRunCommand(Object(Illuminate\\Database\\Console\\Migrations\\MigrateCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#26 /var/www/vendor/symfony/console/Application.php(175): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#27 /var/www/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(201): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#28 /var/www/artisan(35): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#29 {main}
+
+[previous exception] [object] (PDOException(code: 2002): SQLSTATE[HY000] [2002] php_network_getaddresses: getaddrinfo for mysql failed: Temporary failure in name resolution at /var/www/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php:65)
+[stacktrace]
+#0 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php(65): PDO->__construct('mysql:host=mysq...', 'root', Object(SensitiveParameterValue), Array)
+#1 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php(83): Illuminate\\Database\\Connectors\\Connector->createPdoConnection('mysql:host=mysq...', 'root', 'root_password', Array)
+#2 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php(48): Illuminate\\Database\\Connectors\\Connector->tryAgainIfCausedByLostConnection(Object(PDOException), 'mysql:host=mysq...', 'root', 'root_password', Array)
+#3 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connectors/MySqlConnector.php(24): Illuminate\\Database\\Connectors\\Connector->createConnection('mysql:host=mysq...', Array, Array)
+#4 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connectors/ConnectionFactory.php(184): Illuminate\\Database\\Connectors\\MySqlConnector->connect(Array)
+#5 [internal function]: Illuminate\\Database\\Connectors\\ConnectionFactory->Illuminate\\Database\\Connectors\\{closure}()
+#6 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(1339): call_user_func(Object(Closure))
+#7 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(528): Illuminate\\Database\\Connection->getPdo()
+#8 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(423): Illuminate\\Database\\Connection->getPdoForSelect(false)
+#9 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(816): Illuminate\\Database\\Connection->Illuminate\\Database\\{closure}('select table_na...', Array)
+#10 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(983): Illuminate\\Database\\Connection->runQueryCallback('select table_na...', Array, Object(Closure))
+#11 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(962): Illuminate\\Database\\Connection->tryAgainIfCausedByLostConnection(Object(Illuminate\\Database\\QueryException), 'select table_na...', Array, Object(Closure))
+#12 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(785): Illuminate\\Database\\Connection->handleQueryException(Object(Illuminate\\Database\\QueryException), 'select table_na...', Array, Object(Closure))
+#13 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(414): Illuminate\\Database\\Connection->run('select table_na...', Array, Object(Closure))
+#14 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(401): Illuminate\\Database\\Connection->select('select table_na...', Array, false)
+#15 /var/www/vendor/laravel/framework/src/Illuminate/Database/Schema/MySqlBuilder.php(41): Illuminate\\Database\\Connection->selectFromWriteConnection('select table_na...')
+#16 /var/www/vendor/laravel/framework/src/Illuminate/Database/Schema/Builder.php(165): Illuminate\\Database\\Schema\\MySqlBuilder->getTables(false)
+#17 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/DatabaseMigrationRepository.php(184): Illuminate\\Database\\Schema\\Builder->hasTable('migrations')
+#18 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(700): Illuminate\\Database\\Migrations\\DatabaseMigrationRepository->repositoryExists()
+#19 /var/www/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(140): Illuminate\\Database\\Migrations\\Migrator->repositoryExists()
+#20 /var/www/vendor/laravel/framework/src/Illuminate/Support/helpers.php(248): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->Illuminate\\Database\\Console\\Migrations\\{closure}(1)
+#21 /var/www/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(140): retry(1, Object(Closure), 0, Object(Closure))
+#22 /var/www/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(116): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->repositoryExists()
+#23 /var/www/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(84): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->prepareDatabase()
+#24 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(633): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->Illuminate\\Database\\Console\\Migrations\\{closure}()
+#25 /var/www/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(83): Illuminate\\Database\\Migrations\\Migrator->usingConnection(NULL, Object(Closure))
+#26 /var/www/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->handle()
+#27 /var/www/vendor/laravel/framework/src/Illuminate/Container/Util.php(41): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+#28 /var/www/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(93): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+#29 /var/www/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+#30 /var/www/vendor/laravel/framework/src/Illuminate/Container/Container.php(662): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+#31 /var/www/vendor/laravel/framework/src/Illuminate/Console/Command.php(211): Illuminate\\Container\\Container->call(Array)
+#32 /var/www/vendor/symfony/console/Command/Command.php(326): Illuminate\\Console\\Command->execute(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#33 /var/www/vendor/laravel/framework/src/Illuminate/Console/Command.php(180): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#34 /var/www/vendor/symfony/console/Application.php(1096): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#35 /var/www/vendor/symfony/console/Application.php(324): Symfony\\Component\\Console\\Application->doRunCommand(Object(Illuminate\\Database\\Console\\Migrations\\MigrateCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#36 /var/www/vendor/symfony/console/Application.php(175): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#37 /var/www/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(201): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#38 /var/www/artisan(35): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#39 {main}
+
+[previous exception] [object] (PDOException(code: 0): PDO::__construct(): php_network_getaddresses: getaddrinfo for mysql failed: Temporary failure in name resolution at /var/www/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php:65)
+[stacktrace]
+#0 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php(65): PDO->__construct('mysql:host=mysq...', 'root', Object(SensitiveParameterValue), Array)
+#1 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php(83): Illuminate\\Database\\Connectors\\Connector->createPdoConnection('mysql:host=mysq...', 'root', 'root_password', Array)
+#2 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php(48): Illuminate\\Database\\Connectors\\Connector->tryAgainIfCausedByLostConnection(Object(PDOException), 'mysql:host=mysq...', 'root', 'root_password', Array)
+#3 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connectors/MySqlConnector.php(24): Illuminate\\Database\\Connectors\\Connector->createConnection('mysql:host=mysq...', Array, Array)
+#4 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connectors/ConnectionFactory.php(184): Illuminate\\Database\\Connectors\\MySqlConnector->connect(Array)
+#5 [internal function]: Illuminate\\Database\\Connectors\\ConnectionFactory->Illuminate\\Database\\Connectors\\{closure}()
+#6 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(1339): call_user_func(Object(Closure))
+#7 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(528): Illuminate\\Database\\Connection->getPdo()
+#8 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(423): Illuminate\\Database\\Connection->getPdoForSelect(false)
+#9 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(816): Illuminate\\Database\\Connection->Illuminate\\Database\\{closure}('select table_na...', Array)
+#10 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(983): Illuminate\\Database\\Connection->runQueryCallback('select table_na...', Array, Object(Closure))
+#11 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(962): Illuminate\\Database\\Connection->tryAgainIfCausedByLostConnection(Object(Illuminate\\Database\\QueryException), 'select table_na...', Array, Object(Closure))
+#12 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(785): Illuminate\\Database\\Connection->handleQueryException(Object(Illuminate\\Database\\QueryException), 'select table_na...', Array, Object(Closure))
+#13 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(414): Illuminate\\Database\\Connection->run('select table_na...', Array, Object(Closure))
+#14 /var/www/vendor/laravel/framework/src/Illuminate/Database/Connection.php(401): Illuminate\\Database\\Connection->select('select table_na...', Array, false)
+#15 /var/www/vendor/laravel/framework/src/Illuminate/Database/Schema/MySqlBuilder.php(41): Illuminate\\Database\\Connection->selectFromWriteConnection('select table_na...')
+#16 /var/www/vendor/laravel/framework/src/Illuminate/Database/Schema/Builder.php(165): Illuminate\\Database\\Schema\\MySqlBuilder->getTables(false)
+#17 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/DatabaseMigrationRepository.php(184): Illuminate\\Database\\Schema\\Builder->hasTable('migrations')
+#18 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(700): Illuminate\\Database\\Migrations\\DatabaseMigrationRepository->repositoryExists()
+#19 /var/www/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(140): Illuminate\\Database\\Migrations\\Migrator->repositoryExists()
+#20 /var/www/vendor/laravel/framework/src/Illuminate/Support/helpers.php(248): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->Illuminate\\Database\\Console\\Migrations\\{closure}(1)
+#21 /var/www/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(140): retry(1, Object(Closure), 0, Object(Closure))
+#22 /var/www/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(116): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->repositoryExists()
+#23 /var/www/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(84): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->prepareDatabase()
+#24 /var/www/vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php(633): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->Illuminate\\Database\\Console\\Migrations\\{closure}()
+#25 /var/www/vendor/laravel/framework/src/Illuminate/Database/Console/Migrations/MigrateCommand.php(83): Illuminate\\Database\\Migrations\\Migrator->usingConnection(NULL, Object(Closure))
+#26 /var/www/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): Illuminate\\Database\\Console\\Migrations\\MigrateCommand->handle()
+#27 /var/www/vendor/laravel/framework/src/Illuminate/Container/Util.php(41): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+#28 /var/www/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(93): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+#29 /var/www/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+#30 /var/www/vendor/laravel/framework/src/Illuminate/Container/Container.php(662): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+#31 /var/www/vendor/laravel/framework/src/Illuminate/Console/Command.php(211): Illuminate\\Container\\Container->call(Array)
+#32 /var/www/vendor/symfony/console/Command/Command.php(326): Illuminate\\Console\\Command->execute(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#33 /var/www/vendor/laravel/framework/src/Illuminate/Console/Command.php(180): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#34 /var/www/vendor/symfony/console/Application.php(1096): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#35 /var/www/vendor/symfony/console/Application.php(324): Symfony\\Component\\Console\\Application->doRunCommand(Object(Illuminate\\Database\\Console\\Migrations\\MigrateCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#36 /var/www/vendor/symfony/console/Application.php(175): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#37 /var/www/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(201): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#38 /var/www/artisan(35): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#39 {main}
+"} 
+[2026-02-03 03:12:31] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:12:31] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:31:00] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:31:00] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-03 03:31:00] local.INFO: ✅ Service registered with Consul  
+[2026-02-03 03:31:03] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:31:03] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-03 03:31:03] local.INFO: ✅ Service registered with Consul  
+[2026-02-03 03:31:04] local.INFO: HTTP Request {"request_id":"4d543562-ff7a-444e-bd65-65bf9721e158","method":"GET","url":"http://127.0.0.1:8000","path":"/","ip":"127.0.0.1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36","user_id":null,"status_code":200,"duration_ms":99.8,"memory_mb":26.0,"timestamp":"2026-02-03T03:31:04+00:00"} 
+[2026-02-03 03:31:04] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-03 03:31:04] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-03 03:31:04] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:31:04] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-03 03:31:04] local.INFO: ✅ Service registered with Consul  
+[2026-02-03 03:31:05] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-03 03:31:05] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-03 03:31:05] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:31:05] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-03 03:31:05] local.INFO: ✅ Service registered with Consul  
+[2026-02-03 03:31:05] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-03 03:31:05] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-03 03:31:06] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:31:06] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-03 03:31:06] local.INFO: ✅ Service registered with Consul  
+[2026-02-03 03:31:06] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-03 03:31:06] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-03 03:31:06] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:31:06] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-03 03:31:06] local.INFO: ✅ Service registered with Consul  
+[2026-02-03 03:31:07] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-03 03:31:07] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-03 03:31:07] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:31:07] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-03 03:31:07] local.INFO: ✅ Service registered with Consul  
+[2026-02-03 03:31:07] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-03 03:31:07] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-03 03:31:07] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:31:07] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-03 03:31:07] local.INFO: ✅ Service registered with Consul  
+[2026-02-03 03:31:08] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-03 03:31:08] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-03 03:31:08] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:31:08] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-03 03:31:08] local.INFO: ✅ Service registered with Consul  
+[2026-02-03 03:31:08] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-03 03:31:08] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-03 03:31:09] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:31:09] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-03 03:31:09] local.INFO: ✅ Service registered with Consul  
+[2026-02-03 03:31:09] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-03 03:31:09] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-03 03:31:09] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:31:09] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-03 03:31:09] local.INFO: ✅ Service registered with Consul  
+[2026-02-03 03:31:10] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-03 03:31:10] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-03 03:31:10] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:31:10] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-03 03:31:10] local.INFO: ✅ Service registered with Consul  
+[2026-02-03 03:31:11] local.INFO: HTTP Request {"request_id":"5a3ad7f3-2454-48e1-bbac-eaf65188b335","method":"GET","url":"http://127.0.0.1:8000/?new_page=2","path":"/","ip":"127.0.0.1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36","user_id":null,"status_code":200,"duration_ms":117.17,"memory_mb":26.0,"timestamp":"2026-02-03T03:31:11+00:00"} 
+[2026-02-03 03:31:11] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-03 03:31:11] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-03 03:31:11] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:31:11] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-03 03:31:11] local.INFO: ✅ Service registered with Consul  
+[2026-02-03 03:31:11] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-03 03:31:11] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-03 03:31:11] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:31:11] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-03 03:31:11] local.INFO: ✅ Service registered with Consul  
+[2026-02-03 03:31:12] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-03 03:31:12] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-03 03:31:12] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:31:12] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-03 03:31:12] local.INFO: ✅ Service registered with Consul  
+[2026-02-03 03:31:13] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-03 03:31:13] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-03 03:31:13] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:31:13] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-03 03:31:13] local.INFO: ✅ Service registered with Consul  
+[2026-02-03 03:31:13] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-03 03:31:13] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-03 03:31:14] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:31:14] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-03 03:31:14] local.INFO: ✅ Service registered with Consul  
+[2026-02-03 03:31:14] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-03 03:31:14] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-03 03:31:14] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:31:14] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-03 03:31:14] local.INFO: ✅ Service registered with Consul  
+[2026-02-03 03:31:15] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-03 03:31:15] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-03 03:31:15] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-03 03:31:15] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-03 03:31:15] local.INFO: ✅ Service registered with Consul  
+[2026-02-03 03:31:15] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-03 03:31:15] local.INFO: ✅ Service deregistered from Consul  
