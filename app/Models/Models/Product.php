@@ -7,7 +7,24 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {    protected $table = 'products';
-    protected $fillable = ['pro_name','quantity'];
+    
+    // Lab 03: Allow mass assignment for all product fields
+    protected $fillable = [
+        'pro_name',
+        'pro_slug',
+        'pro_price',
+        'pro_sale',
+        'pro_total',
+        'pro_category_id',
+        'pro_content',
+        'pro_description',
+        'pro_image',
+        'quantity',
+        'pro_active',
+        'pro_hot',
+        'pro_pay',
+        'pro_total_number'
+    ];
     const STATUS_PUBLIC = 1;
     const STATUS_PRIVATE = 0;
 

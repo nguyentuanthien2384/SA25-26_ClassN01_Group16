@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cache;
 use App\Models\Models\Product;
-
+use App\Http\Controllers\Api\Lab03ProductController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -240,4 +240,11 @@ Route::get('/metrics', function () {
         return response('# Error collecting metrics', 500)
             ->header('Content-Type', 'text/plain');
     }
+});
+Route::prefix('lab03')->group(function () {
+    Route::get('/products', [Lab03ProductController::class, 'index']);
+    Route::get('/products/{id}', [Lab03ProductController::class, 'show']);
+    Route::post('/products', [Lab03ProductController::class, 'store']);
+    Route::put('/products/{id}', [Lab03ProductController::class, 'update']);
+    Route::delete('/products/{id}', [Lab03ProductController::class, 'destroy']);
 });

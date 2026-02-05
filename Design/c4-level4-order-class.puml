@@ -1,0 +1,232 @@
+@startuml C4_Level4_Order_Module_Class_Diagram
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title C4 Level 4: Code Diagram - Order/Cart Module (Class Diagram)
+
+LAYOUT_LEFT_RIGHT()
+
+' ============================================================================
+' PRESENTATION LAYER (Controllers)
+' ============================================================================
+
+Component(CartController, "CartController", "Laravel Controller", "Shopping cart operations") {
+    rectangle "Methods" as cart_methods {
+        + index(): View
+        + add(Request): RedirectResponse
+        + update(Request): RedirectResponse
+        + delete($id): RedirectResponse
+        + saveCart(Request): RedirectResponse
+    }
+}
+
+Component(OrderController, "OrderController", "Laravel Controller", "Order management") {
+    rectangle "Methods" as order_methods {
+        + index(): View
+        + show($id): View
+        + history(): View
+        + cancel($id): RedirectResponse
+    }
+}
+
+Component(PaymentController, "PaymentController", "Laravel Controller", "Payment processing") {
+    rectangle "Methods" as pay_methods {
+        + show(): View
+        + momo(Request): RedirectResponse
+        + vnpay(Request): RedirectResponse
+        + callback(Request): RedirectResponse
+    }
+}
+
+' ============================================================================
+' BUSINESS LAYER (Services & Events)
+' ============================================================================
+
+Component(CartService, "CartService", "Business Logic", "Cart operations") {
+    rectangle "Methods" as cs_methods {
+        + addToCart(productId, qty): void
+        + updateQuantity(productId, qty): void
+        + removeItem(productId): void
+        + getCartTotal(): int
+        + clearCart(): void
+        + validateStock(productId, qty): bool
+    }
+}
+
+Component(OrderService, "OrderService", "Business Logic", "Order operations") {
+    rectangle "Methods" as os_methods {
+        + createOrder(cartData, userData): Transaction
+        + calculateTotal(items): int
+        + processPayment(transaction, method): bool
+        + updateOrderStatus(id, status): void
+    }
+}
+
+Component(PaymentService, "PaymentService", "Payment Gateway", "External payment integration") {
+    rectangle "Methods" as ps_methods {
+        + createMomoPayment(amount, info): string
+        + createVNPayPayment(amount, info): string
+        + verifyCallback(data): bool
+        + handlePaymentResponse(data): void
+    }
+}
+
+Component(OrderPlacedEvent, "OrderPlaced", "Domain Event", "Event when order is placed") {
+    rectangle "Properties" as ope_props {
+        + transaction: Transaction
+        + orderDetails: array
+        + timestamp: DateTime
+    }
+}
+
+Component(SaveOrderToOutboxListener, "SaveOrderPlacedToOutbox", "Event Listener", "Saves event to outbox") {
+    rectangle "Methods" as sol_methods {
+        + handle(OrderPlaced): void
+    }
+}
+
+' ============================================================================
+' DATA LAYER (Models)
+' ============================================================================
+
+Component(Transaction, "Transaction", "Eloquent Model", "Order/Transaction") {
+    rectangle "Properties" as t_props {
+        # table = 'transactions'
+        + id: int
+        + tr_user_id: int
+        + tr_total: int
+        + tr_status: tinyint
+        + tr_payment_method: string
+        + tr_name: string
+        + tr_email: string
+        + tr_phone: string
+        + tr_address: text
+    }
+    rectangle "Methods" as t_methods {
+        + user(): BelongsTo
+        + orders(): HasMany
+        + scopePending(): Builder
+        + scopeCompleted(): Builder
+    }
+}
+
+Component(Order, "Order", "Eloquent Model", "Order line items") {
+    rectangle "Properties" as o_props {
+        # table = 'orders'
+        + id: int
+        + o_transaction_id: int
+        + o_product_id: int
+        + o_qty: int
+        + o_price: int
+        + o_sale: int
+    }
+    rectangle "Methods" as o_methods {
+        + transaction(): BelongsTo
+        + product(): BelongsTo
+        + getSubtotal(): int
+    }
+}
+
+Component(Cart, "Cart", "Eloquent Model", "Shopping cart") {
+    rectangle "Properties" as c_props {
+        # table = 'carts'
+        + id: int
+        + c_user_id: int
+        + c_product_id: int
+        + c_quantity: int
+    }
+    rectangle "Methods" as c_methods {
+        + user(): BelongsTo
+        + product(): BelongsTo
+    }
+}
+
+Component(OutboxMessage, "OutboxMessage", "Eloquent Model", "Event outbox") {
+    rectangle "Properties" as om_props {
+        # table = 'outbox_messages'
+        + id: int
+        + aggregate_type: string
+        + aggregate_id: int
+        + event_type: string
+        + payload: json
+        + published: boolean
+    }
+    rectangle "Methods" as om_methods {
+        + scopeUnpublished(): Builder
+        + markAsPublished(): void
+    }
+}
+
+Component(Product, "Product", "Eloquent Model", "Product reference") {
+    rectangle "Methods" as prod_methods {
+        + carts(): HasMany
+        + orders(): HasMany
+    }
+}
+
+Component(User, "User", "Eloquent Model", "User reference") {
+    rectangle "Methods" as user_methods {
+        + transactions(): HasMany
+        + carts(): HasMany
+    }
+}
+
+' ============================================================================
+' EXTERNAL SYSTEMS
+' ============================================================================
+
+Component_Ext(MomoGateway, "Momo Gateway", "Payment API", "Momo e-wallet payment")
+Component_Ext(VNPayGateway, "VNPay Gateway", "Payment API", "VNPay payment")
+
+ComponentDb(MySQL, "MySQL Database", "MySQL 8.0", "Transactional data")
+ComponentQueue(Redis, "Redis Queue", "Message Broker", "Event queue")
+
+' ============================================================================
+' RELATIONSHIPS
+' ============================================================================
+
+' Controller -> Service
+Rel(CartController, CartService, "uses", "")
+Rel(OrderController, OrderService, "uses", "")
+Rel(PaymentController, PaymentService, "uses", "")
+
+' Service -> Model
+Rel(CartService, Cart, "uses", "")
+Rel(CartService, Product, "uses", "")
+Rel(OrderService, Transaction, "creates", "")
+Rel(OrderService, Order, "creates", "")
+Rel(PaymentService, Transaction, "updates", "")
+
+' Service -> Event
+Rel(OrderService, OrderPlacedEvent, "fires", "event()")
+
+' Event -> Listener
+Rel(OrderPlacedEvent, SaveOrderToOutboxListener, "triggers", "")
+
+' Listener -> Outbox
+Rel(SaveOrderToOutboxListener, OutboxMessage, "creates", "")
+
+' Model Relationships
+Rel(Transaction, User, "belongsTo", "tr_user_id")
+Rel(Transaction, Order, "hasMany", "orders")
+
+Rel(Order, Transaction, "belongsTo", "")
+Rel(Order, Product, "belongsTo", "o_product_id")
+
+Rel(Cart, User, "belongsTo", "c_user_id")
+Rel(Cart, Product, "belongsTo", "c_product_id")
+
+' Models -> Database
+Rel(Transaction, MySQL, "persists", "")
+Rel(Order, MySQL, "persists", "")
+Rel(Cart, MySQL, "persists", "")
+Rel(OutboxMessage, MySQL, "persists", "")
+
+' Outbox -> Queue
+Rel(OutboxMessage, Redis, "publishes to", "after commit")
+
+' Payment Gateway
+Rel(PaymentService, MomoGateway, "calls API", "HTTPS")
+Rel(PaymentService, VNPayGateway, "calls API", "HTTPS")
+
+@enduml

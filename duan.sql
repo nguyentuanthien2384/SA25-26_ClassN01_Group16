@@ -441,7 +441,7 @@ CREATE TABLE `products` (
   `pro_sale` int(11) NOT NULL DEFAULT 0,
   `pro_active` tinyint(4) NOT NULL DEFAULT 1,
   `pro_hot` tinyint(4) NOT NULL DEFAULT 0,
-  `pro_description` text NOT NULL DEFAULT '0',
+  `pro_description` text NOT NULL,
   `pro_image` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,

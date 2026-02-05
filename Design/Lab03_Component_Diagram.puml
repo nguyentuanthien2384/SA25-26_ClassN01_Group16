@@ -1,0 +1,155 @@
+@startuml Lab03_Component_Diagram
+title Lab 03 - 3-Layer Architecture Component Diagram
+
+!define RECTANGLE_COLOR #E3F2FD
+!define INTERFACE_COLOR #BBDEFB
+
+package "Presentation Layer" {
+    [ProductController] as Controller <<API Controller>> #FFEBEE
+    
+    note right of Controller
+        **Responsibilities:**
+        - Handle HTTP requests
+        - Validate input format
+        - Return JSON responses
+        - Handle exceptions
+        
+        **Methods:**
+        - index(): GET all products
+        - show(id): GET product by ID
+        - store(request): POST create
+        - update(id, request): PUT update
+        - destroy(id): DELETE product
+        - search(keyword): GET search
+    end note
+}
+
+package "Business Logic Layer" {
+    [ProductService] as Service <<Service>> #FFF3E0
+    
+    note right of Service
+        **Responsibilities:**
+        - Business rule validation
+        - Data transformation
+        - Coordinate operations
+        - Exception handling
+        
+        **Business Rules:**
+        - Calculate final price
+        - Mark hot products (price > 10M)
+        - Auto-deactivate (stock = 0)
+        - Validate unique names
+        
+        **Methods:**
+        - getAllProducts(perPage)
+        - getProductById(id)
+        - createProduct(data)
+        - updateProduct(id, data)
+        - deleteProduct(id)
+        - searchProducts(keyword)
+    end note
+}
+
+package "Data Access Layer" {
+    interface ProductRepositoryInterface <<interface>> #E8F5E9
+    [ProductRepository] as Repository <<Repository>> #F1F8E9
+    
+    note right of Repository
+        **Responsibilities:**
+        - Database operations
+        - Query execution
+        - Data persistence
+        - CRUD operations
+        
+        **Methods:**
+        - getAllPaginated(perPage)
+        - getAll()
+        - findById(id)
+        - create(data)
+        - update(id, data)
+        - delete(id)
+        - searchByName(keyword)
+        - getByCategoryId(id)
+        - exists(id)
+    end note
+}
+
+package "Data Layer" {
+    [Product Model] as Model <<Eloquent Model>> #FCE4EC
+    database "MySQL Database" as DB {
+        [products table]
+    }
+}
+
+package "Configuration" {
+    [Lab03ServiceProvider] as Provider <<Service Provider>> #F3E5F5
+    
+    note right of Provider
+        **Purpose:**
+        - Dependency Injection
+        - Bind interface to implementation
+        - Load routes
+        
+        **Bindings:**
+        ProductRepositoryInterface
+        ⟹ ProductRepository
+    end note
+}
+
+' Dependencies (strictly enforced flow)
+Controller ..> Service : depends on
+Service ..> ProductRepositoryInterface : depends on
+Repository ..|> ProductRepositoryInterface : implements
+Repository ..> Model : uses
+Model ..> DB : queries
+
+' Service Provider bindings
+Provider ..> Repository : binds
+Provider ..> ProductRepositoryInterface : to
+
+' Annotations
+Controller -[hidden]down-> Service
+Service -[hidden]down-> Repository
+Repository -[hidden]down-> Model
+
+note bottom of DB
+    **products table schema:**
+    - id (PK)
+    - pro_name (string)
+    - pro_slug (string, unique)
+    - pro_price (decimal)
+    - pro_sale (integer, 0-100%)
+    - pro_total (calculated)
+    - pro_category_id (FK)
+    - pro_content (text)
+    - pro_image (string)
+    - quantity (integer)
+    - pro_active (boolean)
+    - pro_hot (boolean)
+    - timestamps
+end note
+
+legend right
+    **Layered Architecture Principles:**
+    
+    ✅ **Separation of Concerns**
+    Each layer has distinct responsibility
+    
+    ✅ **Dependency Rule**
+    Dependencies point inward (one direction)
+    Controller → Service → Repository → Model
+    
+    ✅ **Dependency Injection**
+    Interface-based programming
+    Service Provider binds implementations
+    
+    ✅ **Testability**
+    Each layer can be tested independently
+    Mocking repositories for service tests
+    
+    ✅ **Maintainability**
+    Changes in one layer don't affect others
+    Business logic isolated in Service layer
+end legend
+
+@enduml

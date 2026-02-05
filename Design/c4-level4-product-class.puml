@@ -1,0 +1,173 @@
+@startuml C4_Level4_Product_Module_Class_Diagram
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title C4 Level 4: Code Diagram - Product Module (Class Diagram)
+
+LAYOUT_LEFT_RIGHT()
+
+' ============================================================================
+' PRESENTATION LAYER (Controllers)
+' ============================================================================
+
+Component(ProductController, "ProductController", "Laravel Controller", "Handles HTTP requests for products") {
+    rectangle "Methods" as pc_methods {
+        + index(Request): View
+        + show($id): View
+        + search(Request): View
+        + filter(Request): View
+    }
+}
+
+Component(ProductDetailController, "ProductDetailController", "Laravel Controller", "Product detail page") {
+    rectangle "Methods" as pdc_methods {
+        + show($id): View
+        + relatedProducts($id): Collection
+    }
+}
+
+Component(CategoryController, "CategoryController", "Laravel Controller", "Category management") {
+    rectangle "Methods" as cc_methods {
+        + index(): View
+        + show($id): View
+        + productsByCategory($id): View
+    }
+}
+
+' ============================================================================
+' BUSINESS LAYER (Services - Optional)
+' ============================================================================
+
+Component(ProductService, "ProductService", "Business Logic", "Product operations") {
+    rectangle "Methods" as ps_methods {
+        + getAllProducts(perPage): LengthAwarePaginator
+        + getProductById(id): Product
+        + getHotProducts(): Collection
+        + searchProducts(keyword): Collection
+        + filterByCategory(categoryId): Collection
+        + calculateDiscountPrice(product): int
+    }
+}
+
+Component(CacheService, "CacheService", "Caching Layer", "Redis caching") {
+    rectangle "Methods" as cs_methods {
+        + remember(key, ttl, callback): mixed
+        + forget(key): bool
+        + flush(pattern): void
+    }
+}
+
+' ============================================================================
+' DATA LAYER (Models & Repositories)
+' ============================================================================
+
+Component(Product, "Product", "Eloquent Model", "Product entity") {
+    rectangle "Properties" as p_props {
+        # table = 'products'
+        # fillable: array
+        + id: int
+        + pro_name: string
+        + pro_slug: string
+        + pro_price: int
+        + pro_sale: int
+        + pro_category_id: int
+        + pro_active: tinyint
+        + pro_hot: tinyint
+        + quantity: int
+    }
+    rectangle "Methods" as p_methods {
+        + category(): BelongsTo
+        + images(): HasMany
+        + ratings(): HasMany
+        + orderItems(): HasMany
+        + scopeActive(Builder): Builder
+        + scopeHot(Builder): Builder
+        + getDiscountedPrice(): int
+        + getStatus(): array
+    }
+}
+
+Component(Category, "Category", "Eloquent Model", "Category entity") {
+    rectangle "Properties" as cat_props {
+        # table = 'category'
+        + id: int
+        + c_name: string
+        + c_slug: string
+        + c_active: tinyint
+        + c_home: tinyint
+    }
+    rectangle "Methods" as cat_methods {
+        + products(): HasMany
+        + parent(): BelongsTo
+        + children(): HasMany
+        + scopeActive(Builder): Builder
+    }
+}
+
+Component(ProductImage, "ProductImage", "Eloquent Model", "Product images") {
+    rectangle "Properties" as pi_props {
+        # table = 'product_images'
+        + id: int
+        + pi_product_id: int
+        + pi_name: string
+    }
+    rectangle "Methods" as pi_methods {
+        + product(): BelongsTo
+    }
+}
+
+Component(Rating, "Rating", "Eloquent Model", "Product reviews") {
+    rectangle "Properties" as r_props {
+        # table = 'ratings'
+        + id: int
+        + r_product_id: int
+        + r_user_id: int
+        + r_number: int
+        + r_content: text
+    }
+    rectangle "Methods" as r_methods {
+        + product(): BelongsTo
+        + user(): BelongsTo
+    }
+}
+
+' ============================================================================
+' DATABASE
+' ============================================================================
+
+ComponentDb(MySQL, "MySQL Database", "MySQL 8.0", "Relational database")
+
+' ============================================================================
+' RELATIONSHIPS
+' ============================================================================
+
+' Controller -> Service
+Rel(ProductController, ProductService, "uses", "calls business logic")
+Rel(ProductDetailController, ProductService, "uses", "")
+Rel(CategoryController, ProductService, "uses", "")
+
+' Service -> Models
+Rel(ProductService, Product, "uses", "Eloquent ORM")
+Rel(ProductService, Category, "uses", "")
+Rel(ProductService, CacheService, "uses", "caching")
+
+' Models -> Database
+Rel(Product, MySQL, "queries", "Eloquent queries")
+Rel(Category, MySQL, "queries", "")
+Rel(ProductImage, MySQL, "queries", "")
+Rel(Rating, MySQL, "queries", "")
+
+' Model Relationships
+Rel(Product, Category, "belongsTo", "pro_category_id")
+Rel(Product, ProductImage, "hasMany", "")
+Rel(Product, Rating, "hasMany", "")
+
+Rel(Category, Product, "hasMany", "products")
+
+Rel(ProductImage, Product, "belongsTo", "")
+Rel(Rating, Product, "belongsTo", "")
+
+' Cache
+Rel(CacheService, Product, "caches", "query results")
+
+@enduml

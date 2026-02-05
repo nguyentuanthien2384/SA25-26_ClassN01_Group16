@@ -1,0 +1,227 @@
+@startuml C4_Level4_User_Module_Class_Diagram
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title C4 Level 4: Code Diagram - User/Authentication Module (Class Diagram)
+
+LAYOUT_LEFT_RIGHT()
+
+' ============================================================================
+' PRESENTATION LAYER (Controllers)
+' ============================================================================
+
+Component(AuthUserController, "AuthUserController", "Laravel Controller", "User authentication") {
+    rectangle "Methods" as auth_methods {
+        + showLoginForm(): View
+        + login(Request): RedirectResponse
+        + logout(Request): RedirectResponse
+        + showRegistrationForm(): View
+        + register(Request): RedirectResponse
+    }
+}
+
+Component(UserController, "UserController", "Laravel Controller", "User profile management") {
+    rectangle "Methods" as user_methods {
+        + index(): View
+        + profile(): View
+        + updateProfile(Request): RedirectResponse
+        + changePassword(Request): RedirectResponse
+    }
+}
+
+Component(WishlistController, "WishlistController", "Laravel Controller", "Wishlist management") {
+    rectangle "Methods" as wish_methods {
+        + index(): View
+        + add($productId): RedirectResponse
+        + remove($id): RedirectResponse
+    }
+}
+
+' ============================================================================
+' MIDDLEWARE
+' ============================================================================
+
+Component(AuthMiddleware, "Authenticate", "Middleware", "Authentication check") {
+    rectangle "Methods" as am_methods {
+        + handle(Request, Closure): Response
+        + redirectTo(): string
+    }
+}
+
+Component(GuestMiddleware, "RedirectIfAuthenticated", "Middleware", "Guest-only routes") {
+    rectangle "Methods" as gm_methods {
+        + handle(Request, Closure): Response
+    }
+}
+
+' ============================================================================
+' BUSINESS LAYER (Services)
+' ============================================================================
+
+Component(AuthService, "AuthService", "Business Logic", "Authentication logic") {
+    rectangle "Methods" as as_methods {
+        + attempt(credentials): bool
+        + login(User): void
+        + logout(): void
+        + register(userData): User
+        + validateCredentials(email, password): bool
+    }
+}
+
+Component(UserService, "UserService", "Business Logic", "User operations") {
+    rectangle "Methods" as us_methods {
+        + getUserById(id): User
+        + updateProfile(id, data): User
+        + changePassword(id, oldPass, newPass): bool
+        + uploadAvatar(file): string
+    }
+}
+
+Component(WishlistService, "WishlistService", "Business Logic", "Wishlist operations") {
+    rectangle "Methods" as ws_methods {
+        + addToWishlist(userId, productId): Wishlist
+        + removeFromWishlist(id): bool
+        + getUserWishlist(userId): Collection
+        + isInWishlist(userId, productId): bool
+    }
+}
+
+' ============================================================================
+' DATA LAYER (Models)
+' ============================================================================
+
+Component(User, "User", "Eloquent Model", "User account") {
+    rectangle "Properties" as u_props {
+        # table = 'users'
+        # fillable: array
+        # hidden = ['u_password']
+        + id: int
+        + u_name: string
+        + u_email: string
+        + u_password: string
+        + u_phone: string
+        + u_address: text
+        + u_avatar: string
+        + email_verified_at: timestamp
+    }
+    rectangle "Methods" as u_methods {
+        + transactions(): HasMany
+        + carts(): HasMany
+        + wishlists(): HasMany
+        + ratings(): HasMany
+        + setPasswordAttribute($value): void
+        + getAvatarUrlAttribute(): string
+    }
+}
+
+Component(Wishlist, "Wishlist", "Eloquent Model", "User wishlist") {
+    rectangle "Properties" as w_props {
+        # table = 'wishlists'
+        + id: int
+        + w_user_id: int
+        + w_product_id: int
+    }
+    rectangle "Methods" as w_methods {
+        + user(): BelongsTo
+        + product(): BelongsTo
+    }
+}
+
+Component(Transaction, "Transaction", "Eloquent Model", "Order history") {
+    rectangle "Methods" as t_methods {
+        + user(): BelongsTo
+    }
+}
+
+Component(Cart, "Cart", "Eloquent Model", "Shopping cart") {
+    rectangle "Methods" as c_methods {
+        + user(): BelongsTo
+    }
+}
+
+Component(Product, "Product", "Eloquent Model", "Product reference") {
+    rectangle "Methods" as p_methods {
+        + wishlists(): HasMany
+    }
+}
+
+' ============================================================================
+' SECURITY & FACADES
+' ============================================================================
+
+Component(Hash, "Hash", "Laravel Facade", "Password hashing") {
+    rectangle "Methods" as h_methods {
+        + make(string): string
+        + check(plain, hashed): bool
+    }
+}
+
+Component(Auth, "Auth", "Laravel Facade", "Authentication facade") {
+    rectangle "Methods" as auth_f_methods {
+        + attempt(credentials): bool
+        + login(User): void
+        + logout(): void
+        + user(): User | null
+        + check(): bool
+        + guest(): bool
+    }
+}
+
+Component(Session, "Session", "Laravel Facade", "Session management") {
+    rectangle "Methods" as s_methods {
+        + put(key, value): void
+        + get(key): mixed
+        + forget(key): void
+        + flush(): void
+    }
+}
+
+' ============================================================================
+' DATABASE
+' ============================================================================
+
+ComponentDb(MySQL, "MySQL Database", "MySQL 8.0", "User data storage")
+
+' ============================================================================
+' RELATIONSHIPS
+' ============================================================================
+
+' Controller -> Middleware
+Rel(UserController, AuthMiddleware, "protected by", "")
+Rel(WishlistController, AuthMiddleware, "protected by", "")
+
+' Controller -> Service
+Rel(AuthUserController, AuthService, "uses", "")
+Rel(UserController, UserService, "uses", "")
+Rel(WishlistController, WishlistService, "uses", "")
+
+' Service -> Model
+Rel(AuthService, User, "uses", "Eloquent")
+Rel(UserService, User, "uses", "")
+Rel(WishlistService, Wishlist, "uses", "")
+Rel(WishlistService, Product, "uses", "")
+
+' Service -> Facade
+Rel(AuthService, Hash, "uses", "password hashing")
+Rel(AuthService, Auth, "uses", "authentication")
+Rel(AuthService, Session, "uses", "session storage")
+
+' Model Relationships
+Rel(User, Transaction, "hasMany", "transactions")
+Rel(User, Cart, "hasMany", "carts")
+Rel(User, Wishlist, "hasMany", "wishlists")
+
+Rel(Wishlist, User, "belongsTo", "w_user_id")
+Rel(Wishlist, Product, "belongsTo", "w_product_id")
+
+Rel(Transaction, User, "belongsTo", "")
+Rel(Cart, User, "belongsTo", "")
+
+' Models -> Database
+Rel(User, MySQL, "persists", "")
+Rel(Wishlist, MySQL, "persists", "")
+
+' Middleware -> Facade
+Rel(AuthMiddleware, Auth, "uses", "check authentication")
+
+@enduml

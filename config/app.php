@@ -170,6 +170,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         App\Providers\CircuitBreakerServiceProvider::class,
         App\Providers\ServiceDiscoveryProvider::class,
+        App\Lab03\Providers\Lab03ServiceProvider::class, // Lab 03 - Layered Architecture
         Barryvdh\Debugbar\ServiceProvider::class,
     ])->toArray(),
 

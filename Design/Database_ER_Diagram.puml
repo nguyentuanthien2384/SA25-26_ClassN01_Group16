@@ -1,0 +1,263 @@
+@startuml ElectroShop_ER_Diagram
+
+!define TABLE(x) entity x << (T,#FFAAAA) >>
+!define PK(x) <b><color:red>PK:</color> x</b>
+!define FK(x) <color:blue>FK:</color> x
+!define NN(x) <color:green>NN:</color> x
+
+' ============================================================================
+' ENTITY-RELATIONSHIP DIAGRAM - ElectroShop E-Commerce Database
+' ============================================================================
+
+title Entity-Relationship Diagram - ElectroShop Database Schema
+
+' ============================================================================
+' ENTITIES (TABLES)
+' ============================================================================
+
+TABLE(users) {
+  PK(id) : BIGINT
+  --
+  u_name : VARCHAR(255)
+  u_email : VARCHAR(255) UNIQUE
+  u_password : VARCHAR(255)
+  u_phone : VARCHAR(20)
+  u_address : TEXT
+  u_avatar : VARCHAR(255)
+  email_verified_at : TIMESTAMP
+  remember_token : VARCHAR(100)
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+TABLE(category) {
+  PK(id) : BIGINT
+  --
+  c_name : VARCHAR(255)
+  c_slug : VARCHAR(255) UNIQUE
+  c_parent_id : BIGINT
+  c_active : TINYINT(1)
+  c_home : TINYINT(1)
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+TABLE(products) {
+  PK(id) : BIGINT
+  --
+  FK(pro_category_id) : BIGINT
+  NN(pro_name) : VARCHAR(255)
+  NN(pro_slug) : VARCHAR(255)
+  NN(pro_price) : INT
+  pro_sale : INT DEFAULT 0
+  pro_total : INT
+  pro_content : TEXT
+  pro_description : TEXT
+  pro_image : VARCHAR(255)
+  quantity : INT DEFAULT 0
+  pro_active : TINYINT(1) DEFAULT 1
+  pro_hot : TINYINT(1) DEFAULT 0
+  pro_pay : INT DEFAULT 0
+  pro_total_number : INT DEFAULT 0
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+TABLE(product_images) {
+  PK(id) : BIGINT
+  --
+  FK(pi_product_id) : BIGINT
+  pi_name : VARCHAR(255)
+  pi_slug : VARCHAR(255)
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+TABLE(carts) {
+  PK(id) : BIGINT
+  --
+  FK(c_user_id) : BIGINT
+  FK(c_product_id) : BIGINT
+  c_quantity : INT DEFAULT 1
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+TABLE(transactions) {
+  PK(id) : BIGINT
+  --
+  FK(tr_user_id) : BIGINT
+  NN(tr_total) : INT
+  tr_status : TINYINT(1) DEFAULT 0
+  tr_payment_method : VARCHAR(50)
+  tr_payment_status : VARCHAR(50)
+  tr_transaction_id : VARCHAR(255)
+  tr_note : TEXT
+  tr_name : VARCHAR(255)
+  tr_email : VARCHAR(255)
+  tr_phone : VARCHAR(20)
+  tr_address : TEXT
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+TABLE(orders) {
+  PK(id) : BIGINT
+  --
+  FK(o_transaction_id) : BIGINT
+  FK(o_product_id) : BIGINT
+  NN(o_qty) : INT
+  NN(o_price) : INT
+  o_sale : INT DEFAULT 0
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+TABLE(ratings) {
+  PK(id) : BIGINT
+  --
+  FK(r_product_id) : BIGINT
+  FK(r_user_id) : BIGINT
+  r_number : INT
+  r_content : TEXT
+  r_status : TINYINT(1) DEFAULT 0
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+TABLE(articles) {
+  PK(id) : BIGINT
+  --
+  FK(a_user_id) : BIGINT
+  FK(a_category_id) : BIGINT
+  NN(a_name) : VARCHAR(255)
+  NN(a_slug) : VARCHAR(255)
+  a_description : TEXT
+  a_content : TEXT
+  a_image : VARCHAR(255)
+  a_status : TINYINT(1) DEFAULT 1
+  a_hot : TINYINT(1) DEFAULT 0
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+TABLE(contacts) {
+  PK(id) : BIGINT
+  --
+  c_name : VARCHAR(255)
+  c_email : VARCHAR(255)
+  c_phone : VARCHAR(20)
+  c_title : VARCHAR(255)
+  c_content : TEXT
+  c_status : TINYINT(1) DEFAULT 0
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+TABLE(wishlists) {
+  PK(id) : BIGINT
+  --
+  FK(w_user_id) : BIGINT
+  FK(w_product_id) : BIGINT
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+TABLE(admins) {
+  PK(id) : BIGINT
+  --
+  ad_name : VARCHAR(255)
+  ad_email : VARCHAR(255) UNIQUE
+  ad_password : VARCHAR(255)
+  ad_phone : VARCHAR(20)
+  ad_avatar : VARCHAR(255)
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+TABLE(banners) {
+  PK(id) : BIGINT
+  --
+  b_name : VARCHAR(255)
+  b_image : VARCHAR(255)
+  b_link : VARCHAR(255)
+  b_position : VARCHAR(50)
+  b_active : TINYINT(1) DEFAULT 1
+  b_order : INT DEFAULT 0
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+TABLE(outbox_messages) {
+  PK(id) : BIGINT
+  --
+  aggregate_type : VARCHAR(255)
+  aggregate_id : BIGINT
+  event_type : VARCHAR(255)
+  payload : JSON
+  occurred_at : TIMESTAMP
+  published : BOOLEAN DEFAULT FALSE
+  published_at : TIMESTAMP NULL
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ============================================================================
+' RELATIONSHIPS
+' ============================================================================
+
+' Category relationships
+category ||--o{ products : "has many"
+category ||--o{ category : "parent-child"
+category ||--o{ articles : "has many"
+
+' Product relationships
+products ||--o{ product_images : "has many images"
+products ||--o{ carts : "in cart"
+products ||--o{ orders : "in orders"
+products ||--o{ ratings : "has ratings"
+products ||--o{ wishlists : "in wishlists"
+
+' User relationships
+users ||--o{ carts : "owns cart"
+users ||--o{ transactions : "places orders"
+users ||--o{ ratings : "writes reviews"
+users ||--o{ articles : "writes articles"
+users ||--o{ wishlists : "has wishlist"
+
+' Transaction relationships
+transactions ||--o{ orders : "contains"
+
+' Notes
+note right of products
+  **Core Product Table**
+  - pro_active: 1=Public, 0=Private
+  - pro_hot: 1=Featured, 0=Normal
+  - pro_pay: Number of times purchased
+  - pro_sale: Discount percentage
+end note
+
+note right of transactions
+  **Order/Transaction Table**
+  - tr_status: 
+    0=Pending, 1=Processing,
+    2=Completed, 3=Cancelled
+  - tr_payment_method:
+    COD, Momo, VNPay, PayPal
+end note
+
+note right of category
+  **Category Hierarchy**
+  - Supports parent-child
+  - c_home: Show on homepage
+  - c_active: 1=Active, 0=Inactive
+end note
+
+note bottom of outbox_messages
+  **Event Sourcing Pattern**
+  - Stores domain events
+  - For microservices messaging
+  - Transactional outbox pattern
+end note
+
+@enduml

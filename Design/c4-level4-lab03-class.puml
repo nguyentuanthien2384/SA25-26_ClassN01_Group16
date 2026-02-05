@@ -1,0 +1,226 @@
+@startuml C4_Level4_Lab03_3Layer_Class_Diagram
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title C4 Level 4: Code Diagram - Lab 03 (3-Layer Architecture)
+
+LAYOUT_TOP_DOWN()
+
+' ============================================================================
+' PRESENTATION LAYER (API Controllers)
+' ============================================================================
+
+rectangle "PRESENTATION LAYER" as PL #LightBlue {
+    Component(Lab03ProductController, "Lab03ProductController", "API Controller", "REST API endpoints") {
+        rectangle "Methods" as api_methods {
+            + index(Request): JsonResponse
+            + show($id): JsonResponse
+            + store(Request): JsonResponse
+            + update(Request, $id): JsonResponse
+            + destroy($id): JsonResponse
+            + search(Request): JsonResponse
+            ---
+            - errorResponse(msg, code): JsonResponse
+            - getErrorDescription(code): string
+        }
+    }
+}
+
+' ============================================================================
+' BUSINESS LAYER (Service)
+' ============================================================================
+
+rectangle "BUSINESS LAYER" as BL #LightGreen {
+    Component(ProductService, "ProductService", "Business Logic Service", "Product operations & validation") {
+        rectangle "Dependencies" as ps_deps {
+            - productRepository: ProductRepositoryInterface
+        }
+        rectangle "Methods" as ps_methods {
+            + getAllProducts(perPage): array
+            + getProductById(id): array
+            + createProduct(data): array
+            + updateProduct(id, data): array
+            + deleteProduct(id): bool
+            + searchProducts(keyword): array
+            + getProductsByCategory(categoryId): array
+            ---
+            - validateProductData(data): array
+            - transformProduct(Product): array
+            - generateSlug(name): string
+        }
+        rectangle "Validation Rules" as ps_rules {
+            • pro_name: required|string|max:255
+            • pro_price: required|numeric|gt:0
+            • pro_category_id: required|exists:category,id
+            • quantity: nullable|integer|min:0
+        }
+    }
+}
+
+' ============================================================================
+' DATA ACCESS LAYER (Repository Pattern)
+' ============================================================================
+
+rectangle "DATA ACCESS LAYER" as DAL #LightYellow {
+    Component(ProductRepositoryInterface, "ProductRepositoryInterface", "Repository Interface", "Data abstraction") {
+        rectangle "Contract" as pri_methods {
+            + getAllPaginated(perPage): LengthAwarePaginator
+            + getAll(): Collection
+            + findById(id): ?Product
+            + create(data): Product
+            + update(id, data): ?Product
+            + delete(id): bool
+            + searchByName(keyword): Collection
+            + getByCategoryId(categoryId): Collection
+            + exists(id): bool
+        }
+    }
+    
+    Component(ProductRepository, "ProductRepository", "Repository Implementation", "Eloquent data access") {
+        rectangle "Dependencies" as pr_deps {
+            - model: Product
+        }
+        rectangle "Methods" as pr_methods {
+            + getAllPaginated(perPage): LengthAwarePaginator
+            + getAll(): Collection
+            + findById(id): ?Product
+            + create(data): Product
+            + update(id, data): ?Product
+            + delete(id): bool
+            + searchByName(keyword): Collection
+            + getByCategoryId(categoryId): Collection
+            + exists(id): bool
+        }
+    }
+}
+
+' ============================================================================
+' DOMAIN MODEL
+' ============================================================================
+
+rectangle "DOMAIN MODEL" as DM #LightCoral {
+    Component(Product, "Product", "Eloquent Model", "Product entity") {
+        rectangle "Properties" as p_props {
+            # table = 'products'
+            # fillable: array
+            + id: int
+            + pro_name: string
+            + pro_slug: string
+            + pro_price: int
+            + pro_category_id: int
+            + pro_description: text
+            + quantity: int
+        }
+        rectangle "Methods" as p_methods {
+            + category(): BelongsTo
+        }
+    }
+    
+    Component(Category, "Category", "Eloquent Model", "Category entity") {
+        rectangle "Methods" as c_methods {
+            + products(): HasMany
+        }
+    }
+}
+
+' ============================================================================
+' INFRASTRUCTURE
+' ============================================================================
+
+rectangle "INFRASTRUCTURE" as INFRA #LightGray {
+    Component(ServiceProvider, "Lab03ServiceProvider", "Service Provider", "Dependency Injection") {
+        rectangle "Bindings" as sp_bindings {
+            + register()
+            • Bind ProductRepositoryInterface
+              → ProductRepository
+            
+            + boot()
+            • Load Lab 03 routes
+        }
+    }
+    
+    Component(Routes, "routes/api.php", "API Routes", "Route definitions") {
+        rectangle "Endpoints" as routes {
+            GET    /api/lab03/products
+            GET    /api/lab03/products/{id}
+            POST   /api/lab03/products
+            PUT    /api/lab03/products/{id}
+            DELETE /api/lab03/products/{id}
+            GET    /api/lab03/products/search
+        }
+    }
+}
+
+ComponentDb(MySQL, "MySQL Database", "MySQL 8.0", "products, category tables")
+
+' ============================================================================
+' RELATIONSHIPS (Data Flow)
+' ============================================================================
+
+' HTTP Request Flow (Top to Bottom)
+Rel(Routes, Lab03ProductController, "routes to", "HTTP")
+
+Rel(Lab03ProductController, ProductService, "delegates to", "calls methods")
+
+Rel(ProductService, ProductRepositoryInterface, "uses", "dependency injection")
+
+Rel_U(ProductRepository, ProductRepositoryInterface, "implements", "")
+
+Rel(ProductRepository, Product, "queries", "Eloquent ORM")
+
+Rel(Product, MySQL, "persists", "SQL")
+
+' Dependency Injection
+Rel(ServiceProvider, ProductRepositoryInterface, "binds", "")
+Rel(ServiceProvider, ProductRepository, "to implementation", "")
+
+' Model Relationships
+Rel(Product, Category, "belongsTo", "pro_category_id")
+Rel(Category, Product, "hasMany", "products")
+
+' Bootstrap
+Rel(ServiceProvider, Routes, "loads", "boot()")
+
+' ============================================================================
+' NOTES & ANNOTATIONS
+' ============================================================================
+
+note right of Lab03ProductController
+  **API Controller Responsibilities:**
+  • Receive HTTP requests
+  • Validate request format
+  • Delegate to Service layer
+  • Format JSON responses
+  • Handle exceptions
+  • Return proper HTTP status codes
+    (200, 201, 400, 404, 500)
+end note
+
+note right of ProductService
+  **Service Layer Responsibilities:**
+  • Business logic validation
+  • Data transformation
+  • Slug generation
+  • Error handling
+  • Transaction management
+  • Call Repository for data access
+end note
+
+note right of ProductRepository
+  **Repository Responsibilities:**
+  • Abstract data access
+  • Eloquent query building
+  • Database operations (CRUD)
+  • No business logic
+  • Return Eloquent collections/models
+end note
+
+note bottom of Product
+  **Domain Model:**
+  • Pure data entity
+  • Eloquent relationships
+  • Accessors/Mutators
+  • No business logic
+end note
+
+@enduml
