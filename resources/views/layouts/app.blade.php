@@ -8,15 +8,15 @@
 		<meta name="csrf-token" content="{{ csrf_token() }}">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
-		<link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico">
-		<!-- Place favicon.ico in the root directory -->
+		<link rel="shortcut icon" type="image/x-icon" href="{{asset('img/favicon.ico')}}">
 
-		<!-- Google Font -->
-		<link href='https://fonts.googleapis.com/css?family=Lato:400,700,900' rel='stylesheet' type='text/css'>
-		<link href='https://fonts.googleapis.com/css?family=Bree+Serif' rel='stylesheet' type='text/css'>
+		<!-- ⚡ OPTIMIZED: Preload critical CSS + defer Google Fonts -->
+		<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href='https://fonts.googleapis.com/css?family=Lato:400,700,900&display=swap' rel='stylesheet' type='text/css'>
+		<link href='https://fonts.googleapis.com/css?family=Bree+Serif&display=swap' rel='stylesheet' type='text/css'>
 
-		<!-- all css here -->
-		<!-- bootstrap v3.3.6 css -->
+		<!-- Critical CSS (above-the-fold) -->
 		<link rel="stylesheet" href="{{asset('css/bootstrap.min.css')}}">
 		<!-- animate css -->
 		<link rel="stylesheet" href="{{asset('css/animate.min.css')}}">
@@ -485,7 +485,7 @@
 											@endif
 											<span class="p-badge p-badge--installment">Trả góp 0%</span>
 											<a href="{{route('get.detail.product',[$proHot->pro_slug,$proHot->id])}}">
-												<img src="{{$proHot->pro_image}}" alt="" class="p-img"/>
+												<img src="{{ $proHot->pro_image ? (strpos($proHot->pro_image, 'http') === 0 ? $proHot->pro_image : asset($proHot->pro_image)) : asset('upload/no-image.jpg') }}" alt="{{$proHot->pro_name}}" class="p-img" loading="lazy"/>
 											</a>
 											<div class="p-title">
 												<a href="{{route('get.detail.product',[$proHot->pro_slug,$proHot->id])}}">{{$proHot->pro_name}}</a>
@@ -584,7 +584,7 @@
 										@endif
 										<span class="p-badge p-badge--installment">Trả góp 0%</span>
 										<a href="{{route('get.detail.product',[$proHot->pro_slug,$proHot->id])}}">
-											<img src="{{$proHot->pro_image}}" alt="" class="p-img"/>
+											<img src="{{ $proHot->pro_image ? (strpos($proHot->pro_image, 'http') === 0 ? $proHot->pro_image : asset($proHot->pro_image)) : asset('upload/no-image.jpg') }}" alt="{{$proHot->pro_name}}" class="p-img" loading="lazy"/>
 										</a>
 										<div class="p-title">
 											<a href="{{route('get.detail.product',[$proHot->pro_slug,$proHot->id])}}">{{$proHot->pro_name}}</a>
@@ -657,7 +657,7 @@
 										@endif
 										<span class="p-badge p-badge--installment">Trả góp 0%</span>
 										<a href="{{route('get.detail.product',[$proHot->pro_slug,$proHot->id])}}">
-											<img src="{{$proHot->pro_image}}" alt="" class="p-img"/>
+											<img src="{{ $proHot->pro_image ? (strpos($proHot->pro_image, 'http') === 0 ? $proHot->pro_image : asset($proHot->pro_image)) : asset('upload/no-image.jpg') }}" alt="{{$proHot->pro_name}}" class="p-img" loading="lazy"/>
 										</a>
 										<div class="p-title">
 											<a href="{{route('get.detail.product',[$proHot->pro_slug,$proHot->id])}}">{{$proHot->pro_name}}</a>
@@ -733,7 +733,7 @@
 										@endif
 										<span class="p-badge p-badge--installment">Trả góp 0%</span>
 										<a href="{{route('get.detail.product',[$articleNew->pro_slug, $articleNew->id])}}">
-											<img src="{{$articleNew->pro_image}}" alt="" class="p-img"/>
+											<img src="{{ $articleNew->pro_image ? (strpos($articleNew->pro_image, 'http') === 0 ? $articleNew->pro_image : asset($articleNew->pro_image)) : asset('upload/no-image.jpg') }}" alt="{{$articleNew->pro_name}}" class="p-img" loading="lazy"/>
 										</a>
 										<div class="p-title">
 											<a href="{{route('get.detail.product',[$articleNew->pro_slug, $articleNew->id])}}">{{$articleNew->pro_name}}</a>
@@ -781,31 +781,24 @@
 		</div>
 		<!-- WRAPPER END -->
 
-		<!-- all js here -->
-		<!-- jquery latest version -->
+		<!-- ⚡ OPTIMIZED: Critical JS first, defer non-critical -->
+		<!-- jquery (critical - needed for everything) -->
 		<script src="{{asset('js/vendor/jquery-3.6.0.min.js')}}"></script>
 		<script src="{{asset('js/vendor/jquery-migrate-3.3.2.min.js')}}"></script>
-		<!-- bootstrap js -->
+		<!-- bootstrap js (critical - layout) -->
 		<script src="{{asset('js/bootstrap.bundle.min.js')}}"></script>
-		<!-- jquery.meanmenu js -->
-		<script src="{{asset('js/jquery.meanmenu.js')}}"></script>
-		<!-- slick.min js -->
+		<!-- slick slider (critical for product display) -->
 		<script src="{{asset('js/slick.min.js')}}"></script>
-		<!-- jquery.treeview js -->
-		<script src="{{asset('js/jquery.treeview.js')}}"></script>
-		<!-- lightbox.min js -->
-		<script src="{{asset('js/lightbox.min.js')}}"></script>
-		<!-- jquery-ui js -->
-		<script src="{{asset('js/jquery-ui.min.js')}}"></script>
-		<!-- jquery.nivo.slider js -->
-		<script src="{{asset('lib/js/jquery.nivo.slider.js')}}"></script>
-		<script src="{{asset('lib/home.js')}}"></script>
-		<!-- jquery.nicescroll.min js -->
-		<script src="{{asset('js/jquery.nicescroll.min.js')}}"></script>
-		<!-- countdon.min js -->
-		<script src="{{asset('js/countdon.min.js')}}"></script>
-		<!-- wow js -->
-		<script src="{{asset('js/wow.min.js')}}"></script>
+		<!-- Deferred JS (non-critical, load after page render) -->
+		<script src="{{asset('js/jquery.meanmenu.js')}}" defer></script>
+		<script src="{{asset('js/jquery.treeview.js')}}" defer></script>
+		<script src="{{asset('js/lightbox.min.js')}}" defer></script>
+		<script src="{{asset('js/jquery-ui.min.js')}}" defer></script>
+		<script src="{{asset('lib/js/jquery.nivo.slider.js')}}" defer></script>
+		<script src="{{asset('lib/home.js')}}" defer></script>
+		<script src="{{asset('js/jquery.nicescroll.min.js')}}" defer></script>
+		<script src="{{asset('js/countdon.min.js')}}" defer></script>
+		<script src="{{asset('js/wow.min.js')}}" defer></script>
 		<!-- plugins js -->
 		<script src="{{asset('js/plugins.js')}}"></script>
 		<!-- main js -->

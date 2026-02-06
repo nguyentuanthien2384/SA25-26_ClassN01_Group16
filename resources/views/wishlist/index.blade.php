@@ -41,7 +41,7 @@
                                                 <span class="pro-label new-label" style="position:absolute; background:#4caf50; right:0px; top:0px;">-{{ $salePercent }}%</span>
                                             @endif
                                             <a href="{{ route('get.detail.product', [$item->product->pro_slug, $item->product->id]) }}">
-                                                <img src="{{ $item->product->pro_image }}" alt="" style="width: 230px; height: 150px; margin-left: auto; margin-right: auto; display: block;"/>
+                                                <img src="{{ $item->product->pro_image ? (strpos($item->product->pro_image, 'http') === 0 ? $item->product->pro_image : asset($item->product->pro_image)) : asset('upload/no-image.jpg') }}" alt="{{$item->product->pro_name}}" style="width: 230px; height: 150px; margin-left: auto; margin-right: auto; display: block;"/>
                                             </a>
                                         </div>
                                         <div class="product-info clearfix text-center">

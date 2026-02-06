@@ -1,0 +1,256 @@
+@startuml Message_Broker_Flow_Sequence
+!theme plain
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+title Sequence Diagram - Message Broker Flow (Event-Driven Architecture)\nElectroShop Microservices - Asynchronous Communication
+
+participant "Order Service" as order
+database "MySQL\n(Orders DB)" as orderDB
+database "Outbox Table\n(outbox_messages)" as outbox
+participant "Outbox Publisher\n(Background Worker)" as publisher
+queue "RabbitMQ\n(Message Broker)" as rabbitmq
+participant "Notification Service\n(Consumer)" as notification
+participant "Inventory Service\n(Consumer)" as inventory
+participant "Analytics Service\n(Consumer)" as analytics
+participant "Email Service\n(SMTP)" as email
+database "Redis\n(Dead Letter Queue)" as redis
+
+== 1. Order Created - Publish Event with Outbox Pattern ==
+
+order -> orderDB: BEGIN TRANSACTION
+activate order
+activate orderDB
+
+order -> orderDB: INSERT INTO transactions\n(user_id, total, status: 'pending')
+orderDB --> order: transaction_id: 123
+
+order -> orderDB: INSERT INTO transactions_detail\n(transaction_id, product_id, quantity, price)
+orderDB --> order: OK
+
+order -> outbox: INSERT INTO outbox_messages\n(\n  event_type: 'OrderCreated',\n  aggregate_id: 123,\n  payload: JSON order data,\n  status: 'pending',\n  retry_count: 0\n)
+activate outbox
+note right: Outbox Pattern:\nEvent saved in SAME transaction\nas business data.\nGuarantees consistency.
+outbox --> order: message_id: 456
+deactivate outbox
+
+order -> orderDB: COMMIT TRANSACTION
+orderDB --> order: OK
+deactivate orderDB
+
+order --> order: Return success to client
+deactivate order
+note right: Order saved successfully.\nClient gets immediate response.\nEvent publishing happens\nasynchronously in background.
+
+== 2. Outbox Publisher - Poll and Publish ==
+
+publisher -> outbox: SELECT * FROM outbox_messages\nWHERE status = 'pending'\n  AND retry_count < 3\nORDER BY created_at ASC\nLIMIT 100
+activate publisher
+activate outbox
+note right: Background worker polls\nevery 5 seconds.\nProcesses in batches.
+
+outbox --> publisher: [message_456, message_457, ...]
+deactivate outbox
+
+loop For each pending message
+    publisher -> rabbitmq: Publish to exchange:\n- Exchange: 'order.events'\n- Routing Key: 'order.created'\n- Message: {\n    event_id: 456,\n    event_type: 'OrderCreated',\n    order_id: 123,\n    user_id: 789,\n    total: 10000000,\n    items: [...],\n    timestamp: '2026-01-28T10:30:00Z'\n  }
+    activate rabbitmq
+    note right: RabbitMQ features:\n- Durable queues\n- Message persistence\n- Acknowledgments\n- Dead letter queue
+
+    alt Publish successful
+        rabbitmq --> publisher: ACK (message accepted)
+
+        publisher -> outbox: UPDATE outbox_messages SET\n  status = 'published',\n  published_at = NOW()\nWHERE id = 456
+        activate outbox
+        outbox --> publisher: OK
+        deactivate outbox
+
+    else Publish failed (RabbitMQ down)
+        rabbitmq --> publisher: NACK (connection error)
+        note right: Network error,\nRabbitMQ unavailable
+
+        publisher -> outbox: UPDATE outbox_messages SET\n  retry_count = retry_count + 1,\n  last_retry_at = NOW(),\n  error_message = 'Connection timeout'\nWHERE id = 456
+        activate outbox
+        outbox --> publisher: OK
+        deactivate outbox
+
+        alt Retry count >= 3
+            publisher -> outbox: UPDATE outbox_messages SET\n  status = 'failed'\nWHERE id = 456
+            outbox --> publisher: OK
+
+            publisher -> redis: LPUSH 'dead_letter_queue'\nJSON message data
+            activate redis
+            note right: Dead Letter Queue:\nFailed messages for\nmanual investigation
+            redis --> publisher: OK
+            deactivate redis
+
+            publisher -> publisher: Log error\nNotify admin via email/Slack
+        end
+    end
+end
+deactivate rabbitmq
+deactivate publisher
+
+== 3. Multiple Consumers - Fan-out Pattern ==
+
+note over rabbitmq
+RabbitMQ Exchange (Fan-out):
+'order.events' → Broadcasts to 3 queues:
+  1. notifications_queue
+  2. inventory_queue
+  3. analytics_queue
+end note
+
+=== 3a. Notification Service Consumer ===
+
+rabbitmq -> notification: Pull message from\n'notifications_queue'
+activate notification
+activate rabbitmq
+
+notification -> notification: Deserialize JSON:\nevent_type: 'OrderCreated'\norder_id: 123
+
+notification -> notification: Determine notification type:\n- Event: OrderCreated\n- Template: order_confirmation\n- Recipients: customer email
+
+notification -> email: Send email via SMTP:\n- To: customer@example.com\n- Subject: "Đơn hàng #123 đã được tạo"\n- Body: HTML template with order details
+activate email
+
+alt Email sent successfully
+    email --> notification: 250 OK (SMTP success)
+    deactivate email
+
+    notification -> notification: Log success:\nNotification sent for order 123
+
+    notification -> rabbitmq: ACK message\n(remove from queue)
+    deactivate rabbitmq
+    deactivate notification
+
+else Email failed (SMTP error)
+    email --> notification: 550 Error (Mailbox not found)
+    deactivate email
+
+    notification -> notification: Retry strategy:\n- Attempt 1: Immediate\n- Attempt 2: Wait 5 seconds\n- Attempt 3: Wait 30 seconds
+
+    alt All retries failed
+        notification -> rabbitmq: NACK message\n(requeue: false)
+        activate rabbitmq
+        note right: Message moves to\nDead Letter Queue\nautomatically
+
+        rabbitmq -> redis: Move to DLQ:\n'notifications_dlq'
+        activate redis
+        redis --> rabbitmq: OK
+        deactivate redis
+        deactivate rabbitmq
+
+        notification -> notification: Log permanent failure\nNotify admin
+        deactivate notification
+    end
+end
+
+=== 3b. Inventory Service Consumer ===
+
+rabbitmq -> inventory: Pull message from\n'inventory_queue'
+activate rabbitmq
+activate inventory
+
+inventory -> inventory: Deserialize event:\norder_id: 123\nitems: [{product_id: 1, quantity: 2}, ...]
+
+inventory -> inventory: Process inventory update:
+
+loop For each item in order
+    inventory -> inventory: UPDATE products SET\n  pro_total = pro_total - quantity,\n  pro_total_number = pro_total_number - quantity\nWHERE id = product_id
+    note right: Deduct stock\nfor sold items
+
+    inventory -> inventory: Check stock level:\nIF pro_total < 10 THEN\n  Trigger 'LowStockAlert' event
+end
+
+inventory -> rabbitmq: ACK message
+deactivate rabbitmq
+
+inventory -> rabbitmq: Publish new event:\n'InventoryUpdated'\n{order_id: 123, updated_products: [...]}
+activate rabbitmq
+rabbitmq --> inventory: ACK
+deactivate rabbitmq
+
+deactivate inventory
+
+=== 3c. Analytics Service Consumer ===
+
+rabbitmq -> analytics: Pull message from\n'analytics_queue'
+activate rabbitmq
+activate analytics
+
+analytics -> analytics: Deserialize event:\norder_id: 123\ntotal: 10000000\nitems: [...]
+
+analytics -> analytics: Update metrics:\n- Total orders today: +1\n- Revenue today: +10000000\n- Popular products: product_id 1\n- Customer analytics: user_id 789
+
+analytics -> analytics: Store in time-series DB:\nPrometheusPushGateway.push({\n  metric: 'order_created',\n  value: 1,\n  labels: {date, product_category}\n})
+
+analytics -> rabbitmq: ACK message
+deactivate rabbitmq
+deactivate analytics
+
+== 4. Circuit Breaker Pattern (Failure Handling) ==
+
+note over notification
+If SMTP service is down,\nCircuit Breaker opens after 5 consecutive failures.
+Further requests return immediately without attempting.
+end note
+
+notification -> notification: Check Circuit Breaker state:\nCircuit state: OPEN
+activate notification
+
+alt Circuit OPEN
+    notification -> notification: Immediate failure response\n(skip SMTP call)
+    notification -> rabbitmq: NACK message (requeue)
+    note right: Message will be\nretried after\nCircuit timeout (60s)
+    deactivate notification
+
+else Circuit CLOSED (normal)
+    notification -> email: Attempt to send
+    activate email
+    email --> notification: Success
+    deactivate email
+    notification -> notification: Circuit Breaker:\nRecord success
+    deactivate notification
+
+else Circuit HALF_OPEN (testing recovery)
+    notification -> email: Test request
+    activate email
+    email --> notification: Success
+    deactivate email
+    notification -> notification: Circuit Breaker:\nCLOSE circuit\n(service recovered)
+    deactivate notification
+end
+
+== 5. Monitoring & Observability ==
+
+note over publisher, analytics
+All services emit metrics to Prometheus:
+- message_published_total
+- message_consumed_total
+- message_processing_duration_seconds
+- message_retry_count
+- dlq_message_count
+
+Grafana dashboards visualize:
+- Message throughput (msg/sec)
+- Consumer lag
+- Error rates
+- Retry patterns
+end note
+
+== 6. Dead Letter Queue Processing ==
+
+note over redis
+Admin dashboard shows DLQ messages:
+- Failed after 3 retries
+- Manual review required
+- Can replay or discard
+
+Example: Email address invalid
+→ Admin fixes customer email
+→ Replay message from DLQ
+→ Success
+end note
+
+@enduml

@@ -1,0 +1,391 @@
+{
+  "info": {
+    "name": "LAB 05 - Product Service API",
+    "description": "Test collection for Lab 05 - Product Microservice\n\nLab 05 Requirements:\n- GET /api/products (List + Search)\n- GET /api/products/{id} (Details)\n- 200 OK, 404 Not Found\n\nBonus Features:\n- Full CRUD (CREATE, UPDATE, DELETE)\n- Filter by category\n- Sort by price\n- Pagination\n- Cache",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "LAB 05 - REQUIRED TESTS",
+      "item": [
+        {
+          "name": "TEST 1: List All Products (200 OK)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/products",
+              "protocol": "http",
+              "host": ["127", "0", "0", "1"],
+              "port": "8000",
+              "path": ["api", "products"]
+            },
+            "description": "Lab 05 Test 1: List all active products\n\nExpected:\n- HTTP 200 OK\n- JSON array of products\n- Only active products (pro_active = 1)\n\nValidation:\n✓ Status code is 200\n✓ Response has 'data' array\n✓ Each product has required fields"
+          },
+          "response": []
+        },
+        {
+          "name": "TEST 2: Search Products (200 OK)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/products?search=iPhone",
+              "protocol": "http",
+              "host": ["127", "0", "0", "1"],
+              "port": "8000",
+              "path": ["api", "products"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "iPhone",
+                  "description": "Search keyword (Lab 05 uses ?q=)"
+                }
+              ]
+            },
+            "description": "Lab 05 Test 2: Search products by name\n\nLab 05 uses: ?q=Laptop\nDự án uses: ?search=iPhone\n\nExpected:\n- HTTP 200 OK\n- Only products matching 'iPhone'\n- Case-insensitive search\n\nValidation:\n✓ Status code is 200\n✓ Results contain 'iPhone' in pro_name\n✓ No non-matching products"
+          },
+          "response": []
+        },
+        {
+          "name": "TEST 3: Get Product Details (200 OK)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/products/1",
+              "protocol": "http",
+              "host": ["127", "0", "0", "1"],
+              "port": "8000",
+              "path": ["api", "products", "1"]
+            },
+            "description": "Lab 05 Test 3: Get single product by ID\n\nExpected:\n- HTTP 200 OK\n- Single product object (not array)\n- All product fields\n- Category relationship\n\nValidation:\n✓ Status code is 200\n✓ Response is object\n✓ ID matches requested ID\n✓ Has required fields"
+          },
+          "response": []
+        },
+        {
+          "name": "TEST 4: Product Not Found (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/products/999",
+              "protocol": "http",
+              "host": ["127", "0", "0", "1"],
+              "port": "8000",
+              "path": ["api", "products", "999"]
+            },
+            "description": "Lab 05 Test 4: Non-existent product ID\n\nExpected:\n- HTTP 404 Not Found\n- Error message\n- No product data\n\nValidation:\n✓ Status code is 404\n✓ Error message present\n✓ No product returned"
+          },
+          "response": []
+        }
+      ],
+      "description": "Lab 05 Required Tests (4 tests)\n\nAll 4 tests must pass for Lab 05 compliance!"
+    },
+    {
+      "name": "BONUS FEATURES",
+      "item": [
+        {
+          "name": "BONUS 1: Filter by Category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/products?category=1",
+              "protocol": "http",
+              "host": ["127", "0", "0", "1"],
+              "port": "8000",
+              "path": ["api", "products"],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "1",
+                  "description": "Category ID"
+                }
+              ]
+            },
+            "description": "Bonus Feature: Filter products by category\n\nLab 05: Not available\nDự án: Available\n\nExpected:\n- Only products from category 1\n- All products have pro_category_id = 1"
+          },
+          "response": []
+        },
+        {
+          "name": "BONUS 2: Sort by Price (Ascending)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/products?sort=price_asc",
+              "protocol": "http",
+              "host": ["127", "0", "0", "1"],
+              "port": "8000",
+              "path": ["api", "products"],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "price_asc",
+                  "description": "Sort by price (low to high)"
+                }
+              ]
+            },
+            "description": "Bonus Feature: Sort products by price\n\nOptions:\n- price_asc: Low to high\n- price_desc: High to low\n- newest: Newest first\n- popular: Best selling"
+          },
+          "response": []
+        },
+        {
+          "name": "BONUS 3: Sort by Price (Descending)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/products?sort=price_desc",
+              "protocol": "http",
+              "host": ["127", "0", "0", "1"],
+              "port": "8000",
+              "path": ["api", "products"],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "price_desc",
+                  "description": "Sort by price (high to low)"
+                }
+              ]
+            },
+            "description": "Sort products by price descending"
+          },
+          "response": []
+        },
+        {
+          "name": "BONUS 4: Pagination",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/products?page=1&per_page=10",
+              "protocol": "http",
+              "host": ["127", "0", "0", "1"],
+              "port": "8000",
+              "path": ["api", "products"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "per_page",
+                  "value": "10",
+                  "description": "Items per page (max 60)"
+                }
+              ]
+            },
+            "description": "Bonus Feature: Pagination\n\nLab 05: Not available\nDự án: Laravel paginate\n\nExpected:\n- Correct page number\n- Pagination metadata (total, last_page, etc.)"
+          },
+          "response": []
+        },
+        {
+          "name": "BONUS 5: Hot Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/products/hot",
+              "protocol": "http",
+              "host": ["127", "0", "0", "1"],
+              "port": "8000",
+              "path": ["api", "products", "hot"]
+            },
+            "description": "Bonus Feature: Get hot/featured products\n\nExpected:\n- Only products with pro_hot = 1\n- Cached for 5 minutes"
+          },
+          "response": []
+        },
+        {
+          "name": "BONUS 6: New Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/products/new",
+              "protocol": "http",
+              "host": ["127", "0", "0", "1"],
+              "port": "8000",
+              "path": ["api", "products", "new"]
+            },
+            "description": "Bonus Feature: Get newest products\n\nExpected:\n- Products ordered by created_at DESC\n- Latest products first"
+          },
+          "response": []
+        },
+        {
+          "name": "BONUS 7: Best Selling Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/products/selling",
+              "protocol": "http",
+              "host": ["127", "0", "0", "1"],
+              "port": "8000",
+              "path": ["api", "products", "selling"]
+            },
+            "description": "Bonus Feature: Get best selling products\n\nExpected:\n- Products ordered by pro_pay DESC\n- Most sold products first"
+          },
+          "response": []
+        }
+      ],
+      "description": "Bonus Features (Not in Lab 05)\n\nThese features exceed Lab 05 requirements!"
+    },
+    {
+      "name": "LAB 03 - FULL CRUD API",
+      "item": [
+        {
+          "name": "CREATE: Create Product (201 Created)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"pro_name\": \"Test Product via API\",\n    \"pro_price\": 999000,\n    \"pro_category_id\": 1,\n    \"quantity\": 50,\n    \"pro_content\": \"This is a test product created via API\",\n    \"pro_description\": \"Test description\",\n    \"pro_active\": 1\n}"
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/lab03/products",
+              "protocol": "http",
+              "host": ["127", "0", "0", "1"],
+              "port": "8000",
+              "path": ["api", "lab03", "products"]
+            },
+            "description": "Lab 03 Feature: Create new product\n\nLab 05: Not available (Read only)\nLab 03: Full CRUD\n\nExpected:\n- HTTP 201 Created\n- Product created successfully\n- Returns created product data\n\nValidation:\n✓ pro_name required\n✓ pro_price > 0\n✓ pro_category_id exists\n✓ quantity >= 0"
+          },
+          "response": []
+        },
+        {
+          "name": "READ: Get All Products (Lab 03)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/lab03/products",
+              "protocol": "http",
+              "host": ["127", "0", "0", "1"],
+              "port": "8000",
+              "path": ["api", "lab03", "products"]
+            },
+            "description": "Lab 03 API: Get all products\n\nSame as Lab 05 but with structured response"
+          },
+          "response": []
+        },
+        {
+          "name": "READ: Get Single Product (Lab 03)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/lab03/products/1",
+              "protocol": "http",
+              "host": ["127", "0", "0", "1"],
+              "port": "8000",
+              "path": ["api", "lab03", "products", "1"]
+            },
+            "description": "Lab 03 API: Get product details\n\nSame as Lab 05 Test 3"
+          },
+          "response": []
+        },
+        {
+          "name": "UPDATE: Update Product (200 OK)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"pro_name\": \"Updated Product Name\",\n    \"pro_price\": 1299000,\n    \"quantity\": 100\n}"
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/lab03/products/1",
+              "protocol": "http",
+              "host": ["127", "0", "0", "1"],
+              "port": "8000",
+              "path": ["api", "lab03", "products", "1"]
+            },
+            "description": "Lab 03 Feature: Update existing product\n\nLab 05: Not available\nLab 03: Full CRUD\n\nExpected:\n- HTTP 200 OK\n- Product updated successfully"
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE: Delete Product (200 OK)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/lab03/products/1",
+              "protocol": "http",
+              "host": ["127", "0", "0", "1"],
+              "port": "8000",
+              "path": ["api", "lab03", "products", "1"]
+            },
+            "description": "Lab 03 Feature: Delete product\n\nLab 05: Not available\nLab 03: Full CRUD\n\nExpected:\n- HTTP 200 OK\n- Product deleted successfully\n\nNote: This is soft delete (sets pro_active = 0)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Lab 03 - Full CRUD API\n\nLab 05 only has READ operations.\nLab 03 adds CREATE, UPDATE, DELETE!"
+    },
+    {
+      "name": "PERFORMANCE TESTS",
+      "item": [
+        {
+          "name": "Cache Test: First Request (MISS)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/products/1",
+              "protocol": "http",
+              "host": ["127", "0", "0", "1"],
+              "port": "8000",
+              "path": ["api", "products", "1"]
+            },
+            "description": "Test cache behavior\n\nFirst request: X-Cache-Status: MISS (~200ms)\nSecond request: X-Cache-Status: HIT (~50ms)\n\nCheck response headers:\n- Cache-Control: public, max-age=300\n- X-Cache-Status: MISS or HIT"
+          },
+          "response": []
+        },
+        {
+          "name": "Cache Test: Second Request (HIT)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/products/1",
+              "protocol": "http",
+              "host": ["127", "0", "0", "1"],
+              "port": "8000",
+              "path": ["api", "products", "1"]
+            },
+            "description": "Same request as above\n\nExpected:\n- X-Cache-Status: HIT (from Redis)\n- Faster response time\n- Same data"
+          },
+          "response": []
+        }
+      ],
+      "description": "Performance Tests\n\nLab 05: No cache\nDự án: Redis cache (5-min TTL)"
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000",
+      "type": "string"
+    },
+    {
+      "key": "api_path",
+      "value": "/api",
+      "type": "string"
+    }
+  ]
+}

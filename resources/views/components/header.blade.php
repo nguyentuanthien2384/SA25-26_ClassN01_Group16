@@ -1,21 +1,17 @@
 <header id="sticky-menu" class="header">
-    @php
-            use App\Models\Models\Category;
-            $cat_parent = Category::where('c_parent', 0)->get();
-            @endphp
     <div class="header-area">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-4 offset-md-4 col-7">
                     <div class="logo text-md-center">
-                        <a href="index.html"><img src=" img/logo/logo.png " alt=""  style="height:100px" /></a>
+                        <a href="{{route('home')}}"><img src="{{asset('img/logo/logo.png')}}" alt="Logo" style="height:100px" loading="lazy" /></a>
                     </div>
                 </div>
                 <div class="col-md-4 col-5">
                     <div class="input-group" style="top:43px">
                         <form action="{{route('get.product.list')}}" method="GET" id="searchform" style="display: flex; align-items: center;">
                             <input type="text" class="form-control" name="k" placeholder="Tìm kiếm" style="flex: 1; margin-right: 5px; margin-bottom: 0">
-                            <button type="submit" class="btn btn-default" style="font-size: 35px"><i class="zmdi zmdi-search" style="size: 50px"></i></button>
+                            <button type="submit" class="btn btn-default" style="font-size: 35px"><i class="zmdi zmdi-search"></i></button>
                         </form>
                     </div>
                     <div class="mini-cart text-end">
@@ -26,7 +22,6 @@
                                     <span>{{$carts->sum('quantity')}}</span>
                                 </a>
                             </li>
-                           
                         </ul>
                     </div>
                 </div>
@@ -39,7 +34,7 @@
             <div class="hamburger-inner"></div>
         </div>
     </div>
-    <div class="main-menu  d-none d-md-block">
+    <div class="main-menu d-none d-md-block">
         <nav>
             <ul>
                 <li><a href="{{route('home')}}">Trang chủ</a></li>
@@ -49,21 +44,24 @@
                             <div class="table-cell">
                                 <div class="half-width">
                                     <ul class="level1">
-                                        @foreach ($cat_parent as $category)
-                                        <li class="level1 first parent"><a class="active" href="{{route('get.list.product',[$category->c_slug,$category->id])}}">{{$category->c_name}}</a>
-                                            <ul class="level2" >
-                                                @php
-                                                $cat_children = Category::where('c_parent',$category->id )->get();
-                                                @endphp
-                                                @foreach ($cat_children as $category)
-                                                <li class="level2 nav-2-1-1 first"> <a href="{{route('get.list.product',[$category->c_slug,$category->id])}}">{{$category->c_name}}</a> <span></span></li>
+                                        {{-- ⚡ OPTIMIZED: Dùng data đã pre-load, KHÔNG query DB ở đây --}}
+                                        @foreach ($catParent ?? [] as $parentCat)
+                                        <li class="level1 first parent">
+                                            <a class="active" href="{{route('get.list.product',[$parentCat->c_slug,$parentCat->id])}}">{{$parentCat->c_name}}</a>
+                                            @if(isset($catChildren[$parentCat->id]))
+                                            <ul class="level2">
+                                                @foreach ($catChildren[$parentCat->id] as $childCat)
+                                                <li class="level2 nav-2-1-1 first">
+                                                    <a href="{{route('get.list.product',[$childCat->c_slug,$childCat->id])}}">{{$childCat->c_name}}</a>
+                                                </li>
                                                 @endforeach
                                             </ul>
+                                            @endif
                                         </li>
                                         @endforeach
                                     </ul>
                                 </div>
-                             </div>
+                            </div>
                         </div>
                     </div>
                 </li>

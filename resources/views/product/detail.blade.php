@@ -91,8 +91,8 @@
                     <div class="single-product clearfix">
                          <div class="single-pro-slider single-big-photo view-lightbox slider-for" style="width:55%;height:460px">
                             <div>
-                                <img src="{{ $productDetails->pro_image }}" alt="" style="width:auto;height:450px" />
-                                <a class="view-full-screen" href="{{ $productDetails->pro_image }}"
+                                <img src="{{ $productDetails->pro_image ? (strpos($productDetails->pro_image, 'http') === 0 ? $productDetails->pro_image : asset($productDetails->pro_image)) : asset('upload/no-image.jpg') }}" alt="{{$productDetails->pro_name}}" style="width:auto;height:450px" />
+                                <a class="view-full-screen" href="{{ $productDetails->pro_image ? (strpos($productDetails->pro_image, 'http') === 0 ? $productDetails->pro_image : asset($productDetails->pro_image)) : asset('upload/no-image.jpg') }}"
                                      data-lightbox="roadtrip" data-title="My caption">
                                     <i class="zmdi zmdi-zoom-in"></i>
                                 </a>
@@ -164,7 +164,7 @@
                             <!-- Single-pro-slider Small-photo start -->
                             <div class="single-pro-slider single-sml-photo slider-nav">
                                     <div>
-                                        <img src="{{ $productDetails->pro_image }}" alt="" style="width:105px;height:80px" />
+                                        <img src="{{ $productDetails->pro_image ? (strpos($productDetails->pro_image, 'http') === 0 ? $productDetails->pro_image : asset($productDetails->pro_image)) : asset('upload/no-image.jpg') }}" alt="{{$productDetails->pro_name}}" style="width:105px;height:80px" />
                                     </div>
                                 @foreach($productimg as $img)
                                     <div>

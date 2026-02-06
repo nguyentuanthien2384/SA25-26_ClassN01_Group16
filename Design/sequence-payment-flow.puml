@@ -1,0 +1,245 @@
+@startuml Payment_Flow_Sequence
+!theme plain
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+title Sequence Diagram - Payment Flow (Luồng Thanh Toán)\nElectroShop E-Commerce Platform - PCI DSS Compliant
+
+actor Customer as customer
+participant "Web Browser" as browser
+participant "API Gateway\n(Kong)" as gateway
+participant "Payment Service" as payment
+participant "Order Service" as order
+database "MySQL\n(Orders DB)" as orderDB
+participant "Payment Gateway\n(MoMo/VNPay/PayPal)" as pgw
+queue "RabbitMQ\n(Event Bus)" as rabbitmq
+participant "Notification Service" as notification
+
+== 1. Initiate Payment ==
+
+customer -> browser: Click "Thanh toán"
+activate browser
+note right: User đã tạo order\ntrong Checkout Flow
+
+browser -> gateway: POST /api/payments/process\n{order_id: 123, payment_method: "momo"}
+activate gateway
+note right: Authorization: Bearer {jwt_token}
+
+gateway -> gateway: Verify JWT token
+gateway -> gateway: Rate limit check:\n100 requests/min
+
+gateway -> payment: POST /payments/process
+activate payment
+
+payment -> orderDB: SELECT * FROM transactions\nWHERE id = 123 AND status = 'pending'
+activate orderDB
+orderDB --> payment: {id: 123, user_id: 456, total: 10000000, status: 'pending'}
+deactivate orderDB
+
+alt Order not found or already paid
+    payment --> gateway: 400 Bad Request\n{error: "Invalid order"}
+    gateway --> browser: 400 Bad Request
+    browser --> customer: Hiển thị lỗi
+    deactivate payment
+    deactivate gateway
+    deactivate browser
+else Order valid
+    
+    payment -> payment: Generate payment request:\n- orderId: "ELEC_123_" + timestamp\n- amount: 10000000 VND\n- orderInfo: "Thanh toan don hang #123"\n- returnUrl: https://electroshop.com/payment/callback\n- notifyUrl: https://electroshop.com/api/payments/webhook
+
+    payment -> payment: Generate signature:\nHMAC_SHA256(secretKey, requestData)
+    note right: Security: Request signature\nprevents tampering
+
+    payment -> orderDB: UPDATE transactions\nSET payment_status = 'processing',\n    payment_method = 'momo',\n    payment_request_id = 'ELEC_123_xxx'\nWHERE id = 123
+    activate orderDB
+    orderDB --> payment: OK
+    deactivate orderDB
+
+    payment -> pgw: POST https://payment.momo.vn/v2/gateway/api/create\n{\n  partnerCode,\n  orderId: "ELEC_123_xxx",\n  amount: 10000000,\n  orderInfo,\n  returnUrl,\n  notifyUrl,\n  signature\n}
+    activate pgw
+    note right: PCI DSS Compliance:\nWe NEVER touch card data.\nAll sensitive data handled\nby certified Payment Gateway.
+
+    pgw -> pgw: Verify signature\nwith shared secret key
+
+    pgw -> pgw: Create payment session:\n- Session ID\n- QR code\n- Deep link
+
+    pgw --> payment: 200 OK\n{\n  payUrl: "https://payment.momo.vn/pay/xxx",\n  qrCodeUrl: "https://...",\n  deeplink: "momo://...",\n  requestId: "MOMO_xxx"\n}
+    deactivate pgw
+
+    payment -> orderDB: INSERT INTO payment_logs\n(order_id, gateway: 'momo', request_id, pay_url, status: 'created')
+    activate orderDB
+    orderDB --> payment: OK
+    deactivate orderDB
+
+    payment --> gateway: 200 OK\n{payment_url, qr_code, deeplink}
+    deactivate payment
+
+    gateway --> browser: 200 OK\nPayment URLs
+    deactivate gateway
+
+    browser -> customer: Hiển thị:\n- Nút "Thanh toán MoMo"\n- QR code\n- Hoặc deeplink
+    deactivate browser
+end
+
+== 2. User Pays on Payment Gateway ==
+
+customer -> browser: Click "Thanh toán MoMo"\nhoặc scan QR code
+activate browser
+
+browser -> pgw: Redirect to\nhttps://payment.momo.vn/pay/xxx
+activate pgw
+note over browser, pgw: Browser leaves our site.\nUser now on MoMo website.\nWe have ZERO access to card data.
+
+pgw -> customer: Hiển thị trang thanh toán MoMo:\n- Đăng nhập MoMo\n- Nhập mã PIN\n- Xác nhận thanh toán
+
+customer -> pgw: Nhập mã PIN\nvà xác nhận
+
+pgw -> pgw: Process payment:\n- Verify PIN\n- Check balance\n- Deduct amount\n- Generate transaction ID
+
+alt Payment Success
+    pgw -> pgw: Transaction status: SUCCESS\nTransaction ID: MOMO_TXN_789
+
+== 3. Payment Gateway Callback (Webhook) ==
+
+    pgw -> gateway: POST /api/payments/webhook\n(Asynchronous notification)\n{\n  orderId: "ELEC_123_xxx",\n  resultCode: 0,\n  message: "Success",\n  transId: "MOMO_TXN_789",\n  amount: 10000000,\n  signature\n}
+    activate gateway
+    note right: Webhook is asynchronous.\nCalled even if user\ncloses browser.
+
+    gateway -> payment: POST /payments/webhook
+    activate payment
+
+    payment -> payment: Verify signature:\nHMAC_SHA256(secretKey, callbackData)
+    note right: Security: Callback signature\nprevents fake notifications
+
+    alt Signature invalid
+        payment --> gateway: 400 Bad Request\n{error: "Invalid signature"}
+        gateway --> pgw: 400 Bad Request
+        deactivate payment
+        deactivate gateway
+    else Signature valid
+        
+        payment -> orderDB: SELECT * FROM transactions\nWHERE payment_request_id = 'ELEC_123_xxx'
+        activate orderDB
+        orderDB --> payment: Order data
+        deactivate orderDB
+
+        payment -> orderDB: BEGIN TRANSACTION
+        activate orderDB
+
+        payment -> orderDB: UPDATE transactions SET\n  payment_status = 'paid',\n  t_status = 2 (completed),\n  payment_transaction_id = 'MOMO_TXN_789',\n  paid_at = NOW()
+        orderDB --> payment: OK
+
+        payment -> orderDB: INSERT INTO payment_logs\n(order_id, gateway: 'momo', trans_id, status: 'success', response_data)
+        orderDB --> payment: OK
+
+        payment -> orderDB: COMMIT TRANSACTION
+        deactivate orderDB
+
+        payment -> rabbitmq: Publish event\n"PaymentCompleted"\n{\n  order_id: 123,\n  payment_method: 'momo',\n  amount: 10000000,\n  transaction_id: 'MOMO_TXN_789'\n}
+        activate rabbitmq
+        note right: Asynchronous event:\n- Send email\n- Update inventory\n- Generate invoice\n- Analytics
+        rabbitmq --> payment: Event queued
+        deactivate rabbitmq
+
+        payment --> gateway: 200 OK\n{status: "processed"}
+        deactivate payment
+
+        gateway --> pgw: 200 OK
+        deactivate gateway
+
+== 4. User Redirected Back to Our Site ==
+
+        pgw -> browser: Redirect to returnUrl:\nhttps://electroshop.com/payment/callback\n?orderId=ELEC_123_xxx\n&resultCode=0\n&message=Success\n&signature=xxx
+        deactivate pgw
+        
+        browser -> gateway: GET /payment/callback?orderId=...&resultCode=0&...
+        activate gateway
+
+        gateway -> payment: GET /payments/verify-callback
+        activate payment
+
+        payment -> payment: Verify signature
+
+        payment -> orderDB: SELECT * FROM transactions\nWHERE payment_request_id = 'ELEC_123_xxx'
+        activate orderDB
+        orderDB --> payment: {status: 'paid', transaction_id: 'MOMO_TXN_789'}
+        deactivate orderDB
+
+        payment --> gateway: 200 OK\n{order_id: 123, status: 'paid', amount: 10000000}
+        deactivate payment
+
+        gateway --> browser: 200 OK\nPayment success page
+        deactivate gateway
+
+        browser -> customer: Hiển thị trang:\n"✅ Thanh toán thành công!\nMã đơn hàng: #123\nSố tiền: 10.000.000 VND"
+        deactivate browser
+
+else Payment Failed
+    pgw -> pgw: Transaction status: FAILED\nReason: Insufficient balance
+
+    pgw -> gateway: POST /api/payments/webhook\n{orderId, resultCode: 1, message: "Insufficient balance"}
+    activate gateway
+
+    gateway -> payment: POST /payments/webhook
+    activate payment
+
+    payment -> payment: Verify signature
+
+    payment -> orderDB: UPDATE transactions SET\n  payment_status = 'failed',\n  payment_failure_reason = 'Insufficient balance'
+    activate orderDB
+    orderDB --> payment: OK
+    deactivate orderDB
+
+    payment --> gateway: 200 OK
+    deactivate payment
+    gateway --> pgw: 200 OK
+    deactivate gateway
+
+    pgw -> browser: Redirect to returnUrl?resultCode=1&message=Failed
+    deactivate pgw
+
+    browser -> gateway: GET /payment/callback?resultCode=1&...
+    activate gateway
+
+    gateway -> payment: GET /payments/verify-callback
+    activate payment
+    payment -> orderDB: Get order status
+    orderDB --> payment: {status: 'failed'}
+    payment --> gateway: Payment failed
+    deactivate payment
+
+    gateway --> browser: Payment failed page
+    deactivate gateway
+
+    browser -> customer: Hiển thị:\n"❌ Thanh toán thất bại\nLý do: Số dư không đủ\nVui lòng thử lại"
+    deactivate browser
+end
+
+== 5. Background: Send Email Notification (Async) ==
+
+rabbitmq -> notification: Consume event\n"PaymentCompleted"
+activate notification
+
+notification -> orderDB: Get full order details\n(items, customer info)
+activate orderDB
+orderDB --> notification: Order + customer data
+deactivate orderDB
+
+notification -> notification: Prepare email:\nSubject: "Thanh toán thành công - Đơn hàng #123"\nTemplate: payment_success\nAttachment: Invoice PDF
+
+notification -> notification: Send email via SMTP
+
+alt Email sent successfully
+    notification -> notification: Log success
+else Email failed
+    notification -> notification: Retry 3 times\nExponential backoff:\n1s, 4s, 16s
+    
+    alt All retries failed
+        notification -> notification: Log permanent failure\nNotify admin
+    end
+end
+
+notification -> rabbitmq: ACK message
+deactivate notification
+
+@enduml

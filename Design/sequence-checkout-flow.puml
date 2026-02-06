@@ -1,0 +1,277 @@
+@startuml Checkout_Flow_Sequence
+!theme plain
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+title Sequence Diagram - Checkout Flow (Luồng Mua Hàng)\nElectroShop E-Commerce Platform
+
+actor Customer as customer
+participant "Web Browser" as browser
+participant "API Gateway\n(Kong)" as gateway
+participant "Catalog Service" as catalog
+participant "Cart Service" as cart
+participant "Order Service" as order
+participant "Payment Service" as payment
+participant "Customer Service" as customerSvc
+database "MySQL\n(Orders DB)" as orderDB
+database "Redis\n(Cache/Session)" as redis
+queue "RabbitMQ\n(Event Bus)" as rabbitmq
+participant "Notification Service" as notification
+
+== 1. Browse Products ==
+
+customer -> browser: Truy cập trang chủ
+activate browser
+
+browser -> gateway: GET /api/products?hot=1
+activate gateway
+
+gateway -> catalog: GET /products?hot=1
+activate catalog
+
+catalog -> redis: Check cache "products:hot"
+activate redis
+redis --> catalog: Cache hit (5-min TTL)
+deactivate redis
+
+catalog --> gateway: 200 OK\n[{id, name, price, image}, ...]
+deactivate catalog
+
+gateway --> browser: 200 OK\nJSON products
+deactivate gateway
+
+browser -> customer: Hiển thị sản phẩm hot
+deactivate browser
+
+== 2. View Product Detail ==
+
+customer -> browser: Click vào sản phẩm
+activate browser
+
+browser -> gateway: GET /api/products/123
+activate gateway
+
+gateway -> catalog: GET /products/123
+activate catalog
+
+catalog -> redis: Check cache "product:123"
+redis --> catalog: Cache miss
+
+catalog -> catalog: Query database\nwith relationships
+catalog -> redis: Cache result (5 min)
+
+catalog --> gateway: 200 OK\n{id, name, price, description, images, category, reviews}
+deactivate catalog
+
+gateway --> browser: 200 OK\nProduct details
+deactivate gateway
+
+browser -> customer: Hiển thị chi tiết sản phẩm
+deactivate browser
+
+== 3. Add to Cart ==
+
+customer -> browser: Click "Add to Cart"
+activate browser
+
+browser -> gateway: POST /api/cart/add\n{product_id: 123, quantity: 2}
+activate gateway
+note right: Session token in header\nAuthorization: Bearer {token}
+
+gateway -> gateway: Verify JWT token
+gateway -> cart: POST /cart/add
+activate cart
+
+cart -> redis: Get cart session\nKey: "cart:user_{user_id}"
+activate redis
+redis --> cart: Current cart data
+deactivate redis
+
+cart -> catalog: GET /products/123\n(check stock & price)
+activate catalog
+catalog --> cart: {stock: 50, price: 5000000}
+deactivate catalog
+
+cart -> cart: Validate:\n- quantity <= stock\n- calculate total
+
+cart -> redis: Update cart\nSet "cart:user_{user_id}" TTL 1 day
+activate redis
+redis --> cart: OK
+deactivate redis
+
+cart --> gateway: 200 OK\n{cart_items: [...], total: 10000000}
+deactivate cart
+
+gateway --> browser: 200 OK\nCart updated
+deactivate gateway
+
+browser -> customer: Hiển thị thông báo\n"Đã thêm vào giỏ hàng"
+deactivate browser
+
+== 4. View Cart ==
+
+customer -> browser: Click vào icon giỏ hàng
+activate browser
+
+browser -> gateway: GET /api/cart
+activate gateway
+
+gateway -> cart: GET /cart
+activate cart
+
+cart -> redis: Get cart session
+activate redis
+redis --> cart: Cart data
+deactivate redis
+
+cart -> catalog: Batch get products\nGET /products/bulk?ids=123,456
+activate catalog
+catalog --> cart: [{id: 123, ...}, {id: 456, ...}]
+deactivate catalog
+
+cart -> cart: Calculate totals:\n- subtotal\n- shipping fee\n- discount\n- grand total
+
+cart --> gateway: 200 OK\n{items: [...], subtotal, shipping, total}
+deactivate cart
+
+gateway --> browser: 200 OK\nCart details
+deactivate gateway
+
+browser -> customer: Hiển thị giỏ hàng
+deactivate browser
+
+== 5. Proceed to Checkout ==
+
+customer -> browser: Click "Thanh toán"
+activate browser
+
+browser -> gateway: GET /api/checkout
+activate gateway
+
+gateway -> gateway: Verify authentication
+alt User not authenticated
+    gateway --> browser: 401 Unauthorized
+    browser --> customer: Redirect to login page
+else User authenticated
+    
+    gateway -> customerSvc: GET /customers/{user_id}
+    activate customerSvc
+    customerSvc --> gateway: {id, name, email, phone, address}
+    deactivate customerSvc
+    
+    gateway -> cart: GET /cart
+    activate cart
+    cart -> redis: Get cart
+    redis --> cart: Cart data
+    cart --> gateway: Cart items + total
+    deactivate cart
+    
+    gateway --> browser: 200 OK\n{customer_info, cart_items, total}
+    deactivate gateway
+    
+    browser -> customer: Hiển thị trang checkout\n(Địa chỉ, phương thức thanh toán)
+end
+deactivate browser
+
+== 6. Confirm Order ==
+
+customer -> browser: Nhập thông tin\n(địa chỉ, SĐT, ghi chú)\nvà click "Đặt hàng"
+activate browser
+
+browser -> gateway: POST /api/orders/create\n{address, phone, note, payment_method: "momo"}
+activate gateway
+
+gateway -> order: POST /orders/create
+activate order
+
+order -> redis: Get cart
+activate redis
+redis --> order: Cart items
+deactivate redis
+
+order -> catalog: Validate stock for all items
+activate catalog
+catalog --> order: Stock availability: OK
+deactivate catalog
+
+order -> order: Calculate final total:\n- subtotal\n- shipping: 30000\n- discount\n- grand_total
+
+order -> orderDB: BEGIN TRANSACTION
+activate orderDB
+
+order -> orderDB: INSERT INTO transactions\n(user_id, total, status: 'pending')
+orderDB --> order: transaction_id
+
+order -> orderDB: INSERT INTO transactions_detail\n(transaction_id, product_id, quantity, price)
+orderDB --> order: OK
+
+order -> orderDB: COMMIT TRANSACTION
+deactivate orderDB
+
+order -> redis: Clear cart\nDEL "cart:user_{user_id}"
+activate redis
+redis --> order: OK
+deactivate redis
+
+order -> rabbitmq: Publish event\n"OrderCreated"\n{order_id, user_id, total, items}
+activate rabbitmq
+note right: Asynchronous event\nDoes NOT block order creation
+rabbitmq --> order: Event queued
+deactivate rabbitmq
+
+order --> gateway: 201 Created\n{order_id, total, payment_url}
+deactivate order
+
+gateway --> browser: 201 Created\nOrder created successfully
+deactivate gateway
+
+browser -> customer: Hiển thị\n"Đơn hàng đã được tạo"
+deactivate browser
+
+== 7. Background: Send Notification (Async) ==
+
+rabbitmq -> notification: Consume event\n"OrderCreated"
+activate notification
+
+notification -> notification: Prepare email\nSubject: "Đơn hàng #{order_id}"\nTemplate: order_confirmation
+
+notification -> notification: Send email via SMTP
+note right: If email fails,\nretry 3 times\nthen mark as failed
+
+notification -> rabbitmq: ACK message
+deactivate notification
+
+== 8. Redirect to Payment ==
+
+customer -> browser: Click "Thanh toán ngay"
+activate browser
+
+browser -> gateway: POST /api/payments/process\n{order_id, payment_method: "momo"}
+activate gateway
+
+gateway -> payment: POST /payments/process
+activate payment
+
+payment -> orderDB: SELECT * FROM transactions\nWHERE id = {order_id}
+activate orderDB
+orderDB --> payment: Order details
+deactivate orderDB
+
+payment -> payment: Build MoMo payment URL:\n- partnerCode\n- amount\n- orderInfo\n- signature (HMAC-SHA256)
+
+payment --> gateway: 200 OK\n{payment_url: "https://payment.momo.vn/..."}
+deactivate payment
+
+gateway --> browser: 200 OK\nPayment URL
+deactivate gateway
+
+browser -> customer: Redirect to MoMo
+deactivate browser
+
+note over customer
+User completes payment
+on MoMo website
+(not part of this flow)
+end note
+
+@enduml

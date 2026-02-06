@@ -189,7 +189,7 @@
                                         @endif
                                         <span class="p-badge p-badge--installment">Trả góp 0%</span>
                                         <a href="{{route('get.detail.product',[$product->pro_slug,$product->id])}}">
-                                            <img src="{{$product->pro_image}}" alt="" class="p-img"/>
+                                            <img src="{{ $product->pro_image ? (strpos($product->pro_image, 'http') === 0 ? $product->pro_image : asset($product->pro_image)) : asset('upload/no-image.jpg') }}" alt="{{$product->pro_name}}" class="p-img"/>
                                         </a>
                                         <div class="p-title">
                                             <a href="{{route('get.detail.product',[$product->pro_slug,$product->id])}}">{{$product->pro_name}}</a>
