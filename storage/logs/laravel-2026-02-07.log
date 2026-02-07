@@ -203,3 +203,110 @@
 [2026-02-07 03:48:41] local.ERROR: Failed to register service with Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1209 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/register"} 
 [2026-02-07 03:48:42] local.ERROR: Failed to deregister service from Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1203 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/deregister/ElectroShop-WINDOWS-PC-8000"} 
 [2026-02-07 03:48:42] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 06:45:24] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 06:45:24] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-07 06:45:24] local.INFO: ✅ Service registered with Consul  
+[2026-02-07 06:46:00] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 06:46:00] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-07 06:46:00] local.INFO: ✅ Service registered with Consul  
+[2026-02-07 06:46:00] local.INFO: HTTP Request {"request_id":"16416bc5-104e-41d2-840e-465e75627f56","method":"GET","url":"http://127.0.0.1:8000","path":"/","ip":"127.0.0.1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36","user_id":null,"status_code":200,"duration_ms":98.11,"memory_mb":26.0,"timestamp":"2026-02-07T06:46:00+00:00"} 
+[2026-02-07 06:46:01] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 06:46:01] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 06:46:01] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 06:46:01] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-07 06:46:01] local.INFO: ✅ Service registered with Consul  
+[2026-02-07 06:46:01] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 06:46:01] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 06:46:01] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 06:46:02] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-07 06:46:02] local.INFO: ✅ Service registered with Consul  
+[2026-02-07 06:46:02] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 06:46:02] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 06:46:02] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 06:46:02] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-07 06:46:02] local.INFO: ✅ Service registered with Consul  
+[2026-02-07 06:46:02] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 06:46:02] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 06:46:03] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 06:46:03] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-07 06:46:03] local.INFO: ✅ Service registered with Consul  
+[2026-02-07 06:46:03] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 06:46:03] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 06:46:03] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 06:46:03] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-07 06:46:03] local.INFO: ✅ Service registered with Consul  
+[2026-02-07 06:46:03] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 06:46:03] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 06:46:04] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 06:46:04] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-07 06:46:04] local.INFO: ✅ Service registered with Consul  
+[2026-02-07 06:46:04] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 06:46:04] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 06:46:04] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 06:46:04] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-07 06:46:04] local.INFO: ✅ Service registered with Consul  
+[2026-02-07 06:46:05] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 06:46:05] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 06:46:05] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 06:46:05] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-07 06:46:05] local.INFO: ✅ Service registered with Consul  
+[2026-02-07 06:46:05] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 06:46:05] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 06:46:06] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 06:46:06] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-07 06:46:06] local.INFO: ✅ Service registered with Consul  
+[2026-02-07 06:46:06] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 06:46:06] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 06:46:06] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 06:46:06] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-07 06:46:06] local.INFO: ✅ Service registered with Consul  
+[2026-02-07 06:46:06] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 06:46:06] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 06:47:48] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 06:47:48] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-07 06:47:48] local.INFO: ✅ Service registered with Consul  
+[2026-02-07 06:47:48] local.INFO: HTTP Request {"request_id":"d6ff3a07-b7a9-47ff-b4e7-6291d0872c44","method":"GET","url":"http://127.0.0.1:8000/admin","path":"admin","ip":"127.0.0.1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36","user_id":null,"status_code":302,"duration_ms":10.55,"memory_mb":24.0,"timestamp":"2026-02-07T06:47:48+00:00"} 
+[2026-02-07 06:47:48] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 06:47:48] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 06:47:49] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 06:47:49] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-07 06:47:49] local.INFO: ✅ Service registered with Consul  
+[2026-02-07 06:47:49] local.INFO: HTTP Request {"request_id":"5fac3c2b-b35d-4dc3-a0d9-76b5bd822afd","method":"GET","url":"http://127.0.0.1:8000/authenticate/login","path":"authenticate/login","ip":"127.0.0.1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36","user_id":null,"status_code":200,"duration_ms":42.18,"memory_mb":24.0,"timestamp":"2026-02-07T06:47:49+00:00"} 
+[2026-02-07 06:47:49] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 06:47:49] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 06:47:56] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 06:47:57] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-07 06:47:57] local.INFO: ✅ Service registered with Consul  
+[2026-02-07 06:47:57] local.INFO: HTTP Request {"request_id":"78053e54-29f1-47eb-a9b5-01ccd4e07d85","method":"POST","url":"http://127.0.0.1:8000/authenticate/login","path":"authenticate/login","ip":"127.0.0.1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36","user_id":null,"status_code":302,"duration_ms":306.02,"memory_mb":24.0,"timestamp":"2026-02-07T06:47:57+00:00"} 
+[2026-02-07 06:47:57] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 06:47:57] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 06:47:57] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 06:47:57] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-07 06:47:57] local.INFO: ✅ Service registered with Consul  
+[2026-02-07 06:47:58] local.INFO: HTTP Request {"request_id":"67d463a9-65c0-4367-b84b-081a243a4dc5","method":"GET","url":"http://127.0.0.1:8000/admin","path":"admin","ip":"127.0.0.1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36","user_id":null,"status_code":200,"duration_ms":120.05,"memory_mb":26.0,"timestamp":"2026-02-07T06:47:58+00:00"} 
+[2026-02-07 06:47:58] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 06:47:58] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 06:48:01] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 06:48:01] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-07 06:48:01] local.INFO: ✅ Service registered with Consul  
+[2026-02-07 06:48:01] local.INFO: HTTP Request {"request_id":"fa310cfe-a3bc-46ab-a99d-27bb367ee926","method":"GET","url":"http://127.0.0.1:8000/admin/product","path":"admin/product","ip":"127.0.0.1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36","user_id":null,"status_code":200,"duration_ms":94.15,"memory_mb":26.0,"timestamp":"2026-02-07T06:48:01+00:00"} 
+[2026-02-07 06:48:01] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 06:48:01] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 06:48:04] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 06:48:04] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-07 06:48:04] local.INFO: ✅ Service registered with Consul  
+[2026-02-07 06:48:04] local.INFO: HTTP Request {"request_id":"da3352dd-3529-4aff-b29d-adc265ce872b","method":"GET","url":"http://127.0.0.1:8000/admin/supplier","path":"admin/supplier","ip":"127.0.0.1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36","user_id":null,"status_code":200,"duration_ms":56.83,"memory_mb":26.0,"timestamp":"2026-02-07T06:48:04+00:00"} 
+[2026-02-07 06:48:04] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 06:48:04] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 06:48:05] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 06:48:05] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-07 06:48:05] local.INFO: ✅ Service registered with Consul  
+[2026-02-07 06:48:05] local.INFO: HTTP Request {"request_id":"7a09fe54-0dfc-4987-8376-b70ca80e4084","method":"GET","url":"http://127.0.0.1:8000/admin/rating","path":"admin/rating","ip":"127.0.0.1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36","user_id":null,"status_code":200,"duration_ms":66.65,"memory_mb":26.0,"timestamp":"2026-02-07T06:48:05+00:00"} 
+[2026-02-07 06:48:05] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 06:48:05] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 06:48:07] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 06:48:07] local.INFO: Service registered with Consul {"service_id":"ElectroShop-WINDOWS-PC-8000","service_name":"ElectroShop","address":"localhost:8000"} 
+[2026-02-07 06:48:07] local.INFO: ✅ Service registered with Consul  
+[2026-02-07 06:48:07] local.INFO: HTTP Request {"request_id":"ea40a842-4760-4764-89b1-b80e4af6078d","method":"GET","url":"http://127.0.0.1:8000/admin/import","path":"admin/import","ip":"127.0.0.1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36","user_id":null,"status_code":200,"duration_ms":88.83,"memory_mb":26.0,"timestamp":"2026-02-07T06:48:07+00:00"} 
+[2026-02-07 06:48:07] local.INFO: Service deregistered from Consul {"service_id":"ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 06:48:07] local.INFO: ✅ Service deregistered from Consul  
