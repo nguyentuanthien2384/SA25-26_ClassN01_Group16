@@ -100,25 +100,26 @@ docker-compose -f docker-compose.microservices.yml ps
 
 ### Bước 4: Truy cập các services
 
-| Service | URL | Mô tả |
-|---------|-----|-------|
-| **API Gateway** | http://localhost:8000 | Entry point cho clients |
-| **Kong Admin** | http://localhost:8001 | Kong Admin API |
-| **Konga GUI** | http://localhost:1337 | Kong Admin Dashboard |
-| **RabbitMQ** | http://localhost:15672 | Message Broker UI (admin/admin123) |
-| **Consul** | http://localhost:8500 | Service Discovery UI |
-| **Jaeger** | http://localhost:16686 | Distributed Tracing UI |
-| **Prometheus** | http://localhost:9090 | Metrics UI |
-| **Grafana** | http://localhost:3000 | Monitoring Dashboard (admin/admin123) |
-| **phpMyAdmin** | http://localhost:8083 | Database Admin |
-| **Redis Commander** | http://localhost:8082 | Redis Admin |
-| **MailHog** | http://localhost:8025 | Email Testing UI |
+| Service             | URL                    | Mô tả                                 |
+| ------------------- | ---------------------- | ------------------------------------- |
+| **API Gateway**     | http://localhost:8000  | Entry point cho clients               |
+| **Kong Admin**      | http://localhost:8001  | Kong Admin API                        |
+| **Konga GUI**       | http://localhost:1337  | Kong Admin Dashboard                  |
+| **RabbitMQ**        | http://localhost:15672 | Message Broker UI (admin/admin123)    |
+| **Consul**          | http://localhost:8500  | Service Discovery UI                  |
+| **Jaeger**          | http://localhost:16686 | Distributed Tracing UI                |
+| **Prometheus**      | http://localhost:9090  | Metrics UI                            |
+| **Grafana**         | http://localhost:3000  | Monitoring Dashboard (admin/admin123) |
+| **phpMyAdmin**      | http://localhost:8083  | Database Admin                        |
+| **Redis Commander** | http://localhost:8082  | Redis Admin                           |
+| **MailHog**         | http://localhost:8025  | Email Testing UI                      |
 
 ---
 
 ## 📡 API Endpoints (qua Kong Gateway)
 
 ### Products API
+
 ```bash
 # Lấy danh sách sản phẩm
 GET http://localhost:8000/api/products
@@ -134,6 +135,7 @@ GET http://localhost:8000/api/products?search=keyword
 ```
 
 ### Orders API
+
 ```bash
 # Tạo đơn hàng
 POST http://localhost:8000/api/orders
@@ -147,6 +149,7 @@ POST http://localhost:8000/api/cart/add
 ```
 
 ### Users API
+
 ```bash
 # Đăng ký
 POST http://localhost:8000/api/auth/register
@@ -163,21 +166,25 @@ GET http://localhost:8000/api/users/profile
 ## 📊 Monitoring & Observability
 
 ### 1. Service Discovery (Consul)
+
 - URL: http://localhost:8500
 - Xem danh sách services đã đăng ký
 - Kiểm tra health status của từng service
 
 ### 2. Distributed Tracing (Jaeger)
+
 - URL: http://localhost:16686
 - Trace request qua nhiều services
 - Debug performance issues
 
 ### 3. Metrics (Prometheus + Grafana)
+
 - Prometheus: http://localhost:9090
 - Grafana: http://localhost:3000
 - Xem metrics của tất cả services
 
 ### 4. Message Broker (RabbitMQ)
+
 - URL: http://localhost:15672
 - Username: admin
 - Password: admin123
@@ -270,22 +277,23 @@ docker logs rabbitmq_broker
 
 ## 📋 So Sánh: Trước và Sau
 
-| Tiêu chí | Trước (Monolith) | Sau (Microservices) |
-|----------|------------------|---------------------|
-| **Containers** | 1 | 15+ |
-| **Databases** | 1 (shared) | 3 (per service) |
-| **API Gateway** | ❌ Không | ✅ Kong |
-| **Message Broker** | ❌ Không | ✅ RabbitMQ |
-| **Service Discovery** | ❌ Không | ✅ Consul |
-| **Tracing** | ❌ Không | ✅ Jaeger |
-| **Monitoring** | ❌ Cơ bản | ✅ Prometheus + Grafana |
-| **Điểm Microservices** | 23% | 90%+ |
+| Tiêu chí               | Trước (Monolith) | Sau (Microservices)     |
+| ---------------------- | ---------------- | ----------------------- |
+| **Containers**         | 1                | 15+                     |
+| **Databases**          | 1 (shared)       | 3 (per service)         |
+| **API Gateway**        | ❌ Không         | ✅ Kong                 |
+| **Message Broker**     | ❌ Không         | ✅ RabbitMQ             |
+| **Service Discovery**  | ❌ Không         | ✅ Consul               |
+| **Tracing**            | ❌ Không         | ✅ Jaeger               |
+| **Monitoring**         | ❌ Cơ bản        | ✅ Prometheus + Grafana |
+| **Điểm Microservices** | 23%              | 90%+                    |
 
 ---
 
 ## ⚠️ Troubleshooting
 
 ### Kong không khởi động
+
 ```powershell
 # Kiểm tra Kong database
 docker logs kong_database
@@ -296,6 +304,7 @@ docker restart kong_gateway
 ```
 
 ### Service không kết nối được database
+
 ```powershell
 # Kiểm tra database đã ready chưa
 docker exec mysql_catalog mysqladmin -uroot -p ping
@@ -305,25 +314,10 @@ docker logs mysql_catalog
 ```
 
 ### RabbitMQ connection refused
+
 ```powershell
 # Kiểm tra RabbitMQ đã ready
 docker logs rabbitmq_broker
 
-# Đợi thêm 30 giây rồi thử lại
+
 ```
-
----
-
-## 🎯 Kết Luận
-
-Với kiến trúc này, hệ thống đã đạt chuẩn Microservices theo 5 PDF tài liệu:
-
-✅ **PDF 1 (General)**: Independent services, Observable, Discoverable
-✅ **PDF 2 (Decomposition)**: Services tách theo business domain
-✅ **PDF 3 (DB Patterns)**: Database per service, Event-Driven
-✅ **PDF 4 (Communication)**: Sync (REST) + Async (RabbitMQ)
-✅ **PDF 5 (API Gateway)**: Kong Gateway với routing, rate limiting
-
----
-
-*Tài liệu triển khai Microservices - ElectroShop*

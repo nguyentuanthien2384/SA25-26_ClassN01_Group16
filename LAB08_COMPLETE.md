@@ -1,20 +1,18 @@
 # ✅ LAB 08 COMPLETE - Deployment View & Quality Attribute Analysis
 
-## 🎉 TẤT CẢ YÊU CẦU LAB 08 ĐÃ HOÀN THÀNH!
-
 ---
 
 ## 📋 Lab 08 Requirements Checklist
 
-| # | Requirement | Status | File |
-|---|-------------|--------|------|
-| 1 | UML Deployment Diagram | ✅ Complete | `Design/deployment-diagram.puml` |
-| 2 | Deployment View Documentation | ✅ Complete | `Design/DEPLOYMENT_VIEW.md` |
-| 3 | ATAM Analysis | ✅ Complete | `Design/ATAM_ANALYSIS.md` |
-| 4 | Scalability Scenario (SS1) | ✅ Complete | Included in ATAM |
-| 5 | Availability Scenario (AS1) | ✅ Complete | Included in ATAM |
-| 6 | Comparison Matrix | ✅ Complete | Included in ATAM |
-| 7 | Trade-off Statement | ✅ Complete | Included in ATAM |
+| #   | Requirement                   | Status      | File                             |
+| --- | ----------------------------- | ----------- | -------------------------------- |
+| 1   | UML Deployment Diagram        | ✅ Complete | `Design/deployment-diagram.puml` |
+| 2   | Deployment View Documentation | ✅ Complete | `Design/DEPLOYMENT_VIEW.md`      |
+| 3   | ATAM Analysis                 | ✅ Complete | `Design/ATAM_ANALYSIS.md`        |
+| 4   | Scalability Scenario (SS1)    | ✅ Complete | Included in ATAM                 |
+| 5   | Availability Scenario (AS1)   | ✅ Complete | Included in ATAM                 |
+| 6   | Comparison Matrix             | ✅ Complete | Included in ATAM                 |
+| 7   | Trade-off Statement           | ✅ Complete | Included in ATAM                 |
 
 ---
 
@@ -23,6 +21,7 @@
 ### 1. `Design/deployment-diagram.puml`
 
 **PlantUML Deployment Diagram** với:
+
 - Client Device node
 - Edge Tier (Load Balancer)
 - Application Cluster (Kong Gateway, 5 Microservices)
@@ -31,6 +30,7 @@
 - All communication links với protocols
 
 **Render command:**
+
 ```bash
 # Visit
 https://www.plantuml.com/plantuml/uml/
@@ -44,6 +44,7 @@ https://www.plantuml.com/plantuml/uml/
 ### 2. `Design/DEPLOYMENT_VIEW.md`
 
 **Comprehensive Deployment View Documentation** với:
+
 - ASCII Deployment Diagram
 - Node Descriptions (Client, Edge, Application, Data, Infrastructure)
 - Communication Protocols table
@@ -58,34 +59,39 @@ https://www.plantuml.com/plantuml/uml/
 **Full ATAM Analysis** với:
 
 #### Scenario SS1: Scalability
+
 ```
-"During a 5-minute Black Friday promotion, the system must handle 
-a sudden 10x spike in concurrent users (from 1,000 to 10,000) 
+"During a 5-minute Black Friday promotion, the system must handle
+a sudden 10x spike in concurrent users (from 1,000 to 10,000)
 placing items in carts and viewing product details."
 ```
 
 **Analysis:**
+
 - Monolithic: ❌ Must scale everything (inefficient)
 - Microservices: ✅ Scale only Product & Cart services (efficient)
 
 ---
 
 #### Scenario AS1: Availability
+
 ```
-"The Notification Service fails completely for 1 hour due to a 
-deployment error. The system must still successfully accept 
+"The Notification Service fails completely for 1 hour due to a
+deployment error. The system must still successfully accept
 and process new orders."
 ```
 
 **Analysis:**
+
 - Monolithic: ❌ Cascade failure, orders may fail
 - Microservices: ✅ 100% order success, notifications queued
 
 ---
 
 #### Trade-off Statement
-> "The ElectroShop platform adopts a Microservices Architecture to achieve 
-> superior Scalability and Availability (Fault Isolation), accepting the 
+
+> "The ElectroShop platform adopts a Microservices Architecture to achieve
+> superior Scalability and Availability (Fault Isolation), accepting the
 > trade-off of increased Complexity in deployment and operational overhead."
 
 ---
@@ -94,26 +100,26 @@ and process new orders."
 
 ### Activity Practice 1: UML Deployment Diagram ✅
 
-| Node | Artifacts | Status |
-|------|-----------|--------|
-| Client Device | Web Browser | ✅ |
-| Load Balancer | Nginx/AWS ALB | ✅ |
-| Application Cluster | Kong Gateway, 5 Services | ✅ |
-| Message Broker | Redis Queue | ✅ |
-| Data Stores | 4 MySQL DBs (per service) | ✅ |
-| Infrastructure | Consul, Jaeger, ELK, Prometheus | ✅ |
+| Node                | Artifacts                       | Status |
+| ------------------- | ------------------------------- | ------ |
+| Client Device       | Web Browser                     | ✅     |
+| Load Balancer       | Nginx/AWS ALB                   | ✅     |
+| Application Cluster | Kong Gateway, 5 Services        | ✅     |
+| Message Broker      | Redis Queue                     | ✅     |
+| Data Stores         | 4 MySQL DBs (per service)       | ✅     |
+| Infrastructure      | Consul, Jaeger, ELK, Prometheus | ✅     |
 
 ---
 
 ### Activity Practice 2: ATAM Analysis ✅
 
-| Step | Task | Status |
-|------|------|--------|
-| 1 | Define Scenarios (SS1, AS1) | ✅ |
-| 2 | Evaluate Architectures | ✅ |
-| 3 | Identify Sensitivity Points | ✅ |
-| 4 | Identify Trade-offs | ✅ |
-| 5 | Trade-off Statement | ✅ |
+| Step | Task                        | Status |
+| ---- | --------------------------- | ------ |
+| 1    | Define Scenarios (SS1, AS1) | ✅     |
+| 2    | Evaluate Architectures      | ✅     |
+| 3    | Identify Sensitivity Points | ✅     |
+| 4    | Identify Trade-offs         | ✅     |
+| 5    | Trade-off Statement         | ✅     |
 
 ---
 
@@ -172,10 +178,10 @@ and process new orders."
 
 ### ATAM Comparison Matrix
 
-| Quality Attribute | Scenario | Monolithic | Microservices |
-|-------------------|----------|------------|---------------|
-| **Scalability** | SS1 (10x spike) | ❌ Scale all | ✅ Scale specific |
-| **Availability** | AS1 (Service fail) | ❌ Cascade | ✅ Isolated |
+| Quality Attribute | Scenario           | Monolithic   | Microservices     |
+| ----------------- | ------------------ | ------------ | ----------------- |
+| **Scalability**   | SS1 (10x spike)    | ❌ Scale all | ✅ Scale specific |
+| **Availability**  | AS1 (Service fail) | ❌ Cascade   | ✅ Isolated       |
 
 ---
 
@@ -205,18 +211,18 @@ and process new orders."
 ### For Lab Report
 
 1. **Deployment Diagram:**
-   - Render `Design/deployment-diagram.puml` using PlantUML Online
-   - Or copy ASCII diagram from `Design/DEPLOYMENT_VIEW.md`
-   - Add to Architecture section of report
+    - Render `Design/deployment-diagram.puml` using PlantUML Online
+    - Or copy ASCII diagram from `Design/DEPLOYMENT_VIEW.md`
+    - Add to Architecture section of report
 
 2. **ATAM Analysis:**
-   - Copy comparison matrix from `Design/ATAM_ANALYSIS.md`
-   - Copy trade-off statement
-   - Add to Quality Analysis section of report
+    - Copy comparison matrix from `Design/ATAM_ANALYSIS.md`
+    - Copy trade-off statement
+    - Add to Quality Analysis section of report
 
 3. **Documentation:**
-   - Reference all files in appendix
-   - Explain architectural decisions
+    - Reference all files in appendix
+    - Explain architectural decisions
 
 ---
 
@@ -265,12 +271,14 @@ Root/
 ## ✅ Lab 08 Completion Checklist
 
 ### Practice 1: UML Deployment Diagram
+
 - [x] Identify Nodes (Client, Load Balancer, Application Cluster)
 - [x] Place Artifacts (API Gateway, Services, Message Broker)
 - [x] Place Data Stores (Separate DBs per service)
 - [x] Draw Associations (HTTP, RESP, MySQL protocols)
 
 ### Practice 2: ATAM Analysis
+
 - [x] Define Scalability Scenario (SS1)
 - [x] Define Availability Scenario (AS1)
 - [x] Evaluate Monolithic approach
@@ -280,6 +288,7 @@ Root/
 - [x] Write Trade-off Statement
 
 ### Documentation
+
 - [x] UML Deployment Diagram (PlantUML + ASCII)
 - [x] ATAM Analysis Table
 - [x] Trade-off Statement paragraph
@@ -329,8 +338,8 @@ Root/
 
 ---
 
-**Created:** 2026-01-28  
-**Lab:** Lab 08 - Deployment View & Quality Attribute Analysis  
-**Status:** ✅ COMPLETE  
-**Files Created:** 4 new files  
+**Created:** 2026-01-28
+**Lab:** Lab 08 - Deployment View & Quality Attribute Analysis
+**Status:** ✅ COMPLETE
+**Files Created:** 4 new files
 **Total Documentation:** ~50KB added

@@ -3,6 +3,7 @@
 ## 1. Kong Migration Là Gì?
 
 **Kong Migration** là một container đặc biệt có nhiệm vụ:
+
 - Khởi tạo database schema cho Kong API Gateway
 - Tạo các tables cần thiết trong PostgreSQL
 - Chạy một lần rồi tự động tắt
@@ -188,28 +189,31 @@ Timeline: ───────────────────────�
 
 ## 5. Các Exit Codes
 
-| Exit Code | Ý Nghĩa | Hành động |
-|-----------|---------|-----------|
-| **0** | ✅ Thành công | Không cần làm gì |
-| **1** | ❌ Lỗi chung | Xem logs: `docker logs kong_migration` |
-| **2** | ❌ Database không kết nối được | Kiểm tra kong_database |
+| Exit Code | Ý Nghĩa                        | Hành động                              |
+| --------- | ------------------------------ | -------------------------------------- |
+| **0**     | ✅ Thành công                  | Không cần làm gì                       |
+| **1**     | ❌ Lỗi chung                   | Xem logs: `docker logs kong_migration` |
+| **2**     | ❌ Database không kết nối được | Kiểm tra kong_database                 |
 
 ---
 
 ## 6. Kiểm Tra Migration Đã Chạy Thành Công
 
 ### Cách 1: Xem Exit Code
+
 ```powershell
 docker inspect kong_migration --format='{{.State.ExitCode}}'
 # Kết quả: 0 = OK
 ```
 
 ### Cách 2: Xem Logs
+
 ```powershell
 docker logs kong_migration
 ```
 
 Output mẫu khi thành công:
+
 ```
 Bootstrapping database...
 migrating core on database 'kong'...
@@ -221,14 +225,16 @@ Database is up to date
 ```
 
 ### Cách 3: Kiểm Tra Tables Trong PostgreSQL
+
 ```powershell
 docker exec -it kong_database psql -U kong -d kong -c "\dt"
 ```
 
 Output:
+
 ```
               List of relations
- Schema |         Name          | Type  | Owner 
+ Schema |         Name          | Type  | Owner
 --------+-----------------------+-------+-------
  public | services              | table | kong
  public | routes                | table | kong
@@ -244,10 +250,12 @@ Output:
 ## 7. Khi Nào Cần Chạy Lại Migration?
 
 ### Tự động chạy lại khi:
+
 - `docker-compose up` lần đầu
 - Sau khi `docker-compose down -v` (xóa volumes)
 
 ### Thủ công chạy lại:
+
 ```powershell
 # Nếu cần reset Kong database
 docker-compose -f docker-compose.microservices.yml run --rm kong-migration kong migrations reset
@@ -259,6 +267,7 @@ docker-compose -f docker-compose.microservices.yml run --rm kong-migration kong 
 ## 8. Troubleshooting
 
 ### Lỗi: Migration failed
+
 ```powershell
 # Xem chi tiết lỗi
 docker logs kong_migration
@@ -271,6 +280,7 @@ docker exec -it kong_database psql -U kong -d kong -c "SELECT 1"
 ```
 
 ### Lỗi: Database connection refused
+
 ```powershell
 # Restart database
 docker restart kong_database
@@ -308,5 +318,3 @@ docker-compose -f docker-compose.microservices.yml up -d kong-migration
 ```
 
 ---
-
-*Tài liệu được tạo: 28/01/2026*

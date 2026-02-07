@@ -3,6 +3,7 @@
 ## 📋 Giới Thiệu C4 Model
 
 C4 Model là phương pháp mô hình hóa kiến trúc phần mềm với 4 cấp độ:
+
 - **Level 1: System Context** - Bối cảnh hệ thống
 - **Level 2: Container** - Các container trong hệ thống
 - **Level 3: Component** - Các component trong container
@@ -66,14 +67,14 @@ C4 Model là phương pháp mô hình hóa kiến trúc phần mềm với 4 c�
 
 ### Mô tả các thành phần:
 
-| Thành phần | Loại | Mô tả |
-|------------|------|-------|
-| **Khách Hàng** | Person | Người dùng mua hàng trực tuyến |
-| **Admin** | Person | Quản trị viên quản lý hệ thống |
-| **ElectroShop** | Software System | Hệ thống e-commerce chính |
-| **Payment Gateway** | External System | Cổng thanh toán (VNPay, Momo) |
-| **Email Service** | External System | Dịch vụ gửi email |
-| **SMS Gateway** | External System | Dịch vụ gửi SMS |
+| Thành phần          | Loại            | Mô tả                          |
+| ------------------- | --------------- | ------------------------------ |
+| **Khách Hàng**      | Person          | Người dùng mua hàng trực tuyến |
+| **Admin**           | Person          | Quản trị viên quản lý hệ thống |
+| **ElectroShop**     | Software System | Hệ thống e-commerce chính      |
+| **Payment Gateway** | External System | Cổng thanh toán (VNPay, Momo)  |
+| **Email Service**   | External System | Dịch vụ gửi email              |
+| **SMS Gateway**     | External System | Dịch vụ gửi SMS                |
 
 ---
 
@@ -157,13 +158,13 @@ C4 Model là phương pháp mô hình hóa kiến trúc phần mềm với 4 c�
 
 ### Chi tiết các Container:
 
-| Container | Technology | Port | Mô tả |
-|-----------|------------|------|-------|
-| **Web Application** | Laravel/PHP | 8000 | Ứng dụng web chính |
-| **Database** | MySQL 8.0 | 3308 | Lưu trữ dữ liệu |
-| **Cache/Queue** | Redis 7 | 6380 | Cache và message queue |
-| **phpMyAdmin** | PHP | 8083 | GUI quản lý MySQL |
-| **Redis Commander** | Node.js | 8082 | GUI quản lý Redis |
+| Container           | Technology  | Port | Mô tả                  |
+| ------------------- | ----------- | ---- | ---------------------- |
+| **Web Application** | Laravel/PHP | 8000 | Ứng dụng web chính     |
+| **Database**        | MySQL 8.0   | 3308 | Lưu trữ dữ liệu        |
+| **Cache/Queue**     | Redis 7     | 6380 | Cache và message queue |
+| **phpMyAdmin**      | PHP         | 8083 | GUI quản lý MySQL      |
+| **Redis Commander** | Node.js     | 8082 | GUI quản lý Redis      |
 
 ---
 
@@ -240,27 +241,30 @@ C4 Model là phương pháp mô hình hóa kiến trúc phần mềm với 4 c�
 ### Chi tiết các Component:
 
 #### Presentation Layer
-| Component | Mô tả |
-|-----------|-------|
-| **Views (Blade)** | Template hiển thị giao diện |
-| **Controllers** | Xử lý request, điều hướng logic |
-| **Middleware** | Xác thực, phân quyền, logging |
-| **Routes** | Định nghĩa URL endpoints |
+
+| Component         | Mô tả                           |
+| ----------------- | ------------------------------- |
+| **Views (Blade)** | Template hiển thị giao diện     |
+| **Controllers**   | Xử lý request, điều hướng logic |
+| **Middleware**    | Xác thực, phân quyền, logging   |
+| **Routes**        | Định nghĩa URL endpoints        |
 
 #### Business Layer
-| Component | Mô tả |
-|-----------|-------|
-| **Services** | Business logic phức tạp |
-| **Events** | Định nghĩa các sự kiện |
-| **Listeners** | Xử lý khi event xảy ra |
-| **Jobs** | Background tasks (queue) |
+
+| Component     | Mô tả                    |
+| ------------- | ------------------------ |
+| **Services**  | Business logic phức tạp  |
+| **Events**    | Định nghĩa các sự kiện   |
+| **Listeners** | Xử lý khi event xảy ra   |
+| **Jobs**      | Background tasks (queue) |
 
 #### Data Layer
-| Component | Mô tả |
-|-----------|-------|
-| **Models** | Đại diện bảng database |
+
+| Component        | Mô tả                  |
+| ---------------- | ---------------------- |
+| **Models**       | Đại diện bảng database |
 | **Eloquent ORM** | Tương tác với database |
-| **Cache Facade** | Tương tác với Redis |
+| **Cache Facade** | Tương tác với Redis    |
 
 ---
 
@@ -420,70 +424,6 @@ C4 Model là phương pháp mô hình hóa kiến trúc phần mềm với 4 c�
 
 ---
 
-## 🔷 PlantUML Source Code
-
-### System Context (PlantUML)
-
-```plantuml
-@startuml C4_Context
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
-
-title System Context Diagram - ElectroShop
-
-Person(customer, "Khách Hàng", "Người mua hàng trực tuyến")
-Person(admin, "Admin", "Quản trị viên hệ thống")
-
-System(electroshop, "ElectroShop", "Hệ thống bán đồ điện tử trực tuyến")
-
-System_Ext(payment, "Payment Gateway", "VNPay, Momo, ZaloPay")
-System_Ext(email, "Email Service", "SMTP Server")
-System_Ext(sms, "SMS Gateway", "Twilio, Nexmo")
-
-Rel(customer, electroshop, "Xem sản phẩm, Đặt hàng", "HTTPS")
-Rel(admin, electroshop, "Quản lý hệ thống", "HTTPS")
-Rel(electroshop, payment, "Xử lý thanh toán", "HTTPS/API")
-Rel(electroshop, email, "Gửi email", "SMTP")
-Rel(electroshop, sms, "Gửi SMS", "API")
-
-@enduml
-```
-
-### Container Diagram (PlantUML)
-
-```plantuml
-@startuml C4_Container
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
-
-title Container Diagram - ElectroShop
-
-Person(customer, "Khách Hàng", "Người mua hàng")
-Person(admin, "Admin", "Quản trị viên")
-
-System_Boundary(electroshop, "ElectroShop System") {
-    Container(webapp, "Web Application", "Laravel/PHP", "Xử lý business logic, render views")
-    Container(nginx, "Web Server", "Nginx", "Reverse proxy, static files")
-    ContainerDb(mysql, "Database", "MySQL 8.0", "Lưu trữ dữ liệu")
-    ContainerDb(redis, "Cache/Queue", "Redis 7", "Cache, session, queue")
-    Container(phpmyadmin, "DB Admin", "phpMyAdmin", "Quản lý MySQL")
-    Container(rediscmd, "Cache Admin", "Redis Commander", "Quản lý Redis")
-}
-
-System_Ext(payment, "Payment Gateway", "VNPay/Momo")
-System_Ext(email, "Email Service", "SMTP")
-
-Rel(customer, nginx, "HTTPS", "443")
-Rel(admin, nginx, "HTTPS", "443")
-Rel(nginx, webapp, "FastCGI", "9000")
-Rel(webapp, mysql, "TCP/SQL", "3306")
-Rel(webapp, redis, "TCP", "6379")
-Rel(webapp, payment, "HTTPS/API")
-Rel(webapp, email, "SMTP", "587")
-Rel(admin, phpmyadmin, "HTTP", "8083")
-Rel(admin, rediscmd, "HTTP", "8082")
-Rel(phpmyadmin, mysql, "SQL")
-Rel(rediscmd, redis, "Redis Protocol")
-
-@enduml
 ```
 
 ---
@@ -514,3 +454,4 @@ Rel(rediscmd, redis, "Redis Protocol")
 ---
 
 *Tài liệu C4 Model - ElectroShop E-Commerce System*
+```

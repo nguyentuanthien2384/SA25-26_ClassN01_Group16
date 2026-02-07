@@ -1,0 +1,205 @@
+[2026-02-07 03:41:46] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 03:41:47] local.ERROR: Failed to register service with Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1202 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/register"} 
+[2026-02-07 03:41:50] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 03:41:51] local.ERROR: Failed to register service with Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1202 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/register"} 
+[2026-02-07 03:41:55] local.ERROR: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it (Connection: mysql, SQL: select `id`, `c_name`, `c_slug`, `c_parent`, `c_active` from `category` where `c_active` = 1) {"exception":"[object] (Illuminate\\Database\\QueryException(code: 2002): SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it (Connection: mysql, SQL: select `id`, `c_name`, `c_slug`, `c_parent`, `c_active` from `category` where `c_active` = 1) at D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php:829)
+[stacktrace]
+#0 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(983): Illuminate\\Database\\Connection->runQueryCallback('select `id`, `c...', Array, Object(Closure))
+#1 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(962): Illuminate\\Database\\Connection->tryAgainIfCausedByLostConnection(Object(Illuminate\\Database\\QueryException), 'select `id`, `c...', Array, Object(Closure))
+#2 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(785): Illuminate\\Database\\Connection->handleQueryException(Object(Illuminate\\Database\\QueryException), 'select `id`, `c...', Array, Object(Closure))
+#3 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(414): Illuminate\\Database\\Connection->run('select `id`, `c...', Array, Object(Closure))
+#4 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2871): Illuminate\\Database\\Connection->select('select `id`, `c...', Array, true)
+#5 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2860): Illuminate\\Database\\Query\\Builder->runSelect()
+#6 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(3414): Illuminate\\Database\\Query\\Builder->Illuminate\\Database\\Query\\{closure}()
+#7 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2859): Illuminate\\Database\\Query\\Builder->onceWithColumns(Array, Object(Closure))
+#8 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\Builder.php(739): Illuminate\\Database\\Query\\Builder->get(Array)
+#9 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\Builder.php(723): Illuminate\\Database\\Eloquent\\Builder->getModels(Array)
+#10 D:\\Web_Ban_Do_Dien_Tu\\app\\Http\\Controllers\\FrontendController.php(17): Illuminate\\Database\\Eloquent\\Builder->get()
+#11 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Cache\\Repository.php(396): App\\Http\\Controllers\\FrontendController->App\\Http\\Controllers\\{closure}()
+#12 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Cache\\CacheManager.php(429): Illuminate\\Cache\\Repository->remember('frontend:catego...', 600, Object(Closure))
+#13 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Support\\Facades\\Facade.php(355): Illuminate\\Cache\\CacheManager->__call('remember', Array)
+#14 D:\\Web_Ban_Do_Dien_Tu\\app\\Http\\Controllers\\FrontendController.php(14): Illuminate\\Support\\Facades\\Facade::__callStatic('remember', Array)
+#15 D:\\Web_Ban_Do_Dien_Tu\\Modules\\Catalog\\App\\Http\\Controllers\\HomeController.php(21): App\\Http\\Controllers\\FrontendController->__construct()
+#16 [internal function]: Modules\\Catalog\\App\\Http\\Controllers\\HomeController->__construct()
+#17 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(952): ReflectionClass->newInstanceArgs(Array)
+#18 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(795): Illuminate\\Container\\Container->build('Modules\\\\Catalog...')
+#19 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(957): Illuminate\\Container\\Container->resolve('Modules\\\\Catalog...', Array, true)
+#20 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(731): Illuminate\\Foundation\\Application->resolve('Modules\\\\Catalog...', Array)
+#21 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(942): Illuminate\\Container\\Container->make('Modules\\\\Catalog...', Array)
+#22 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Route.php(278): Illuminate\\Foundation\\Application->make('Modules\\\\Catalog...')
+#23 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Route.php(1104): Illuminate\\Routing\\Route->getController()
+#24 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Route.php(1035): Illuminate\\Routing\\Route->controllerMiddleware()
+#25 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(818): Illuminate\\Routing\\Route->gatherMiddleware()
+#26 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(800): Illuminate\\Routing\\Router->gatherRouteMiddleware(Object(Illuminate\\Routing\\Route))
+#27 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(784): Illuminate\\Routing\\Router->runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))
+#28 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(748): Illuminate\\Routing\\Router->runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))
+#29 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(737): Illuminate\\Routing\\Router->dispatchToRoute(Object(Illuminate\\Http\\Request))
+#30 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Kernel.php(200): Illuminate\\Routing\\Router->dispatch(Object(Illuminate\\Http\\Request))
+#31 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(144): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}(Object(Illuminate\\Http\\Request))
+#32 D:\\Web_Ban_Do_Dien_Tu\\vendor\\barryvdh\\laravel-debugbar\\src\\Middleware\\InjectDebugbar.php(66): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#33 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(183): Barryvdh\\Debugbar\\Middleware\\InjectDebugbar->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#34 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#35 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#36 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(183): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#37 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#38 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\TrimStrings.php(40): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#39 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(183): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#40 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#41 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(183): Illuminate\\Foundation\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#42 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance.php(99): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#43 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(183): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#44 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Http\\Middleware\\HandleCors.php(49): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#45 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(183): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#46 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Http\\Middleware\\TrustProxies.php(39): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#47 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(183): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#48 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(119): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#49 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#50 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#51 D:\\Web_Ban_Do_Dien_Tu\\public\\index.php(51): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#52 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\resources\\server.php(16): require_once('D:\\\\Web_Ban_Do_D...')
+#53 {main}
+
+[previous exception] [object] (PDOException(code: 2002): SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it at D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connectors\\Connector.php:65)
+[stacktrace]
+#0 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connectors\\Connector.php(65): PDO->__construct('mysql:host=127....', 'root', Object(SensitiveParameterValue), Array)
+#1 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connectors\\Connector.php(83): Illuminate\\Database\\Connectors\\Connector->createPdoConnection('mysql:host=127....', 'root', '', Array)
+#2 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connectors\\Connector.php(48): Illuminate\\Database\\Connectors\\Connector->tryAgainIfCausedByLostConnection(Object(PDOException), 'mysql:host=127....', 'root', '', Array)
+#3 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connectors\\MySqlConnector.php(24): Illuminate\\Database\\Connectors\\Connector->createConnection('mysql:host=127....', Array, Array)
+#4 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connectors\\ConnectionFactory.php(184): Illuminate\\Database\\Connectors\\MySqlConnector->connect(Array)
+#5 [internal function]: Illuminate\\Database\\Connectors\\ConnectionFactory->Illuminate\\Database\\Connectors\\{closure}()
+#6 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(1339): call_user_func(Object(Closure))
+#7 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(1375): Illuminate\\Database\\Connection->getPdo()
+#8 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(528): Illuminate\\Database\\Connection->getReadPdo()
+#9 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(423): Illuminate\\Database\\Connection->getPdoForSelect(true)
+#10 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(816): Illuminate\\Database\\Connection->Illuminate\\Database\\{closure}('select `id`, `c...', Array)
+#11 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(983): Illuminate\\Database\\Connection->runQueryCallback('select `id`, `c...', Array, Object(Closure))
+#12 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(962): Illuminate\\Database\\Connection->tryAgainIfCausedByLostConnection(Object(Illuminate\\Database\\QueryException), 'select `id`, `c...', Array, Object(Closure))
+#13 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(785): Illuminate\\Database\\Connection->handleQueryException(Object(Illuminate\\Database\\QueryException), 'select `id`, `c...', Array, Object(Closure))
+#14 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(414): Illuminate\\Database\\Connection->run('select `id`, `c...', Array, Object(Closure))
+#15 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2871): Illuminate\\Database\\Connection->select('select `id`, `c...', Array, true)
+#16 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2860): Illuminate\\Database\\Query\\Builder->runSelect()
+#17 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(3414): Illuminate\\Database\\Query\\Builder->Illuminate\\Database\\Query\\{closure}()
+#18 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2859): Illuminate\\Database\\Query\\Builder->onceWithColumns(Array, Object(Closure))
+#19 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\Builder.php(739): Illuminate\\Database\\Query\\Builder->get(Array)
+#20 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\Builder.php(723): Illuminate\\Database\\Eloquent\\Builder->getModels(Array)
+#21 D:\\Web_Ban_Do_Dien_Tu\\app\\Http\\Controllers\\FrontendController.php(17): Illuminate\\Database\\Eloquent\\Builder->get()
+#22 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Cache\\Repository.php(396): App\\Http\\Controllers\\FrontendController->App\\Http\\Controllers\\{closure}()
+#23 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Cache\\CacheManager.php(429): Illuminate\\Cache\\Repository->remember('frontend:catego...', 600, Object(Closure))
+#24 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Support\\Facades\\Facade.php(355): Illuminate\\Cache\\CacheManager->__call('remember', Array)
+#25 D:\\Web_Ban_Do_Dien_Tu\\app\\Http\\Controllers\\FrontendController.php(14): Illuminate\\Support\\Facades\\Facade::__callStatic('remember', Array)
+#26 D:\\Web_Ban_Do_Dien_Tu\\Modules\\Catalog\\App\\Http\\Controllers\\HomeController.php(21): App\\Http\\Controllers\\FrontendController->__construct()
+#27 [internal function]: Modules\\Catalog\\App\\Http\\Controllers\\HomeController->__construct()
+#28 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(952): ReflectionClass->newInstanceArgs(Array)
+#29 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(795): Illuminate\\Container\\Container->build('Modules\\\\Catalog...')
+#30 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(957): Illuminate\\Container\\Container->resolve('Modules\\\\Catalog...', Array, true)
+#31 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(731): Illuminate\\Foundation\\Application->resolve('Modules\\\\Catalog...', Array)
+#32 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(942): Illuminate\\Container\\Container->make('Modules\\\\Catalog...', Array)
+#33 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Route.php(278): Illuminate\\Foundation\\Application->make('Modules\\\\Catalog...')
+#34 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Route.php(1104): Illuminate\\Routing\\Route->getController()
+#35 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Route.php(1035): Illuminate\\Routing\\Route->controllerMiddleware()
+#36 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(818): Illuminate\\Routing\\Route->gatherMiddleware()
+#37 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(800): Illuminate\\Routing\\Router->gatherRouteMiddleware(Object(Illuminate\\Routing\\Route))
+#38 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(784): Illuminate\\Routing\\Router->runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))
+#39 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(748): Illuminate\\Routing\\Router->runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))
+#40 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(737): Illuminate\\Routing\\Router->dispatchToRoute(Object(Illuminate\\Http\\Request))
+#41 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Kernel.php(200): Illuminate\\Routing\\Router->dispatch(Object(Illuminate\\Http\\Request))
+#42 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(144): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}(Object(Illuminate\\Http\\Request))
+#43 D:\\Web_Ban_Do_Dien_Tu\\vendor\\barryvdh\\laravel-debugbar\\src\\Middleware\\InjectDebugbar.php(66): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#44 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(183): Barryvdh\\Debugbar\\Middleware\\InjectDebugbar->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#45 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#46 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#47 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(183): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#48 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#49 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\TrimStrings.php(40): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#50 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(183): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#51 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#52 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(183): Illuminate\\Foundation\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#53 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance.php(99): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#54 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(183): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#55 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Http\\Middleware\\HandleCors.php(49): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#56 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(183): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#57 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Http\\Middleware\\TrustProxies.php(39): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#58 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(183): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#59 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(119): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#60 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#61 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#62 D:\\Web_Ban_Do_Dien_Tu\\public\\index.php(51): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#63 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\resources\\server.php(16): require_once('D:\\\\Web_Ban_Do_D...')
+#64 {main}
+"} 
+[2026-02-07 03:41:57] local.ERROR: Failed to deregister service from Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1202 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/deregister/ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 03:41:57] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 03:43:36] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 03:43:37] local.ERROR: Failed to register service with Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1204 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/register"} 
+[2026-02-07 03:43:37] local.INFO: HTTP Request {"request_id":"35be442d-a356-4065-9149-19ac5c4d67a0","method":"GET","url":"http://127.0.0.1:8000","path":"/","ip":"127.0.0.1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36","user_id":null,"status_code":200,"duration_ms":109.46,"memory_mb":26.0,"timestamp":"2026-02-07T03:43:37+00:00"} 
+[2026-02-07 03:43:38] local.ERROR: Failed to deregister service from Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1201 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/deregister/ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 03:43:38] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 03:43:39] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 03:43:40] local.ERROR: Failed to register service with Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1201 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/register"} 
+[2026-02-07 03:43:41] local.ERROR: Failed to deregister service from Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1203 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/deregister/ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 03:43:41] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 03:43:42] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 03:43:43] local.ERROR: Failed to register service with Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1201 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/register"} 
+[2026-02-07 03:43:44] local.ERROR: Failed to deregister service from Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1203 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/deregister/ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 03:43:44] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 03:43:44] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 03:43:46] local.ERROR: Failed to register service with Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1204 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/register"} 
+[2026-02-07 03:43:47] local.ERROR: Failed to deregister service from Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1202 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/deregister/ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 03:43:47] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 03:43:47] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 03:43:49] local.ERROR: Failed to register service with Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1205 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/register"} 
+[2026-02-07 03:43:50] local.ERROR: Failed to deregister service from Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1202 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/deregister/ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 03:43:50] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 03:43:50] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 03:43:51] local.ERROR: Failed to register service with Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1206 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/register"} 
+[2026-02-07 03:43:53] local.ERROR: Failed to deregister service from Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1201 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/deregister/ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 03:43:53] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 03:43:53] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 03:43:55] local.ERROR: Failed to register service with Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1200 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/register"} 
+[2026-02-07 03:43:56] local.ERROR: Failed to deregister service from Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1202 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/deregister/ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 03:43:56] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 03:43:56] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 03:43:57] local.ERROR: Failed to register service with Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1208 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/register"} 
+[2026-02-07 03:43:59] local.ERROR: Failed to deregister service from Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1202 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/deregister/ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 03:43:59] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 03:43:59] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 03:44:00] local.ERROR: Failed to register service with Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1202 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/register"} 
+[2026-02-07 03:44:02] local.ERROR: Failed to deregister service from Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1201 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/deregister/ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 03:44:02] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 03:44:02] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 03:44:03] local.ERROR: Failed to register service with Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1201 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/register"} 
+[2026-02-07 03:44:05] local.ERROR: Failed to deregister service from Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1202 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/deregister/ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 03:44:05] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 03:44:05] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 03:44:06] local.ERROR: Failed to register service with Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1201 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/register"} 
+[2026-02-07 03:44:08] local.ERROR: Failed to deregister service from Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1203 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/deregister/ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 03:44:08] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 03:48:22] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 03:48:23] local.ERROR: Failed to register service with Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1203 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/register"} 
+[2026-02-07 03:48:24] local.INFO: HTTP Request {"request_id":"01cfbb49-59f3-4490-abaf-d2be2c9a72c5","method":"GET","url":"http://127.0.0.1:8000/?hot_page=2","path":"/","ip":"127.0.0.1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36","user_id":null,"status_code":200,"duration_ms":87.66,"memory_mb":26.0,"timestamp":"2026-02-07T03:48:24+00:00"} 
+[2026-02-07 03:48:25] local.ERROR: Failed to deregister service from Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1203 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/deregister/ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 03:48:25] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 03:48:25] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 03:48:26] local.ERROR: Failed to register service with Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1204 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/register"} 
+[2026-02-07 03:48:28] local.ERROR: Failed to deregister service from Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1204 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/deregister/ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 03:48:28] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 03:48:28] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 03:48:29] local.ERROR: Failed to register service with Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1202 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/register"} 
+[2026-02-07 03:48:31] local.ERROR: Failed to deregister service from Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1215 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/deregister/ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 03:48:31] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 03:48:31] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 03:48:32] local.ERROR: Failed to register service with Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1202 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/register"} 
+[2026-02-07 03:48:34] local.ERROR: Failed to deregister service from Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1202 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/deregister/ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 03:48:34] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 03:48:34] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 03:48:35] local.ERROR: Failed to register service with Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1201 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/register"} 
+[2026-02-07 03:48:37] local.ERROR: Failed to deregister service from Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1204 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/deregister/ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 03:48:37] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 03:48:37] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 03:48:38] local.ERROR: Failed to register service with Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1202 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/register"} 
+[2026-02-07 03:48:39] local.ERROR: Failed to deregister service from Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1204 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/deregister/ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 03:48:39] local.INFO: ✅ Service deregistered from Consul  
+[2026-02-07 03:48:40] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-07 03:48:41] local.ERROR: Failed to register service with Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1209 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/register"} 
+[2026-02-07 03:48:42] local.ERROR: Failed to deregister service from Consul {"error":"cURL error 7: Failed to connect to localhost port 8500 after 1203 ms: Couldn't connect to server (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for http://localhost:8500/v1/agent/service/deregister/ElectroShop-WINDOWS-PC-8000"} 
+[2026-02-07 03:48:42] local.INFO: ✅ Service deregistered from Consul  

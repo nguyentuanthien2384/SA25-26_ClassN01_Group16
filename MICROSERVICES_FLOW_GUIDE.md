@@ -71,16 +71,17 @@ User                    API Gateway              Catalog Service           Datab
 
 **Mô tả chi tiết:**
 
-| Bước | Hành động | Mô tả |
-|------|-----------|-------|
-| 1 | User request | Người dùng truy cập trang sản phẩm |
-| 2 | API Gateway | Kong/Nginx route request đến Catalog Service |
-| 3 | Query DB | Service truy vấn MySQL lấy danh sách sản phẩm |
-| 4 | Cache | Kết quả được cache vào Redis |
-| 5 | Response | Trả về JSON data |
-| 6 | Render | Frontend hiển thị sản phẩm |
+| Bước | Hành động    | Mô tả                                         |
+| ---- | ------------ | --------------------------------------------- |
+| 1    | User request | Người dùng truy cập trang sản phẩm            |
+| 2    | API Gateway  | Kong/Nginx route request đến Catalog Service  |
+| 3    | Query DB     | Service truy vấn MySQL lấy danh sách sản phẩm |
+| 4    | Cache        | Kết quả được cache vào Redis                  |
+| 5    | Response     | Trả về JSON data                              |
+| 6    | Render       | Frontend hiển thị sản phẩm                    |
 
 **Endpoint liên quan:**
+
 ```
 GET  /api/products              # Lấy danh sách sản phẩm
 GET  /api/products/{id}         # Chi tiết sản phẩm
@@ -126,16 +127,17 @@ User          API Gateway       Order Service      Catalog Service    Notificati
 
 **Mô tả chi tiết:**
 
-| Bước | Service | Hành động |
-|------|---------|-----------|
-| 1-2 | API Gateway | Nhận request đặt hàng từ user |
-| 3-4 | Catalog Service | Kiểm tra tồn kho sản phẩm |
-| 5 | Order Service | Tạo đơn hàng mới trong DB |
-| 6 | Message Queue | Publish event "OrderCreated" vào Redis |
-| 7 | Notification Service | Consume event, gửi email xác nhận |
-| 8 | User | Nhận phản hồi thành công |
+| Bước | Service              | Hành động                              |
+| ---- | -------------------- | -------------------------------------- |
+| 1-2  | API Gateway          | Nhận request đặt hàng từ user          |
+| 3-4  | Catalog Service      | Kiểm tra tồn kho sản phẩm              |
+| 5    | Order Service        | Tạo đơn hàng mới trong DB              |
+| 6    | Message Queue        | Publish event "OrderCreated" vào Redis |
+| 7    | Notification Service | Consume event, gửi email xác nhận      |
+| 8    | User                 | Nhận phản hồi thành công               |
 
 **Endpoint liên quan:**
+
 ```
 POST /api/orders                # Tạo đơn hàng
 GET  /api/orders/{id}           # Chi tiết đơn hàng
@@ -182,13 +184,13 @@ Order Service        Redis Queue        Notification Service       External
 
 **Các loại thông báo:**
 
-| Event | Trigger | Action |
-|-------|---------|--------|
-| `order.created` | Đơn hàng mới | Gửi email xác nhận |
-| `order.shipped` | Đơn hàng được giao | Gửi SMS tracking |
-| `order.delivered` | Giao hàng thành công | Gửi email đánh giá |
-| `user.registered` | Đăng ký mới | Gửi email chào mừng |
-| `password.reset` | Quên mật khẩu | Gửi email reset |
+| Event             | Trigger              | Action              |
+| ----------------- | -------------------- | ------------------- |
+| `order.created`   | Đơn hàng mới         | Gửi email xác nhận  |
+| `order.shipped`   | Đơn hàng được giao   | Gửi SMS tracking    |
+| `order.delivered` | Giao hàng thành công | Gửi email đánh giá  |
+| `user.registered` | Đăng ký mới          | Gửi email chào mừng |
+| `password.reset`  | Quên mật khẩu        | Gửi email reset     |
 
 ---
 
@@ -336,6 +338,7 @@ User         Order Service      Payment Gateway      Bank/VNPay      Notificatio
 ```
 
 **Ví dụ:**
+
 - Order Service → Catalog Service: Kiểm tra tồn kho
 - User Service → Auth Service: Xác thực token
 
@@ -348,6 +351,7 @@ User         Order Service      Payment Gateway      Bank/VNPay      Notificatio
 ```
 
 **Ví dụ:**
+
 - Order Service → Redis → Notification Service: Gửi email đơn hàng
 - Payment Service → Redis → Order Service: Cập nhật trạng thái thanh toán
 
@@ -427,62 +431,3 @@ Docker Compose           Container              Service
      │                       │                     │
      │ (healthy/unhealthy)   │                     │
 ```
-
-**Health check endpoints:**
-```yaml
-# MySQL
-healthcheck:
-  test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-  interval: 10s
-  timeout: 5s
-  retries: 5
-
-# Redis
-healthcheck:
-  test: ["CMD", "redis-cli", "ping"]
-  interval: 10s
-  timeout: 3s
-  retries: 3
-
-# Laravel App
-healthcheck:
-  test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-  interval: 30s
-  timeout: 10s
-  retries: 3
-```
-
----
-
-## 📝 Tổng Kết
-
-| Aspect | Monolithic | Microservices (ElectroShop) |
-|--------|------------|----------------------------|
-| **Deployment** | 1 đơn vị | Nhiều containers độc lập |
-| **Scaling** | Scale cả app | Scale từng service |
-| **Database** | 1 DB dùng chung | Mỗi service có DB riêng |
-| **Communication** | In-process | HTTP/Message Queue |
-| **Failure** | App chết = All down | 1 service chết ≠ All down |
-| **Technology** | Đồng nhất | Có thể khác nhau |
-
----
-
-## 🔧 Commands Hữu Ích
-
-```powershell
-# Xem logs tất cả services
-docker-compose logs -f
-
-# Xem event queue trong Redis
-docker exec electroshop_redis redis-cli LRANGE queues:default 0 -1
-
-# Monitor MySQL queries
-docker exec electroshop_mysql mysql -uroot -proot_password -e "SHOW PROCESSLIST;"
-
-# Restart specific service
-docker-compose restart electroshop_app
-```
-
----
-
-*Tài liệu Microservices Flow - ElectroShop*

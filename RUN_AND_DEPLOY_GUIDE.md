@@ -52,7 +52,7 @@ Mở file `.env` và cấu hình database:
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
-DB_PORT=3306
+DB_PORT=3307
 DB_DATABASE=duan
 DB_USERNAME=root
 DB_PASSWORD=your_password_here
@@ -72,6 +72,7 @@ mysql -u root -p duan < duan.sql
 ```
 
 Hoặc dùng phpMyAdmin:
+
 1. Mở http://localhost/phpmyadmin
 2. Tạo database `duan`
 3. Import file `duan.sql`
@@ -118,7 +119,7 @@ docker run -d -p 6379:6379 --name redis redis:alpine
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
-DB_PORT=3306
+DB_PORT=3307
 DB_DATABASE=duan
 DB_USERNAME=root
 DB_PASSWORD=your_password
@@ -160,16 +161,16 @@ php consumer.php
 
 #### Bước 7: Truy cập các services
 
-| Service | URL | Mô Tả |
-|---------|-----|-------|
-| **Laravel App** | http://localhost:8000 | Main application |
-| **Kibana** | http://localhost:5601 | Log visualization |
-| **Grafana** | http://localhost:3000 | Metrics dashboard |
-| **Jaeger UI** | http://localhost:16686 | Distributed tracing |
-| **Consul UI** | http://localhost:8500 | Service discovery |
-| **Konga** | http://localhost:1337 | Kong admin UI |
-| **Kong Gateway** | http://localhost:8000 | API Gateway |
-| **Prometheus** | http://localhost:9090 | Metrics collection |
+| Service          | URL                    | Mô Tả               |
+| ---------------- | ---------------------- | ------------------- |
+| **Laravel App**  | http://localhost:8000  | Main application    |
+| **Kibana**       | http://localhost:5601  | Log visualization   |
+| **Grafana**      | http://localhost:3000  | Metrics dashboard   |
+| **Jaeger UI**    | http://localhost:16686 | Distributed tracing |
+| **Consul UI**    | http://localhost:8500  | Service discovery   |
+| **Konga**        | http://localhost:1337  | Kong admin UI       |
+| **Kong Gateway** | http://localhost:8000  | API Gateway         |
+| **Prometheus**   | http://localhost:9090  | Metrics collection  |
 
 **🎉 FULL STACK RUNNING!**
 
@@ -470,74 +471,74 @@ CMD ["php-fpm"]
 #### Bước 2: Tạo docker-compose.production.yml
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: laravel-app
-    restart: unless-stopped
-    working_dir: /var/www
-    volumes:
-      - ./:/var/www
-    networks:
-      - app-network
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: laravel-app
+        restart: unless-stopped
+        working_dir: /var/www
+        volumes:
+            - ./:/var/www
+        networks:
+            - app-network
 
-  nginx:
-    image: nginx:alpine
-    container_name: nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./:/var/www
-      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-    networks:
-      - app-network
+    nginx:
+        image: nginx:alpine
+        container_name: nginx
+        restart: unless-stopped
+        ports:
+            - "80:80"
+            - "443:443"
+        volumes:
+            - ./:/var/www
+            - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+        networks:
+            - app-network
 
-  mysql:
-    image: mysql:8.0
-    container_name: mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: duan_production
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_USER: duan_user
-      MYSQL_PASSWORD: user_password
-    volumes:
-      - mysql-data:/var/lib/mysql
-    networks:
-      - app-network
+    mysql:
+        image: mysql:8.0
+        container_name: mysql
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: duan_production
+            MYSQL_ROOT_PASSWORD: root_password
+            MYSQL_USER: duan_user
+            MYSQL_PASSWORD: user_password
+        volumes:
+            - mysql-data:/var/lib/mysql
+        networks:
+            - app-network
 
-  redis:
-    image: redis:alpine
-    container_name: redis
-    restart: unless-stopped
-    networks:
-      - app-network
+    redis:
+        image: redis:alpine
+        container_name: redis
+        restart: unless-stopped
+        networks:
+            - app-network
 
-  queue-worker:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: queue-worker
-    restart: unless-stopped
-    working_dir: /var/www
-    command: php artisan queue:work --tries=3
-    volumes:
-      - ./:/var/www
-    networks:
-      - app-network
+    queue-worker:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: queue-worker
+        restart: unless-stopped
+        working_dir: /var/www
+        command: php artisan queue:work --tries=3
+        volumes:
+            - ./:/var/www
+        networks:
+            - app-network
 
 networks:
-  app-network:
-    driver: bridge
+    app-network:
+        driver: bridge
 
 volumes:
-  mysql-data:
+    mysql-data:
 ```
 
 #### Bước 3: Deploy
@@ -589,6 +590,7 @@ composer install --optimize-autoloader --no-dev
 ```
 
 Hoặc nếu không có SSH:
+
 - Upload folder `vendor/` đã build sẵn từ local
 
 #### Bước 4: Setup database
@@ -714,19 +716,12 @@ curl http://localhost:8000/api/health
 
 ---
 
-## 📚 TÀI LIỆU THAM KHẢO
-
-- **[GETTING_STARTED.md](./GETTING_STARTED.md)** - Setup guide chi tiết
-- **[QUICK_RUN.md](./QUICK_RUN.md)** - Chạy nhanh 3 phút
-- **[FIX_GUIDE.md](./FIX_GUIDE.md)** - Troubleshooting
-- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System architecture
-- **[README.md](./README.md)** - Project overview
-
 ---
 
 ## 🎯 CHECKLIST DEPLOY
 
 ### Development (Local)
+
 - ✅ PHP 8.2+ installed
 - ✅ MySQL running
 - ✅ Composer installed
@@ -735,6 +730,7 @@ curl http://localhost:8000/api/health
 - ✅ `php artisan serve` running
 
 ### Production (VPS)
+
 - ✅ Server setup (PHP, MySQL, Nginx)
 - ✅ Code uploaded
 - ✅ Dependencies installed
@@ -746,6 +742,7 @@ curl http://localhost:8000/api/health
 - ✅ Cache optimized
 
 ### Production (Docker)
+
 - ✅ Docker installed
 - ✅ `docker-compose.production.yml` created
 - ✅ Services running
@@ -753,23 +750,3 @@ curl http://localhost:8000/api/health
 - ✅ Optimizations applied
 
 ---
-
-## 🆘 CẦN TRỢ GIÚP?
-
-**Gặp lỗi?** → Đọc [FIX_GUIDE.md](./FIX_GUIDE.md)
-
-**Không chạy được?** → Đọc [GETTING_STARTED.md](./GETTING_STARTED.md)
-
-**Deploy lỗi?** → Check logs: `storage/logs/laravel.log`
-
-**Cần support?** → Contact: admin@example.com
-
----
-
-<div align="center">
-
-**🚀 GOOD LUCK WITH YOUR DEPLOYMENT! 🚀**
-
-**Made with ❤️**
-
-</div>
