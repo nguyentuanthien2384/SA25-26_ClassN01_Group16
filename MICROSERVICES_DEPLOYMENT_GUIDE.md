@@ -63,13 +63,6 @@
 
 ---
 
-## 🔧 Yêu Cầu Hệ Thống
-
-- **Docker Desktop**: Version 4.0+
-- **RAM**: Tối thiểu 8GB (khuyến nghị 16GB)
-- **Disk**: 10GB free space
-- **CPU**: 4 cores+
-
 ---
 
 ## 🚀 Hướng Dẫn Triển Khai

@@ -1,0 +1,29 @@
+[2026-02-27 12:57:52] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-27 12:58:36] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-27 13:11:12] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-27 13:14:02] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-27 13:14:41] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-27 13:15:08] local.INFO: Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch  
+[2026-02-27 13:15:08] local.ERROR: PHP Parse error: Syntax error, unexpected '=' on line 1 {"exception":"[object] (Psy\\Exception\\ParseErrorException(code: 0): PHP Parse error: Syntax error, unexpected '=' on line 1 at D:\\Web_Ban_Do_Dien_Tu\\vendor\\psy\\psysh\\src\\Exception\\ParseErrorException.php:44)
+[stacktrace]
+#0 D:\\Web_Ban_Do_Dien_Tu\\vendor\\psy\\psysh\\src\\CodeCleaner.php(333): Psy\\Exception\\ParseErrorException::fromParseError(Object(PhpParser\\Error))
+#1 D:\\Web_Ban_Do_Dien_Tu\\vendor\\psy\\psysh\\src\\CodeCleaner.php(262): Psy\\CodeCleaner->parse('<?php  = new Pr...', false)
+#2 D:\\Web_Ban_Do_Dien_Tu\\vendor\\psy\\psysh\\src\\Shell.php(848): Psy\\CodeCleaner->clean(Array, false)
+#3 D:\\Web_Ban_Do_Dien_Tu\\vendor\\psy\\psysh\\src\\Shell.php(877): Psy\\Shell->addCode(' = new Predis\\\\C...', true)
+#4 D:\\Web_Ban_Do_Dien_Tu\\vendor\\psy\\psysh\\src\\Shell.php(1342): Psy\\Shell->setCode(' = new Predis\\\\C...', true)
+#5 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\tinker\\src\\Console\\TinkerCommand.php(76): Psy\\Shell->execute(' = new Predis\\\\C...')
+#6 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(36): Laravel\\Tinker\\Console\\TinkerCommand->handle()
+#7 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Util.php(41): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+#8 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(93): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+#9 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+#10 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(662): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+#11 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Command.php(211): Illuminate\\Container\\Container->call(Array)
+#12 D:\\Web_Ban_Do_Dien_Tu\\vendor\\symfony\\console\\Command\\Command.php(326): Illuminate\\Console\\Command->execute(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#13 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Command.php(180): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#14 D:\\Web_Ban_Do_Dien_Tu\\vendor\\symfony\\console\\Application.php(1096): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#15 D:\\Web_Ban_Do_Dien_Tu\\vendor\\symfony\\console\\Application.php(324): Symfony\\Component\\Console\\Application->doRunCommand(Object(Laravel\\Tinker\\Console\\TinkerCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#16 D:\\Web_Ban_Do_Dien_Tu\\vendor\\symfony\\console\\Application.php(175): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#17 D:\\Web_Ban_Do_Dien_Tu\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(201): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#18 D:\\Web_Ban_Do_Dien_Tu\\artisan(35): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#19 {main}
+"} 

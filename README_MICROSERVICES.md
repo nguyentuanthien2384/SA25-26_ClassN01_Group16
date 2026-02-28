@@ -1,7 +1,5 @@
 # 🚀 Microservices Architecture - Web Bán Đồ Điện Tử
 
-## Dự án này implement HOÀN CHỈNH kiến trúc microservices t
-
 ---
 
 ## 🏗️ KIẾN TRÚC TỔNG QUAN

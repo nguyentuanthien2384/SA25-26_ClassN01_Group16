@@ -18,16 +18,20 @@ class EmailSender
         $this->logger = $logger;
         $this->config = $config;
         
-        // Create SMTP transport
         $smtp = $config['smtp'];
-        $dsn = sprintf(
-            '%s://%s:%s@%s:%d',
-            $smtp['encryption'] === 'ssl' ? 'smtps' : 'smtp',
-            urlencode($smtp['username']),
-            urlencode($smtp['password']),
-            $smtp['host'],
-            $smtp['port']
-        );
+        
+        if (!empty($smtp['username']) && !empty($smtp['password'])) {
+            $dsn = sprintf(
+                '%s://%s:%s@%s:%d',
+                $smtp['encryption'] === 'ssl' ? 'smtps' : 'smtp',
+                urlencode($smtp['username']),
+                urlencode($smtp['password']),
+                $smtp['host'],
+                $smtp['port']
+            );
+        } else {
+            $dsn = sprintf('smtp://%s:%d', $smtp['host'], $smtp['port']);
+        }
         
         $transport = Transport::fromDsn($dsn);
         $this->mailer = new Mailer($transport);

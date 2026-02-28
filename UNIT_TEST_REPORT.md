@@ -1,10 +1,5 @@
 # Unit Test Report - Web Bán Đồ Điện Tử
 
-> **Project:** Web Bán Đồ Điện Tử (E-Commerce Platform)  
-> **Framework:** Laravel 10 + PHPUnit 10  
-> **Ngày tạo:** 07/02/2026  
-> **Tác giả:** Nghiêm Đức Việt (23010636)  
-> **Lớp:** CSE703110-1-2-25(N02)
 
 ---
 
