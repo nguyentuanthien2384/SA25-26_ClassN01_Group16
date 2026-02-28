@@ -69,7 +69,9 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'CheckLoginUser' => CheckLoginUser::class,
-        'CheckLoginAdmin' => CheckLoginAdmin::class
+        'CheckLoginAdmin' => CheckLoginAdmin::class,
+        'gateway.token' => \App\Http\Middleware\GatewayTokenMiddleware::class,
+        'circuit.breaker' => \App\Http\Middleware\CircuitBreaker::class,
     ];
 
 }

@@ -171,7 +171,6 @@ return [
         App\Providers\CircuitBreakerServiceProvider::class,
         App\Providers\ServiceDiscoveryProvider::class,
         App\Lab03\Providers\Lab03ServiceProvider::class, // Lab 03 - Layered Architecture
-        Barryvdh\Debugbar\ServiceProvider::class,
     ])->toArray(),
 
     /*
@@ -187,7 +186,6 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
-        'Debugbar' => Barryvdh\Debugbar\Facades\Debugbar::class,
     ])->toArray(),
 
 ];

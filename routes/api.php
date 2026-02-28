@@ -248,3 +248,4 @@ Route::prefix('lab03')->group(function () {
     Route::put('/products/{id}', [Lab03ProductController::class, 'update']);
     Route::delete('/products/{id}', [Lab03ProductController::class, 'destroy']);
 });
+require __DIR__ . '/gateway.php';
