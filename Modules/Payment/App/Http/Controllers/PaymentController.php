@@ -4,7 +4,6 @@ namespace Modules\Payment\App\Http\Controllers;
 
 use App\Models\Models\Cart;
 use App\Models\Models\Transaction;
-use App\Services\ExternalApiService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -14,11 +13,8 @@ use App\Http\Controllers\Controller;
 
 class PaymentController extends Controller
 {
-    protected ExternalApiService $apiService;
-
-    public function __construct(ExternalApiService $apiService)
+    public function __construct()
     {
-        $this->apiService = $apiService;
     }
     public function show(Request $request, $method, Transaction $transaction)
     {
@@ -310,8 +306,8 @@ class PaymentController extends Controller
                 ->with('danger', 'Chưa cấu hình MoMo sandbox.');
         }
 
-        $orderId = (string) $transaction->id;
-        $requestId = (string) $transaction->id;
+        $orderId = 'TXN' . $transaction->id . '_' . time();
+        $requestId = $orderId;
         $amount = (string) $transaction->tr_total;
         $orderInfo = 'Thanh toan don hang #' . $transaction->id;
         $extraData = '';
@@ -339,12 +335,7 @@ class PaymentController extends Controller
         ];
 
         try {
-            // Use Circuit Breaker pattern with retry
-            $response = $this->apiService->callWithRetry(
-                'momo',
-                $config['endpoint'],
-                ['data' => $payload]
-            );
+            $response = Http::timeout(15)->post($config['endpoint'], $payload);
 
             if (!$response->ok()) {
                 throw new \Exception('MoMo API returned error: ' . $response->body());

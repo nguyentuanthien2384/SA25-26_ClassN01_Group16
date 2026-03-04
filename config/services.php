@@ -43,6 +43,7 @@ return [
     'vnpay' => [
         'url' => env('VNPAY_URL', 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'),
         'return_url' => env('VNPAY_RETURN_URL'),
+        'ipn_url' => env('VNPAY_IPN_URL'),
         'tmn_code' => env('VNPAY_TMN_CODE'),
         'hash_secret' => env('VNPAY_HASH_SECRET'),
     ],
@@ -51,6 +52,9 @@ return [
         'mode' => env('PAYPAL_MODE', 'sandbox'),
         'client_id' => env('PAYPAL_CLIENT_ID'),
         'client_secret' => env('PAYPAL_CLIENT_SECRET'),
+        'endpoint' => env('PAYPAL_ENDPOINT', 'https://api-m.sandbox.paypal.com'),
+        'return_url' => env('PAYPAL_RETURN_URL'),
+        'cancel_url' => env('PAYPAL_CANCEL_URL'),
     ],
 
     'vietqr' => [
@@ -72,6 +76,7 @@ return [
     ],
 
     'consul' => [
+        'enabled' => env('CONSUL_ENABLED', false),
         'host' => env('CONSUL_HOST', 'localhost'),
         'port' => env('CONSUL_PORT', 8500),
         'service_host' => env('CONSUL_SERVICE_HOST', 'localhost'),

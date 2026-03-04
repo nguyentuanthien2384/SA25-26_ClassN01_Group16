@@ -1,276 +1,456 @@
 @extends('layouts.app')
 @section('content')
     <style>
-        .pro-reviewer-comment {
-            width: 500px;
-            margin-left: 90px;
-            padding-left: 30px;
-            border-radius: 1px;
-            border: 1px solid #dfd4d4;
-        }
-        .product-buy {
+        .pd-wrap {
             display: flex;
-            flex-direction: column;
-            align-items: stretch;
-            gap: 10px;
+            gap: 30px;
+            align-items: flex-start;
         }
-        .product-qty {
-            min-width: 160px;
+        .pd-gallery {
+            width: 50%;
+            flex-shrink: 0;
         }
-        .product-qty .cart-plus-minus-box {
+        .pd-gallery .main-img {
             width: 100%;
-            height: 44px;
-            line-height: 44px;
-            text-align: center;
+            max-height: 460px;
+            object-fit: contain;
+            border-radius: 12px;
+            background: #f8f9fc;
+            display: block;
         }
-        .product-action {
+        .pd-gallery .thumb-list {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            overflow-x: auto;
+        }
+        .pd-gallery .thumb-list img {
+            width: 72px;
+            height: 72px;
+            object-fit: contain;
+            border: 2px solid #e8ecf1;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: border-color .2s;
+            background: #fff;
+        }
+        .pd-gallery .thumb-list img:hover,
+        .pd-gallery .thumb-list img.active {
+            border-color: #4b5bff;
+        }
+        .pd-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .pd-info .pd-name {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1f2a44;
+            margin: 0 0 10px;
+            line-height: 1.3;
+        }
+        .pd-info .pd-rating {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 6px;
+            margin-bottom: 16px;
+            color: #f5a623;
+            font-size: 20px;
         }
-        .product-action a {
-            height: 46px;
+        .pd-info .pd-rating span {
+            color: #7a849b;
+            font-size: 14px;
+        }
+        .pd-info .pd-price-wrap {
+            background: #fef2f2;
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin-bottom: 16px;
+        }
+        .pd-info .pd-price {
+            font-size: 24px;
+            font-weight: 800;
+            color: #e53935;
+        }
+        .pd-info .pd-price-old {
+            font-size: 16px;
+            color: #9e9e9e;
+            text-decoration: line-through;
+            margin-left: 10px;
+        }
+        .pd-info .pd-desc {
+            font-size: 14px;
+            color: #3a476a;
+            line-height: 1.7;
+            margin-bottom: 16px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        .pd-info .pd-stock {
+            font-size: 14px;
+            color: #3a476a;
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            background: #f0fdf4;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        .pd-info .pd-stock strong {
+            color: #16a34a;
+        }
+        .pd-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .pd-actions .btn-cart,
+        .pd-actions .btn-buy {
+            flex: 1;
+            height: 48px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 0 22px;
-            border-radius: 4px;
-            font-weight: 600;
-            min-width: 190px;
-            white-space: nowrap;
-            line-height: 1;
             gap: 8px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all .2s;
         }
-        .product-action a.btn-add-cart {
-            border: 1px solid #f2583e;
-            color: #f2583e;
+        .pd-actions .btn-cart {
+            border: 2px solid #4b5bff;
+            color: #4b5bff;
             background: #fff;
         }
-        .product-action a.btn-buy-now {
-            border: 1px solid #f2583e;
+        .pd-actions .btn-cart:hover {
+            background: #f0f2ff;
+        }
+        .pd-actions .btn-buy {
+            border: 2px solid #e53935;
             color: #fff;
-            background: #f2583e;
+            background: #e53935;
+        }
+        .pd-actions .btn-buy:hover {
+            background: #c62828;
+        }
+
+        .pd-tabs {
+            margin-top: 40px;
+        }
+        .pd-tabs .tab-nav {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid #e8ecf1;
+            margin-bottom: 24px;
+        }
+        .pd-tabs .tab-nav button {
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #7a849b;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all .2s;
+            margin-bottom: -2px;
+        }
+        .pd-tabs .tab-nav button.active {
+            color: #4b5bff;
+            border-bottom-color: #4b5bff;
+        }
+        .pd-tabs .tab-panel {
+            display: none;
+        }
+        .pd-tabs .tab-panel.active {
+            display: block;
+        }
+        .pd-tabs .tab-panel .pro-content {
+            font-size: 14px;
+            line-height: 1.8;
+            color: #3a476a;
+        }
+        .pd-tabs .tab-panel .pro-content img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .review-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .review-item {
+            display: flex;
+            gap: 14px;
+            padding: 16px 0;
+            border-bottom: 1px solid #f0f2f5;
+        }
+        .review-item:last-child {
+            border-bottom: none;
+        }
+        .review-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #e8ecf1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: #4b5bff;
+        }
+        .review-body {
+            flex: 1;
+            min-width: 0;
+        }
+        .review-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 4px;
+        }
+        .review-name {
+            font-weight: 700;
+            font-size: 14px;
+            color: #1f2a44;
+        }
+        .review-date {
+            font-size: 12px;
+            color: #7a849b;
+        }
+        .review-text {
+            font-size: 14px;
+            color: #3a476a;
+            margin: 0;
+            word-break: break-word;
+        }
+
+        .review-form {
+            background: #f8f9fc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 24px;
+        }
+        .review-form h4 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f2a44;
+            margin: 0 0 16px;
         }
         .star-rating {
-    unicode-bidi: bidi-override;
-    direction: rtl;
-    text-align: left;
-  }
-  .star-rating input[type="radio"] {
-    display: none;
-  }
-  .star-rating label {
-    display: inline-block;
-    font-size: 30px;
-    color: #ccc;
-    cursor: pointer;
-  }
-  .star-rating label:before {
-    content: '★';
-    margin-right: 5px;
-  }
-  .star-rating input[type="radio"]:checked ~ label {
-    color: #ffcc00;}
+            unicode-bidi: bidi-override;
+            direction: rtl;
+            text-align: left;
+            margin-bottom: 12px;
+        }
+        .star-rating input[type="radio"] { display: none; }
+        .star-rating label {
+            display: inline-block;
+            font-size: 28px;
+            color: #d1d5db;
+            cursor: pointer;
+            transition: color .15s;
+        }
+        .star-rating label:before { content: '★'; }
+        .star-rating input[type="radio"]:checked ~ label { color: #f5a623; }
+        .star-rating label:hover,
+        .star-rating label:hover ~ label { color: #f5a623; }
+        .review-form input[type="text"],
+        .review-form textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 12px;
+            outline: none;
+        }
+        .review-form input[type="text"]:focus,
+        .review-form textarea:focus {
+            border-color: #4b5bff;
+            box-shadow: 0 0 0 3px rgba(75,91,255,.1);
+        }
+        .review-form button[type="submit"] {
+            padding: 10px 24px;
+            background: #4b5bff;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .review-form button[type="submit"]:hover { background: #3a48e0; }
+
+        @media (max-width: 768px) {
+            .pd-wrap {
+                flex-direction: column;
+            }
+            .pd-gallery {
+                width: 100%;
+            }
+            .pd-actions {
+                flex-direction: column;
+            }
+        }
     </style>
-    <div class="heading-banner-area overlay-bg">
+
+    <div class="product-area pt-80 pb-80">
         <div class="container">
-            <div class="row">
-                <div class="col-md-12">
+            @php
+                $totalReviews = $productDetails->pro_total_number ?? 0;
+                $totalStars = $productDetails->pro_total ?? 0;
+                $avgRating = $totalReviews > 0 ? round($totalStars / $totalReviews, 1) : 0;
+            @endphp
+
+            <div class="pd-wrap">
+                <div class="pd-gallery">
+                    <img
+                        id="mainImage"
+                        class="main-img"
+                        src="{{ $productDetails->pro_image ? (strpos($productDetails->pro_image, 'http') === 0 ? $productDetails->pro_image : asset($productDetails->pro_image)) : asset('upload/no-image.jpg') }}"
+                        alt="{{ $productDetails->pro_name }}"
+                    />
+                    <div class="thumb-list">
+                        <img
+                            class="active"
+                            src="{{ $productDetails->pro_image ? (strpos($productDetails->pro_image, 'http') === 0 ? $productDetails->pro_image : asset($productDetails->pro_image)) : asset('upload/no-image.jpg') }}"
+                            alt="{{ $productDetails->pro_name }}"
+                            onclick="changeImage(this)"
+                        />
+                        @foreach($productimg as $img)
+                        <img
+                            src="{{ asset('upload/' . $img->img_product) }}"
+                            alt=""
+                            onclick="changeImage(this)"
+                        />
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="pd-info">
+                    <h1 class="pd-name">{{ $productDetails->pro_name }}</h1>
+
+                    <div class="pd-rating">
+                        @for ($i = 1; $i <= 5; $i++)
+                            @if ($i <= floor($avgRating))
+                                <i class="zmdi zmdi-star"></i>
+                            @elseif ($i - 0.5 <= $avgRating)
+                                <i class="zmdi zmdi-star-half"></i>
+                            @else
+                                <i class="zmdi zmdi-star-outline"></i>
+                            @endif
+                        @endfor
+                        <span>{{ $avgRating }} ({{ $totalReviews }} đánh giá)</span>
+                    </div>
+
+                    <div class="pd-price-wrap">
+                        @if($productDetails->pro_sale > 0 && $productDetails->pro_sale < $productDetails->pro_price)
+                            <span class="pd-price">{{ number_format($productDetails->pro_sale, 0, ',', '.') }}đ</span>
+                            <span class="pd-price-old">{{ number_format($productDetails->pro_price, 0, ',', '.') }}đ</span>
+                        @else
+                            <span class="pd-price">{{ number_format($productDetails->pro_price, 0, ',', '.') }}đ</span>
+                        @endif
+                    </div>
+
+                    <div class="pd-desc">
+                        {!! $productDetails->pro_description !!}
+                    </div>
+
+                    <div class="pd-stock">
+                        Kho: <strong>{{ $productDetails->quantity > 0 ? $productDetails->quantity . ' sản phẩm' : 'Tạm hết hàng' }}</strong>
+                    </div>
+
+                    <div class="pd-actions">
+                        <a href="{{ route('cart.add', $productDetails->id) }}" class="btn-cart">
+                            <i class="zmdi zmdi-shopping-cart-plus"></i> Thêm vào giỏ
+                        </a>
+                        <a href="{{ route('cart.add', ['product' => $productDetails->id, 'buy_now' => 1]) }}" class="btn-buy">
+                            <i class="zmdi zmdi-flash"></i> Mua ngay
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pd-tabs">
+                <div class="tab-nav">
+                    <button class="active" onclick="switchTab(event, 'tab-desc')">Mô tả sản phẩm</button>
+                    <button onclick="switchTab(event, 'tab-reviews')">Đánh giá ({{ $totalReviews }})</button>
+                </div>
+
+                <div id="tab-desc" class="tab-panel active">
+                    <div class="pro-content">
+                        {!! $productDetails->pro_content !!}
+                    </div>
+                </div>
+
+                <div id="tab-reviews" class="tab-panel">
+                    <h3 style="font-size:18px; font-weight:700; color:#1f2a44; margin-bottom:16px;">
+                        Đánh giá khách hàng
+                    </h3>
+
+                    @if($ratings->count() > 0)
+                    <ul class="review-list">
+                        @foreach($ratings as $rating)
+                        <li class="review-item">
+                            <div class="review-avatar">
+                                {{ strtoupper(substr(optional($rating->user)->name ?? 'U', 0, 1)) }}
+                            </div>
+                            <div class="review-body">
+                                <div class="review-header">
+                                    <span class="review-name">{{ optional($rating->user)->name ?? 'Ẩn danh' }}</span>
+                                    <span class="review-date">{{ $rating->created_at->diffForHumans() }}</span>
+                                </div>
+                                <p class="review-text">{{ $rating->ra_content }}</p>
+                            </div>
+                        </li>
+                        @endforeach
+                    </ul>
+                    @else
+                        <p style="color:#7a849b;">Chưa có đánh giá nào.</p>
+                    @endif
+
+                    @if(Auth::check())
+                    <div class="review-form">
+                        <h4>Gửi đánh giá của bạn</h4>
+                        <form action="{{ route('postRating', $productDetails) }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="ra_product_id" value="{{ $productDetails->id }}">
+                            <div class="star-rating">
+                                <input type="radio" id="star5" name="ra_number" value="5"><label for="star5"></label>
+                                <input type="radio" id="star4" name="ra_number" value="4"><label for="star4"></label>
+                                <input type="radio" id="star3" name="ra_number" value="3" checked><label for="star3"></label>
+                                <input type="radio" id="star2" name="ra_number" value="2"><label for="star2"></label>
+                                <input type="radio" id="star1" name="ra_number" value="1"><label for="star1"></label>
+                            </div>
+                            <input type="text" name="ra_content" placeholder="Nhập nội dung đánh giá..." required>
+                            <button type="submit">Gửi đánh giá</button>
+                        </form>
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
-    <!-- HEADING-BANNER END -->
-    <!-- PRODUCT-AREA START -->
-    <div class="product-area single-pro-area pt-80 pb-80 product-style-2">
-        <div class="container">
 
-            <div class="row shop-list single-pro-info no-sidebar">
-                <!-- Single-product start -->
-                <div class="col-lg-12">
-                    <div class="single-product clearfix">
-                         <div class="single-pro-slider single-big-photo view-lightbox slider-for" style="width:55%;height:460px">
-                            <div>
-                                <img src="{{ $productDetails->pro_image ? (strpos($productDetails->pro_image, 'http') === 0 ? $productDetails->pro_image : asset($productDetails->pro_image)) : asset('upload/no-image.jpg') }}" alt="{{$productDetails->pro_name}}" style="width:auto;height:450px" />
-                                <a class="view-full-screen" href="{{ $productDetails->pro_image ? (strpos($productDetails->pro_image, 'http') === 0 ? $productDetails->pro_image : asset($productDetails->pro_image)) : asset('upload/no-image.jpg') }}"
-                                     data-lightbox="roadtrip" data-title="My caption">
-                                    <i class="zmdi zmdi-zoom-in"></i>
-                                </a>
-                            </div>
-                            @foreach($productimg as $img)
-                            <div>
-                                <img src="{{ asset('upload/' . $img->img_product) }}" alt="" style="width:auto;height:450px" />
-                                <a class="view-full-screen" href="{{ $productDetails->pro_image }}"
-                                    data-lightbox="roadtrip" data-title="My caption">
-                                    <i class="zmdi zmdi-zoom-in"></i>
-                                </a>
-                            </div>
-                            @endforeach
-                        </div>
-                        @php
-                            $totalReviews = $productDetails->pro_total_number;
-                            $totalStars = $productDetails->pro_total;
-                            $averageRating = $totalReviews > 0 ? $totalReviews / $totalStars : 0;
-                            $roundedNumber = round($averageRating * 2) / 2;
-                        @endphp
-                        <div class="product-info"style="width:45%;height:460px">
-                            <div class="fix">
-                                <h4 class="post-title floatleft">Tên sản phẩm: {{ $productDetails->pro_name }}</h4>
-                                <div class="pro-rating floatright" style="color:rgb(221, 172, 12);font-size: 25px; ">
-                                    @for ($i = 1; $i <= 5; $i++)
-                                        @if ($i <= $roundedNumber)
-                                            <i class="zmdi zmdi-star"></i>
-                                        @elseif ($i - 0.5 == $roundedNumber)
-                                            <i class="zmdi zmdi-star-half"></i>
-                                            {{-- @else
-										<i class="zmdi zmdi-star"></i>  --}}
-                                        @endif
-                                    @endfor
-                                    <span style="color: black; font-size:18px">{{ $totalStars }}(Đánh giá)</span>
-                                </div>
-                            </div>
-                            <div class="fix mb-20" >
-                                <label for="">
-                                    <H5>Giá bán: </H5>
-                                </label> 
-                                @if($productDetails->pro_sale > 0 && $productDetails->pro_sale < $productDetails->pro_price)
-                                    <del style=" font-size: 17px">
-                                        <span class="pro-price">{{ number_format($productDetails->pro_price, 0, ',', '.') }} Đ</span>
-                                    </del> <br>
-                                    <label for="">
-                                        <H5>Giá khuyến mãi: </H5>
-                                    </label>
-                                    <span class="pro-price">{{ number_format($productDetails->pro_sale, 0, ',', '.') }} Đ</span>
-                                @else
-                                    <span class="pro-price">{{ number_format($productDetails->pro_price, 0, ',', '.') }} Đ</span>
-                                @endif
-                            </div>
-                            <div class="product-description" style="font-size: 14px">
-                                {!!$productDetails->pro_description !!}
-                            </div>
-                             <div class="product-buy">
-                                <div class="product-qty">
-                                    <input style="color: black" type="text" value="Số lượng: {{ $productDetails->quantity }}" name="qtybutton"
-                                        class="cart-plus-minus-box" readonly>
-                                </div>
-                                <div class="product-action">
-                                    <a href="{{ route('cart.add', $productDetails->id) }}" data-bs-toggle="tooltip"
-                                        data-placement="top" title="Add To Cart" class="btn-add-cart">Thêm vào giỏ hàng <i
-                                            class="zmdi zmdi-shopping-cart-plus"></i></a>
-                                    <a href="{{ route('cart.add', ['product' => $productDetails->id, 'buy_now' => 1]) }}" data-bs-toggle="tooltip"
-                                        data-placement="top" title="Buy Now" class="btn-buy-now">Mua ngay</a>
-                                </div>
-                            </div>
-                            <!-- Single-pro-slider Small-photo start -->
-                            <div class="single-pro-slider single-sml-photo slider-nav">
-                                    <div>
-                                        <img src="{{ $productDetails->pro_image ? (strpos($productDetails->pro_image, 'http') === 0 ? $productDetails->pro_image : asset($productDetails->pro_image)) : asset('upload/no-image.jpg') }}" alt="{{$productDetails->pro_name}}" style="width:105px;height:80px" />
-                                    </div>
-                                @foreach($productimg as $img)
-                                    <div>
-											<img src="{{ asset('upload/' . $img->img_product) }}" alt="" style="width:105px;height:80px" />
-									</div>
-                                    @endforeach
-                            </div>
-                            <!-- Single-pro-slider Small-photo end -->
-                        </div>
+    <script>
+    function changeImage(thumb) {
+        document.getElementById('mainImage').src = thumb.src;
+        document.querySelectorAll('.thumb-list img').forEach(function(img) {
+            img.classList.remove('active');
+        });
+        thumb.classList.add('active');
+    }
 
-                    </div>
-                </div>
-
-                <!-- Single-product end -->
-            </div>
-            <!-- single-product-tab start -->
-            <div class="single-pro-tab" style="padding-top: 90px;">
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="single-pro-tab-menu">
-                            <!-- Nav tabs -->
-                            <ul class="nav d-block">
-                                <li><a href="#description" data-bs-toggle="tab">Miêu tả</a></li>
-                                <li><a class="active" href="#" data-bs-toggle="tab">Đánh giá</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-md-9">
-                        <!-- Tab panes -->
-                        <div class="tab-content">
-                            <div class="tab-pane" id="description">
-                                <div class="pro-tab-info pro-description">
-                                    {!! $productDetails->pro_content !!}
-                                </div>
-                            </div>
-                        </div>
-                            <div class="tab-content">
-                                <div class="tab-pane active" id="reviews">
-                                    <div class="pro-tab-info pro-reviews">
-                                        <div class="customer-review mb-60">
-                                            <h3 class="tab-title title-border mb-30">Đánh giá khách hàng</h3>
-                                            <ul class="product-comments clearfix">
-                                                <li class="mb-30">
-                                                    @foreach ($ratings as $rating)
-                                                        <div class="pro-reviewer">
-                                                            <img src="img/reviewer/1.jpg" alt="" />
-                                                        </div>
-                                                        <div class="pro-reviewer-comment">
-                                                            <div class="fix">
-                                                                <div class="floatleft mbl-center">
-                                                                    <h6 class="text-uppercase mb-0" style="paddin:  8px">
-                                                                        <strong>{{ optional($rating->user)->name ?? '[N/A]' }}</strong>
-                                                                    </h6>
-                                                                    <p class="reply-date">{{ $rating->created_at }}</p>
-                                                                </div>
-                                                                <div class="comment-reply floatright">
-                                                                    <a href="#"><i
-                                                                            class="zmdi zmdi-mail-reply"></i></a>
-                                                                    <a href="#"><i class="zmdi zmdi-close"></i></a>
-                                                                </div>
-                                                            </div>
-                                                            <p class="mb-0" style="font-size: 15px">
-                                                                {{ $rating->ra_content }}</p>
-                                                        </div>
-                                                    @endforeach
-                                                </li>
-
-                                                <li class="threaded-comments">
-                                                    <div class="pro-reviewer">
-                                                        <img src="img/reviewer/1.jpg" alt="" />
-                                                    </div>
-
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                @if (Auth::check())
-                                    <div class="sen">
-                                        <h4 class="titl">Khách hàng gửi đánh giá</h4>
-                                        <form id="" action="{{ route('postRating', $productDetails) }}"
-                                            method="post">
-                                            @csrf
-                                            <input type="text" name="ra_product_id" value="{{ $productDetails->id }}"
-                                                required>
-                                                    <div class="star-rating">
-                                                      <input type="radio" id="star5" name="ra_number" value="5"><label for="star5"></label>
-                                                      <input type="radio" id="star4" name="ra_number" value="4"><label for="star4"></label>
-                                                      <input type="radio" id="star3" name="ra_number" value="3"><label for="star3"></label>
-                                                      <input type="radio" id="star2" name="ra_number" value="2"><label for="star2"></label>
-                                                      <input type="radio" id="star1" name="ra_number" value="1"><label for="star1"></label>
-                                                    </div>
-                                            <input type="text" name="ra_content" placeholder="Nội dung đánh giá"
-                                                required />
-                                            <button type="submit">Gửi thông tin</button>
-                                            <p class="form-message"></p>
-                                        </form>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- single-product-tab end -->
-    </div>
-    </div>
+    function switchTab(e, tabId) {
+        document.querySelectorAll('.pd-tabs .tab-panel').forEach(function(p) { p.classList.remove('active'); });
+        document.querySelectorAll('.pd-tabs .tab-nav button').forEach(function(b) { b.classList.remove('active'); });
+        document.getElementById(tabId).classList.add('active');
+        e.target.classList.add('active');
+    }
+    </script>
 @stop

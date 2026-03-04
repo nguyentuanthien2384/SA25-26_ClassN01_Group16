@@ -34,35 +34,27 @@ class ServiceDiscoveryProvider extends ServiceProvider
             return;
         }
 
-        // Only register if Consul is enabled
-        if (!config('services.consul.enabled', true)) {
+        if (!config('services.consul.enabled', false)) {
             return;
         }
 
         try {
             $serviceDiscovery = $this->app->make(ServiceDiscovery::class);
-            
-            // Register service on boot
+
             if ($serviceDiscovery->register()) {
-                Log::info('✅ Service registered with Consul');
+                Log::info('Service registered with Consul');
             }
 
-            // Deregister on shutdown
             register_shutdown_function(function () use ($serviceDiscovery) {
                 try {
                     $serviceDiscovery->deregister();
-                    Log::info('✅ Service deregistered from Consul');
                 } catch (\Exception $e) {
-                    Log::error('Failed to deregister from Consul on shutdown', [
-                        'error' => $e->getMessage(),
-                    ]);
+                    Log::error('Failed to deregister from Consul', ['error' => $e->getMessage()]);
                 }
             });
 
         } catch (\Exception $e) {
-            Log::warning('Could not register with Consul', [
-                'error' => $e->getMessage(),
-            ]);
+            Log::warning('Could not register with Consul', ['error' => $e->getMessage()]);
         }
     }
 

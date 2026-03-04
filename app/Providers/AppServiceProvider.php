@@ -4,35 +4,42 @@ namespace App\Providers;
 
 use App\Models\Models\Cart;
 use App\Models\Models\Wishlist;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        view()->composer('*', function($view){
-            $cart = new Cart();
-            $carts = Cart::orderBy('quantity','DESC')->get();
-            $wishlistIds = [];
-            $wishlistCount = 0;
-            if (get_data_user('web')) {
-                $wishlistIds = Wishlist::where('user_id', get_data_user('web'))
-                    ->pluck('product_id')
-                    ->toArray();
+        view()->composer('layouts.app', function ($view) {
+            $userId = get_data_user('web');
+
+            if ($userId) {
+                $carts = Cache::remember("cart:user:{$userId}", 60, function () use ($userId) {
+                    return Cart::select(['id', 'pro_id', 'quantity', 'price'])
+                        ->where('user_id', $userId)
+                        ->orderBy('quantity', 'DESC')
+                        ->get();
+                });
+
+                $wishlistIds = Cache::remember("wishlist:ids:{$userId}", 120, function () use ($userId) {
+                    return Wishlist::where('user_id', $userId)
+                        ->pluck('product_id')
+                        ->toArray();
+                });
                 $wishlistCount = count($wishlistIds);
+            } else {
+                $carts = collect();
+                $wishlistIds = [];
+                $wishlistCount = 0;
             }
-            $view->with(compact('cart','carts','wishlistIds','wishlistCount'));
+
+            $view->with(compact('carts', 'wishlistIds', 'wishlistCount'));
         });
     }
 }

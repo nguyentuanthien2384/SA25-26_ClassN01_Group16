@@ -28,8 +28,6 @@ class IndexProductToElasticsearch
                 Log::warning('Elasticsearch not available: ' . $e->getMessage());
                 $this->enabled = false;
             }
-        } else {
-            Log::info('Elasticsearch package not installed. CQRS read model disabled. Install: composer require elasticsearch/elasticsearch');
         }
     }
 

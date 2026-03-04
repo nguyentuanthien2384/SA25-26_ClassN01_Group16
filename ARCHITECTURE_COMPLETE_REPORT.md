@@ -402,21 +402,88 @@ Sensitivity: Threshold quá thấp → false positive, quá cao → slow detecti
 
 ## 2.2. Catalog Service — Code Level
 
-### Controller Layer
+**Microservice:** catalog-service (port 9005) | **Database:** catalog_db (mysql-catalog:3310)
+**Patterns:** CQRS, Caching, Pagination, Eager Loading, Dependency Injection
+
+### Service-Level API Controller
+```php
+// File: app/Http/Controllers/Api/CatalogServiceController.php
+// Kong Route: /api/catalog/* → catalog-service:8000
+
+class CatalogServiceController extends Controller
+{
+    private ProductCommandService $commandService;  // CQRS — inject qua constructor
+
+    // ── READ (Query side — cached) ──
+    public function index(Request $request): JsonResponse
+    {
+        // Pagination: min 1, max 60 items/page
+        $perPage = min(max((int) $request->input('per_page', 20), 1), 60);
+
+        // Cache key bao gồm TẤT CẢ filter params → tránh cache collision
+        $cacheKey = "catalog:products:{$perPage}:{$page}:{$category}:{$search}:{$sort}";
+
+        $products = Cache::remember($cacheKey, 300, function () use (...) {
+            return Product::select([                          // NFR-1: Select tối ưu
+                'id', 'pro_name', 'pro_slug', 'pro_price',
+                'pro_sale', 'pro_image', 'pro_description', 'pro_category_id',
+            ])
+            ->where('pro_active', Product::STATUS_PUBLIC)
+            ->with(['category:id,c_name,c_slug'])             // NFR-1: Eager loading
+            ->paginate($perPage);                              // NFR-1: Pagination
+        });
+
+        return response()->json($products)
+            ->header('X-Cache-Status', 'HIT'/'MISS')          // NFR-5: Observability
+            ->header('X-Service', 'catalog-service');          // NFR-5: Service tracing
+    }
+
+    // ── WRITE (Command side — CQRS) ──
+    public function store(Request $request): JsonResponse
+    {
+        // Validation: price > 0, category phải tồn tại
+        $product = $this->commandService->create($request->all());  // CQRS Command
+        Cache::tags(['catalog'])->flush();                           // Cache invalidation
+        return response()->json($product, 201);
+    }
+
+    // ── Categories ──
+    public function categories(): JsonResponse
+    {
+        return Cache::remember('catalog:categories', 600, function () {
+            return Category::where('c_active', 1)
+                ->select(['id', 'c_name', 'c_slug'])
+                ->withCount('Products')                       // Aggregate query
+                ->get();
+        });
+    }
+}
 ```
-File: app/Http/Controllers/Api/ProductApiController.php
-├── index(Request)     → GET /api/products     → Cache + Pagination + Filter
-└── show(int $id)      → GET /api/products/{id} → Cache single product
-```
+
+**NFR mapping cho Catalog Service:**
+
+| NFR | Cách đáp ứng trong code | Dòng code |
+|-----|------------------------|-----------|
+| NFR-1 Performance | `Cache::remember()` TTL 300s, `->select()` chỉ cột cần | `index()` line 20-35 |
+| NFR-1 Query < 100ms | `->with(['category:id,...'])` Eager Loading tránh N+1 | `index()` line 28 |
+| NFR-2 Scalability | Pagination `min(max(...), 60)` giới hạn data | `index()` line 15 |
+| NFR-4 Security | Validator cho store/update, `exists:category,id` | `store()` line 5-10 |
+| NFR-5 Monitoring | Header `X-Cache-Status`, `X-Service` | `index()` line 33-34 |
 
 ### Service Layer (Lab03 Layered Architecture)
 ```
 File: app/Lab03/Services/ProductService.php
-├── getAllPaginated()    → Delegate to Repository
-├── getById()           → Delegate to Repository
-├── create(array)       → Validate + Repository::create
-├── update(id, array)   → Validate + Repository::update
-└── delete(id)          → Repository::delete
+├── getAllProducts(perPage)  → Delegate to Repository (Pagination)
+├── getProductById(id)      → Repository::findById + transformProductData
+├── createProduct(data)     → validateProductData → applyBusinessRules → Repository::create
+│   Business Rules:
+│   ├── pro_price > 0 (required)
+│   ├── pro_sale 0-100% → tính pro_total = price - (price * sale / 100)
+│   ├── pro_price > 10,000,000 VND → tự động đánh dấu pro_hot = 1
+│   └── quantity == 0 → tự động pro_active = 0 (tắt sản phẩm)
+├── updateProduct(id, data) → Validate → applyBusinessRules → Repository::update
+├── deleteProduct(id)       → Check exists → Repository::delete
+└── searchProducts(keyword) → Repository::searchByName → transform
 
 Dependency Injection:
   ProductService → ProductRepositoryInterface (Interface, not concrete class)
@@ -438,85 +505,459 @@ File: app/Lab03/Repositories/ProductRepository.php implements ProductRepositoryI
 └── exists($id)                → Product::where('id', $id)->exists()
 
 Interface: app/Lab03/Repositories/ProductRepositoryInterface.php
-  → 9 methods defined (Dependency Inversion Principle)
+  → 9 methods defined (Dependency Inversion Principle — SOLID)
 ```
 
 ### Model Layer
 ```
 File: app/Models/Models/Product.php
 ├── Table: products
-├── Relationships: belongsTo(Category), hasMany(ProImage), hasMany(Rating)
-├── Constants: STATUS_PUBLIC, HOT_ON
-└── Scopes: active(), hot(), new()
+├── Fillable: pro_name, pro_slug, pro_price, pro_sale, pro_total, pro_category_id,
+│             pro_content, pro_description, pro_image, quantity, pro_active, pro_hot, pro_pay
+├── Relationships: belongsTo(Category), belongsTo(User), belongsTo(Rating)
+└── Constants: STATUS_PUBLIC = 1, STATUS_PRIVATE = 0, HOT_ON = 1, HOT_OFF = 0
 ```
 
+---
+
 ## 2.3. Order Service — Code Level
+
+**Microservice:** order-service (port 9002) | **Database:** order_db (mysql-order:3311)
+**Patterns:** Saga, Event-Driven, Outbox, State Machine
+
+### Service-Level API Controller
+```php
+// File: app/Http/Controllers/Api/OrderServiceController.php
+// Kong Route: /api/orders/* → catalog-service:8000 (shared DB)
+
+class OrderServiceController extends Controller
+{
+    // ── CREATE order (Saga + Event-Driven) ──
+    public function store(Request $request): JsonResponse
+    {
+        DB::beginTransaction();
+
+        // 1. Đọc cart items
+        $cartItems = Cart::where('user_id', $request->user_id)->get();
+        if ($cartItems->isEmpty()) return response()->json(['error' => 'Cart is empty'], 400);
+
+        // 2. Tính tổng tiền
+        $total = $cartItems->sum(fn($item) => $item->price * $item->quantity);
+
+        // 3. Tạo Transaction (đơn hàng chính)
+        $transaction = new Transaction();
+        $transaction->tr_user_id = $request->user_id;
+        $transaction->tr_total   = $total;
+        $transaction->tr_status  = Transaction::STATUS_DEFAULT;  // 0
+        $transaction->save();
+
+        // 4. Tạo Order items (bảng oders)
+        foreach ($cartItems as $item) {
+            DB::table('oders')->insert([
+                'od_transaction_id' => $transaction->id,
+                'od_product_id'     => $item->pro_id,
+                'od_qty'            => $item->quantity,
+                'od_price'          => $item->price,
+            ]);
+        }
+
+        DB::commit();
+
+        // 5. SAGA PATTERN — Orchestrate distributed steps
+        $saga = new OrderSaga($transaction);
+        $saga->addStep(new ReserveStockStep())       // Step 1: Lock inventory
+             ->addStep(new ProcessPaymentStep())      // Step 2: Charge payment
+             ->addStep(new CreateShipmentStep())       // Step 3: Create delivery
+             ->addStep(new SendNotificationStep());    // Step 4: Notify user
+        $saga->execute();
+        // Nếu Step 3 fail → compensate Step 2 (refund) → compensate Step 1 (release stock)
+
+        // 6. EVENT-DRIVEN — Async notification via Outbox
+        event(new OrderPlaced($transaction, $cartItems->toArray()));
+
+        // 7. Clear cart
+        Cart::where('user_id', $request->user_id)->delete();
+
+        return response()->json([
+            'transaction_id' => $transaction->id,
+            'total'          => $total,
+            'status'         => 'processing',
+        ], 201);
+    }
+
+    // ── UPDATE status (State Machine) ──
+    public function updateStatus(Request $request, int $id): JsonResponse
+    {
+        // State Machine: chỉ cho phép chuyển trạng thái hợp lệ
+        $validTransitions = [
+            STATUS_DEFAULT(0) => [STATUS_WAIT(2)],           // Mới → Đang xử lý
+            STATUS_WAIT(2)    => [STATUS_DONE(1), STATUS_FAILUE(3)],  // Xử lý → Thành công / Thất bại
+        ];
+        // Không cho phép: DONE → DEFAULT, FAILUE → bất kỳ
+    }
+}
+```
+
+**NFR mapping cho Order Service:**
+
+| NFR | Cách đáp ứng trong code | Component |
+|-----|------------------------|-----------|
+| NFR-3 Availability | Saga compensation — tự hoàn tác khi lỗi | OrderSaga.compensate() |
+| NFR-3 Fault Isolation | Saga catch Exception → log lỗi nhưng order vẫn saved | store() try/catch |
+| NFR-4 Security | State machine validation — không cho skip trạng thái | updateStatus() |
+| NFR-2 Scalability | Event-Driven async — notification không block order | event(OrderPlaced) |
 
 ### Saga Pattern (Distributed Transaction)
 ```
 File: app/Services/Saga/OrderSaga.php
 ├── addStep(SagaStepInterface)  → Thêm bước vào saga
 ├── execute()                    → Thực thi tuần tự, nếu lỗi → compensate()
-└── compensate()                 → Hoàn tác theo thứ tự ngược
+└── compensate()                 → Hoàn tác theo thứ tự ngược (LIFO)
 
-4 Steps:
-  1. ReserveStockStep     → Lock inventory, compensate = release stock
-  2. ProcessPaymentStep   → Charge customer, compensate = refund
-  3. CreateShipmentStep   → Create delivery, compensate = cancel shipment
-  4. SendNotificationStep → Email/SMS, compensate = send cancellation notice
+4 Steps (mỗi step implement SagaStepInterface):
+  Step 1: ReserveStockStep     → Lock inventory    | compensate = release stock
+  Step 2: ProcessPaymentStep   → Charge customer   | compensate = refund
+  Step 3: CreateShipmentStep   → Create delivery   | compensate = cancel shipment
+  Step 4: SendNotificationStep → Email/SMS confirm  | compensate = cancellation notice
 
 Interface: app/Services/Saga/SagaStepInterface.php
-  execute(Transaction)    → Thực thi bước
-  compensate(Transaction) → Hoàn tác bước
+  execute(Transaction $transaction)    → Thực thi bước
+  compensate(Transaction $transaction) → Hoàn tác bước
+
+Compensation Flow (ví dụ Step 3 fail):
+  execute Step 1 ✓ → execute Step 2 ✓ → execute Step 3 ✗
+  → compensate Step 2 (refund) → compensate Step 1 (release stock)
+  → Log::critical() nếu compensate cũng fail
 ```
 
-### Event-Driven Architecture
+### Event-Driven Architecture + Outbox Pattern
 ```
 Flow: User đặt hàng → OrderPlaced Event → SaveOrderPlacedToOutbox Listener → OutboxMessage DB
 
 Files:
-  app/Events/OrderPlaced.php              → Event chứa Transaction data
-  app/Listeners/SaveOrderPlacedToOutbox.php → Lưu vào outbox_messages table
-  app/Jobs/PublishOutboxMessages.php       → Đọc outbox → push Redis queue
+  app/Events/OrderPlaced.php              → Event chứa Transaction + cart items data
+  app/Listeners/SaveOrderPlacedToOutbox.php → Lưu vào outbox_messages table (cùng transaction)
+  app/Jobs/PublishOutboxMessages.php       → Background Job: đọc outbox → push Redis queue
   notification-service/consumer.php        → Consumer đọc Redis → gửi email
 
-Outbox Pattern Flow:
-  1. Transaction COMMIT (đảm bảo data consistency)
-  2. Event lưu vào outbox_messages table (cùng transaction)
-  3. Background Job đọc outbox → push to Redis queue
-  4. Notification Service consumer → gửi email
+Outbox Pattern — Đảm bảo Consistency:
+  1. DB Transaction COMMIT (order data + outbox message cùng 1 transaction)
+  2. Background Job poll outbox_messages WHERE published = false
+  3. Push message to Redis queue
+  4. Mark outbox message published = true, published_at = now()
+  5. Notification Service consumer → gửi email/SMS
+  → Nếu step 3-5 fail → retry vì message vẫn trong outbox (at-least-once delivery)
 ```
 
-## 2.4. API Gateway — Code Level
+---
+
+## 2.4. User Service — Code Level
+
+**Microservice:** user-service (port 9003) | **Database:** user_db (mysql-user:3312)
+**Patterns:** Stateless Auth, Password Hashing (bcrypt), Input Validation
+
+### Service-Level API Controller
+```php
+// File: app/Http/Controllers/Api/UserServiceController.php
+// Kong Route: /api/users/* → catalog-service:8000 (shared DB)
+
+class UserServiceController extends Controller
+{
+    // ── Register ──
+    public function register(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:users,email',   // Unique constraint
+            'password' => 'required|string|min:6|confirmed',     // Confirmation match
+            'phone'    => 'nullable|string',
+        ]);
+
+        $id = DB::table('users')->insertGetId([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => Hash::make($request->password),  // NFR-4: bcrypt hashing
+            'active'   => 1,
+        ]);
+
+        return response()->json(['success' => true, 'data' => [...]], 201);
+    }
+
+    // ── Login (Stateless) ──
+    public function login(Request $request): JsonResponse
+    {
+        $user = DB::table('users')->where('email', $request->email)->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            Log::warning('[USER] Login failed', ['email' => $request->email]);
+            return response()->json(['error' => 'Invalid email or password'], 401);
+        }
+
+        return response()->json([
+            'data'  => ['id' => $user->id, 'name' => $user->name, ...],
+            'token' => 'valid-user-token',  // Stateless token
+        ]);
+    }
+
+    // ── Profile (Read) ──
+    public function show(int $id): JsonResponse
+    {
+        $user = DB::table('users')
+            ->select(['id', 'name', 'email', 'phone', 'address'])  // NFR-1: Select tối ưu
+            ->where('id', $id)->first();
+        // ...
+    }
+
+    // ── Profile Update ──
+    public function update(Request $request, int $id): JsonResponse
+    {
+        DB::table('users')->where('id', $id)->update(
+            array_merge($request->only(['name', 'phone', 'address']), ['updated_at' => now()])
+        );
+        // ...
+    }
+}
+```
+
+**NFR mapping cho User Service:**
+
+| NFR | Cách đáp ứng trong code | Dòng code |
+|-----|------------------------|-----------|
+| NFR-4 Authentication | `Hash::make()` bcrypt + `Hash::check()` verification | register/login |
+| NFR-4 SQL Injection | `DB::table()->where()` parameterized queries | Toàn bộ controller |
+| NFR-4 Input Validation | Validator rules: email format, unique, min length | register() |
+| NFR-5 Monitoring | `Log::warning()` cho failed login attempts | login() |
+
+---
+
+## 2.5. Notification Service — Code Level
+
+**Microservice:** notification-service (port 9004) | **Database:** notification_db (mysql-notification:3313)
+**Patterns:** Event-Driven, Outbox Pattern, Async Processing
+
+### Service-Level API Controller
+```php
+// File: app/Http/Controllers/Api/NotificationServiceController.php
+// Kong Route: /api/notifications/* → catalog-service:8000
+
+class NotificationServiceController extends Controller
+{
+    // ── Queue notification (Outbox Pattern) ──
+    public function send(Request $request): JsonResponse
+    {
+        $request->validate([
+            'type'      => 'required|in:email,sms,push',   // 3 loại notification
+            'recipient' => 'required|string',
+            'subject'   => 'required|string|max:255',
+            'body'      => 'required|string',
+        ]);
+
+        DB::beginTransaction();
+
+        // 1. Lưu notification vào log table
+        $notificationId = DB::table('notifications_log')->insertGetId([...]);
+
+        // 2. Outbox Pattern — lưu event cùng transaction
+        OutboxMessage::create([
+            'aggregate_type' => 'notification',
+            'aggregate_id'   => $notificationId,
+            'event_type'     => 'notification.queued',
+            'payload'        => json_encode(['type', 'recipient', 'subject']),
+        ]);
+
+        DB::commit();  // Cả notification + outbox đều commit cùng lúc
+        // → Đảm bảo consistency: không bao giờ mất notification
+
+        return response()->json(['notification_id' => $notificationId, 'status' => 'queued'], 201);
+    }
+
+    // ── Process outbox (Worker endpoint) ──
+    public function processOutbox(): JsonResponse
+    {
+        $pending = OutboxMessage::unpublished()->take(50)->get();  // Batch 50 messages
+
+        foreach ($pending as $message) {
+            // Gửi notification thực tế (email/SMS/push)
+            $message->markPublished();  // published = true, published_at = now()
+        }
+
+        return response()->json([
+            'processed' => $processed,
+            'remaining' => OutboxMessage::unpublished()->count(),
+        ]);
+    }
+}
+```
+
+**Outbox Pattern — Đảm bảo At-Least-Once Delivery:**
+```
+DB Transaction:
+  ┌─────────────────────────────────────┐
+  │ INSERT notifications_log            │  ← Notification data
+  │ INSERT outbox_messages              │  ← Event record
+  │ COMMIT                              │  ← Cả 2 commit cùng lúc
+  └─────────────────────────────────────┘
+         │
+         ▼
+  Worker (processOutbox):
+  ┌─────────────────────────────────────┐
+  │ SELECT outbox WHERE published=false │
+  │ Deliver notification (email/SMS)    │
+  │ UPDATE published=true               │
+  └─────────────────────────────────────┘
+  → Nếu worker crash trước UPDATE → message vẫn unpublished → retry tự động
+```
+
+---
+
+## 2.6. Monitoring Service — Code Level
+
+**Patterns:** Health Check, Prometheus Metrics, Service Discovery
+
+### Service-Level API Controller
+```php
+// File: app/Http/Controllers/Api/MonitoringServiceController.php
+// Kong Route: /api/monitoring/* → catalog-service:8000
+
+class MonitoringServiceController extends Controller
+{
+    // ── Health Check (cho Kong + Prometheus) ──
+    public function health(): JsonResponse
+    {
+        $checks = [
+            'database' => $this->checkDatabase(),   // PDO connection test
+            'cache'    => $this->checkCache(),       // Redis put/get test
+            'storage'  => $this->checkStorage(),     // is_writable() test
+        ];
+
+        $healthy = !in_array(false, array_column($checks, 'ok'));
+
+        return response()->json([
+            'status'    => $healthy ? 'healthy' : 'degraded',
+            'timestamp' => now()->toIso8601String(),
+            'uptime_s'  => (int)(microtime(true) - LARAVEL_START),
+            'checks'    => $checks,
+        ], $healthy ? 200 : 503);  // 503 nếu bất kỳ check nào fail
+    }
+
+    // ── Prometheus Metrics (text/plain format) ──
+    public function metrics(): Response
+    {
+        $lines = [
+            '# HELP http_requests_total Total HTTP requests',
+            '# TYPE http_requests_total counter',
+            "http_requests_total {$requestCount}",
+            '',
+            '# HELP service_health Service health (1=up, 0=down)',
+            '# TYPE service_health gauge',
+            "service_health{service=\"database\"} {$dbOk}",
+            "service_health{service=\"cache\"} {$cacheOk}",
+        ];
+
+        return response(implode("\n", $lines), 200)
+            ->header('Content-Type', 'text/plain; charset=UTF-8');
+        // → Prometheus scrape endpoint này mỗi 15s
+    }
+
+    // ── Service Discovery (ping tất cả services) ──
+    public function services(): JsonResponse
+    {
+        $services = [
+            'catalog-service'      => ['host' => 'catalog-service',      'port' => 8000],
+            'order-service'        => ['host' => 'order-service',        'port' => 8000],
+            'user-service'         => ['host' => 'user-service',         'port' => 8000],
+            'notification-service' => ['host' => 'notification-service', 'port' => 8000],
+        ];
+
+        foreach ($services as $name => $info) {
+            $results[$name] = [
+                'host'   => $info['host'],
+                'port'   => $info['port'],
+                'status' => $this->pingService($info['host'], $info['port']),  // UP/DOWN
+            ];
+        }
+        // → Kết quả: {"catalog-service": "UP", "order-service": "UP", ...}
+    }
+
+    private function pingService(string $host, int $port): string
+    {
+        $fp = @fsockopen($host, $port, $errno, $errstr, 2);  // 2s timeout
+        if ($fp) { fclose($fp); return 'UP'; }
+        return 'DOWN';
+    }
+}
+```
+
+**NFR mapping cho Monitoring Service:**
+
+| NFR | Cách đáp ứng trong code | Endpoint |
+|-----|------------------------|----------|
+| NFR-3 Availability | Health check trả 503 khi degraded → Kong tự loại | `/api/monitoring/health` |
+| NFR-5 Metrics | Prometheus format text/plain → Grafana dashboard | `/api/monitoring/metrics` |
+| NFR-5 Tracing | Service Discovery ping → UP/DOWN status | `/api/monitoring/services` |
+| NFR-2 Scalability | Uptime tracking, resource monitoring | `health()` |
+
+---
+
+## 2.7. API Gateway — Code Level
+
+**Entry point:** Kong API Gateway (port 9000) → Laravel GatewayController
+**Patterns:** Reverse Proxy, Token Auth, RBAC, Circuit Breaker fallback
 
 ### Gateway Routing
-```
-File: app/Http/Controllers/Gateway/GatewayController.php
-├── handle(Request, path)
-│   ├── Check role (admin required for POST/PUT/DELETE) → 403 if user
-│   ├── Construct target URL: PRODUCT_SERVICE_URL/api/products/{path}
-│   ├── Forward request with headers
-│   ├── Return backend response + X-Gateway header
-│   └── Catch ConnectionException → 503 Service Unavailable
+```php
+// File: app/Http/Controllers/Gateway/GatewayController.php
+public function handle(Request $request, string $path = '')
+{
+    $method = $request->method();
+    $role   = $request->attributes->get('role', 'user');
 
-File: routes/gateway.php
-├── Middleware: gateway.token (authentication)
-└── Route: /api/gateway/products/{path?} → GatewayController@handle
-    Methods: GET, POST, PUT, DELETE
+    // RBAC: User không được POST/PUT/DELETE → 403 Forbidden
+    if (in_array($method, ['POST', 'PUT', 'DELETE']) && $role !== 'admin') {
+        return response()->json([
+            'error'   => 'Forbidden',
+            'details' => 'Admin token required for write operations',
+        ], 403);
+    }
+
+    // Reverse proxy → forward request đến Product Service
+    try {
+        $targetUrl = env('PRODUCT_SERVICE_URL', 'http://localhost:8000') . '/api/products/' . $path;
+        $response  = Http::withHeaders([...])->{strtolower($method)}($targetUrl, $request->all());
+        return response($response->body(), $response->status())
+            ->header('X-Gateway', 'ElectroShop-Gateway');
+    } catch (ConnectionException $e) {
+        return response()->json(['error' => 'Service Unavailable'], 503);  // Circuit Breaker
+    }
+}
 ```
 
 ### Authentication Flow
 ```
 Request → Kong (port 9000) → Laravel Route → GatewayTokenMiddleware → GatewayController
 
-Token Validation:
+Token Validation (GatewayTokenMiddleware.php):
   "Bearer valid-admin-token" → role = admin → full access (GET/POST/PUT/DELETE)
   "Bearer valid-user-token"  → role = user  → read-only (GET only)
   No token / Invalid token   → 401 Unauthorized
   User tries POST/PUT/DELETE → 403 Forbidden
 ```
 
-## 2.5. CQRS Pattern — Code Level
+### Route Registration
+```php
+// File: routes/gateway.php
+Route::middleware('gateway.token')->any('/gateway/products/{path?}', [GatewayController::class, 'handle']);
+
+// File: app/Http/Kernel.php
+protected $middlewareAliases = [
+    'gateway.token'  => GatewayTokenMiddleware::class,   // Auth 401/403
+    'circuit.breaker' => CircuitBreaker::class,           // Fault tolerance
+];
+```
+
+---
+
+## 2.8. CQRS Pattern — Code Level
 
 ```
 WRITE SIDE (Command):
@@ -526,7 +967,7 @@ WRITE SIDE (Command):
   ├── delete(id)         → DB::beginTransaction → Product::delete → event(ProductDeleted) → commit
   └── updateStock(id, qty) → Product::increment('pro_number', qty)
   
-  Error Handling: Mỗi method có try/catch → rollback nếu lỗi
+  Error Handling: Mỗi method có try/catch → DB::rollBack() nếu lỗi
 
 READ SIDE (Query):
   File: app/Services/CQRS/ProductQueryService.php
@@ -535,10 +976,10 @@ READ SIDE (Query):
   ├── findByCategory(catId) → Elasticsearch term query
   └── getTrending(limit)    → Elasticsearch sort by view_count + sold_count
   
-  Fallback Strategy: Elasticsearch unavailable → MySQL direct query
+  Fallback Strategy: Elasticsearch unavailable → MySQL direct query (Graceful Degradation)
 ```
 
-## 2.6. Infrastructure Services — Code Level
+## 2.9. Infrastructure Services — Code Level
 
 ### Service Discovery (Consul)
 ```
@@ -552,15 +993,15 @@ File: app/Providers/ServiceDiscoveryProvider.php
   → Auto-register on boot, deregister on shutdown
 ```
 
-### Circuit Breaker Service
+### Circuit Breaker
 ```
 File: app/Http/Middleware/CircuitBreaker.php
 ├── States: CLOSED → OPEN → HALF_OPEN → CLOSED
-├── Failure Threshold: 5 consecutive failures
+├── Failure Threshold: 5 consecutive failures → OPEN
 ├── Open Timeout: 60s (then try HALF_OPEN)
 ├── Half-Open Timeout: 30s
-├── Storage: Laravel Cache (Redis)
-└── Fallback: 503 JSON response
+├── Storage: Laravel Cache (Redis) — state persist across requests
+└── Fallback: 503 JSON response khi OPEN
 
 File: app/Services/ExternalApiService.php
 ├── callWithCircuitBreaker(service, callable)
@@ -569,6 +1010,920 @@ File: app/Services/ExternalApiService.php
 │   └── Delay: 2s → 4s → 8s (exponential backoff)
 └── getStatus() → All services circuit breaker state
 ```
+
+### Route Registration (Toàn bộ hệ thống)
+```php
+// File: routes/services.php — Đăng ký routes cho 5 services
+Route::prefix('catalog')->group(function () {
+    Route::get('/products',         [CatalogServiceController::class, 'index']);
+    Route::get('/products/{id}',    [CatalogServiceController::class, 'show']);
+    Route::post('/products',        [CatalogServiceController::class, 'store']);
+    Route::put('/products/{id}',    [CatalogServiceController::class, 'update']);
+    Route::delete('/products/{id}', [CatalogServiceController::class, 'destroy']);
+    Route::get('/categories',       [CatalogServiceController::class, 'categories']);
+});
+Route::prefix('orders')->group([OrderServiceController::class, ...]);
+Route::prefix('users')->group([UserServiceController::class, ...]);
+Route::prefix('notifications')->group([NotificationServiceController::class, ...]);
+Route::prefix('monitoring')->group([MonitoringServiceController::class, ...]);
+
+// File: app/Providers/RouteServiceProvider.php — Load 3 route files
+Route::middleware('api')->prefix('api')->group(base_path('routes/api.php'));
+Route::middleware('api')->prefix('api')->group(base_path('routes/gateway.php'));
+Route::middleware('api')->prefix('api')->group(base_path('routes/services.php'));
+```
+
+---
+
+# PHẦN 2B: CODE LEVEL CHO TỪNG COMPONENT (Chi tiết)
+
+> Phần 2 ở trên tổ chức theo **Service** (Catalog, Order, User...).
+> Phần 2B này tổ chức theo **Component** — mỗi component là 1 building block kiến trúc.
+
+## Component 1: Middleware Layer
+
+### 1a. GatewayTokenMiddleware — Authentication (401)
+```
+File:   app/Http/Middleware/GatewayTokenMiddleware.php
+Layer:  Presentation → Security
+NFR:    NFR-4 Security (Authentication)
+```
+
+```php
+class GatewayTokenMiddleware
+{
+    public function handle(Request $request, Closure $next): Response
+    {
+        $auth = $request->header('Authorization');
+
+        // ① Kiểm tra header Authorization tồn tại và bắt đầu bằng "Bearer "
+        if (!$auth || !str_starts_with($auth, 'Bearer ')) {
+            Log::warning('[GATEWAY] Unauthorized: missing or malformed token', [
+                'method' => $request->method(),
+                'path'   => $request->path(),
+                'ip'     => $request->ip(),
+            ]);
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        // ② Tách token từ header
+        $token = trim(substr($auth, strlen('Bearer ')));
+
+        // ③ Validate token → gán role vào request attributes
+        if ($token === 'valid-admin-token') {
+            $request->attributes->set('role', 'admin');  // Admin: full access
+            return $next($request);
+        }
+        if ($token === 'valid-user-token') {
+            $request->attributes->set('role', 'user');   // User: read-only
+            return $next($request);
+        }
+
+        // ④ Token không hợp lệ → 401
+        return response()->json(['error' => 'Unauthorized', 'details' => 'Invalid or expired token'], 401);
+    }
+}
+```
+
+**Interaction:**
+```
+Client → Kong → Route (middleware: gateway.token) → GatewayTokenMiddleware → GatewayController
+                                                    ↑ 401 nếu sai          ↑ 403 nếu user POST
+```
+
+### 1b. CircuitBreaker Middleware — Fault Tolerance (503)
+```
+File:   app/Http/Middleware/CircuitBreaker.php
+Layer:  Presentation → Infrastructure
+NFR:    NFR-3 Availability (Fault Isolation)
+```
+
+```php
+class CircuitBreaker
+{
+    // ── 3 trạng thái ──
+    private const STATE_CLOSED    = 'closed';     // Bình thường → cho request qua
+    private const STATE_OPEN      = 'open';       // Lỗi nhiều → chặn tất cả request
+    private const STATE_HALF_OPEN = 'half_open';  // Thử lại 1 request để test
+
+    private int $failureThreshold = 5;   // Sau 5 failures → OPEN
+    private int $timeout          = 60;  // Sau 60s OPEN → chuyển HALF_OPEN
+    private int $halfOpenTimeout  = 30;  // HALF_OPEN timeout
+
+    public function handle(Request $request, Closure $next, string $service = 'default')
+    {
+        $circuitKey = "circuit_breaker:{$service}";
+        $state = Cache::get("{$circuitKey}:state", self::STATE_CLOSED);
+
+        // ① STATE_OPEN → trả 503 hoặc chuyển HALF_OPEN
+        if ($state === self::STATE_OPEN) {
+            $openedAt = Cache::get("{$circuitKey}:opened_at");
+            if (time() - $openedAt > $this->timeout) {
+                Cache::put("{$circuitKey}:state", self::STATE_HALF_OPEN);
+            } else {
+                return $this->fallbackResponse($service);  // 503 Service Unavailable
+            }
+        }
+
+        try {
+            $response = $next($request);
+
+            // ② Thành công trong HALF_OPEN → reset về CLOSED
+            if ($state === self::STATE_HALF_OPEN) {
+                Cache::put("{$circuitKey}:state", self::STATE_CLOSED);
+                Cache::forget("{$circuitKey}:failures");
+            }
+            return $response;
+
+        } catch (\Exception $e) {
+            // ③ Thất bại → tăng failure count
+            $failures = Cache::increment("{$circuitKey}:failures", 1);
+
+            // ④ Vượt threshold → OPEN circuit
+            if ($failures >= $this->failureThreshold) {
+                Cache::put("{$circuitKey}:state", self::STATE_OPEN);
+                Cache::put("{$circuitKey}:opened_at", time());
+                Log::critical("Circuit breaker {$service}: CLOSED → OPEN");
+            }
+            throw $e;
+        }
+    }
+
+    // 503 JSON fallback
+    private function fallbackResponse(string $service)
+    {
+        return response()->json([
+            'error'   => 'Service Unavailable',
+            'message' => "The {$service} service is temporarily unavailable.",
+            'code'    => 'CIRCUIT_OPEN',
+        ], 503);
+    }
+}
+```
+
+**State Machine:**
+```
+     request OK              5 failures
+  ┌─────────────┐         ┌──────────────┐
+  │   CLOSED    │────────→│    OPEN      │
+  │ (bình thường)│         │(chặn request)│
+  └─────────────┘         └──────┬───────┘
+       ↑                         │ sau 60s
+       │ success              ┌──┴────────┐
+       └──────────────────────│ HALF_OPEN │
+                              │(thử 1 req)│
+                              └──┬────────┘
+                                 │ failure → quay lại OPEN
+```
+
+### 1c. LogRequests Middleware — Observability
+```
+File:   app/Http/Middleware/LogRequests.php
+Layer:  Presentation → Cross-cutting
+NFR:    NFR-5 Monitoring & Observability
+```
+
+```php
+class LogRequests
+{
+    public function handle(Request $request, Closure $next): Response
+    {
+        // ① Tạo UUID cho distributed tracing
+        $requestId = Str::uuid()->toString();
+        $request->attributes->set('request_id', $requestId);
+        $startTime = microtime(true);
+
+        // ② Xử lý request
+        $response = $next($request);
+
+        // ③ Tính duration (ms)
+        $duration = round((microtime(true) - $startTime) * 1000, 2);
+
+        // ④ Structured log → ELK Stack ready
+        Log::info('HTTP Request', [
+            'request_id'  => $requestId,
+            'method'      => $request->method(),
+            'url'         => $request->fullUrl(),
+            'status_code' => $response->getStatusCode(),
+            'duration_ms' => $duration,
+            'memory_mb'   => round(memory_get_peak_usage(true) / 1024 / 1024, 2),
+            'ip'          => $request->ip(),
+            'user_agent'  => $request->userAgent(),
+        ]);
+
+        // ⑤ Gán X-Request-ID vào response header → client có thể trace
+        $response->headers->set('X-Request-ID', $requestId);
+        return $response;
+    }
+}
+```
+
+---
+
+## Component 2: Saga Pattern (Distributed Transaction)
+
+### 2a. SagaStepInterface — Contract
+```
+File: app/Services/Saga/SagaStepInterface.php
+```
+
+```php
+interface SagaStepInterface
+{
+    public function execute(Transaction $transaction): void;      // Thực thi bước
+    public function compensate(Transaction $transaction): void;   // Hoàn tác bước
+}
+```
+
+### 2b. OrderSaga — Orchestrator
+```
+File: app/Services/Saga/OrderSaga.php
+```
+
+```php
+class OrderSaga
+{
+    private array $steps = [];           // Danh sách step
+    private array $executedSteps = [];   // Step đã execute thành công
+    private Transaction $transaction;
+
+    // Thêm step vào saga (builder pattern)
+    public function addStep(SagaStepInterface $step): self { ... }
+
+    // Thực thi tuần tự tất cả steps
+    public function execute(): bool
+    {
+        foreach ($this->steps as $step) {
+            $step->execute($this->transaction);
+            $this->executedSteps[] = $step;       // Ghi nhận đã execute
+        }
+        // Nếu exception → compensate() tự động
+    }
+
+    // Hoàn tác theo thứ tự ngược (LIFO)
+    private function compensate(): void
+    {
+        foreach (array_reverse($this->executedSteps) as $step) {
+            $step->compensate($this->transaction);
+        }
+    }
+}
+```
+
+### 2c. ReserveStockStep — Inventory reservation
+```
+File: app/Services/Saga/Steps/ReserveStockStep.php
+```
+
+```php
+class ReserveStockStep implements SagaStepInterface
+{
+    public function execute(Transaction $transaction): void
+    {
+        // Lấy danh sách sản phẩm từ đơn hàng
+        $items = $transaction->orders->map(fn($order) => [
+            'product_id' => $order->or_product_id,
+            'quantity'   => $order->or_qty,
+        ])->toArray();
+
+        // Gọi Inventory Service API (hoặc simulate)
+        // Http::post(config('services.inventory.url') . '/reserve', ['items' => $items]);
+
+        // Lưu reservation ID vào metadata để compensate có thể dùng
+        $transaction->update([
+            'tr_metadata' => array_merge($transaction->tr_metadata ?? [], [
+                'stock_reserved'       => true,
+                'stock_reservation_id' => 'RES-' . $transaction->id,
+            ]),
+        ]);
+    }
+
+    public function compensate(Transaction $transaction): void
+    {
+        $metadata = $transaction->tr_metadata ?? [];
+        if (!($metadata['stock_reserved'] ?? false)) return;  // Không có gì để hoàn tác
+
+        // Release stock đã reserve
+        $transaction->update([
+            'tr_metadata' => array_merge($metadata, [
+                'stock_reserved' => false,
+                'stock_released' => true,
+            ]),
+        ]);
+    }
+}
+```
+
+### 2d. ProcessPaymentStep — Payment processing
+```
+File: app/Services/Saga/Steps/ProcessPaymentStep.php
+```
+
+```php
+class ProcessPaymentStep implements SagaStepInterface
+{
+    public function execute(Transaction $transaction): void
+    {
+        // COD → mark pending, không cần verify online
+        if ($transaction->tr_payment_method === 'cod') {
+            $transaction->update(['tr_payment_status' => 0, 'tr_status' => Transaction::STATUS_WAIT]);
+            return;
+        }
+
+        // Online payment (MoMo/VNPay/PayPal) → verify với gateway
+        // Http::post(config('services.payment.url') . '/verify', [...]);
+
+        $transaction->update(['tr_payment_status' => 1]);
+    }
+
+    public function compensate(Transaction $transaction): void
+    {
+        if ($transaction->tr_payment_status != 1) return;  // Chưa charge → không cần refund
+
+        // Refund payment
+        $transaction->update(['tr_payment_status' => 2]);   // 2 = Refunded
+    }
+}
+```
+
+### 2e. CreateShipmentStep — Shipping
+```
+File: app/Services/Saga/Steps/CreateShipmentStep.php
+```
+
+```php
+class CreateShipmentStep implements SagaStepInterface
+{
+    public function execute(Transaction $transaction): void
+    {
+        $shipmentId   = 'SHIP-' . $transaction->id;
+        $trackingCode = 'TRACK-' . strtoupper(substr(md5($transaction->id), 0, 10));
+
+        $transaction->update([
+            'tr_metadata' => array_merge($transaction->tr_metadata ?? [], [
+                'shipment_id'      => $shipmentId,
+                'tracking_code'    => $trackingCode,
+                'shipment_created' => true,
+            ]),
+        ]);
+    }
+
+    public function compensate(Transaction $transaction): void
+    {
+        $metadata = $transaction->tr_metadata ?? [];
+        if (!($metadata['shipment_created'] ?? false)) return;
+
+        $transaction->update([
+            'tr_metadata' => array_merge($metadata, [
+                'shipment_created'   => false,
+                'shipment_cancelled' => true,
+            ]),
+        ]);
+    }
+}
+```
+
+### 2f. SendNotificationStep — Email/SMS
+```
+File: app/Services/Saga/Steps/SendNotificationStep.php
+```
+
+```php
+class SendNotificationStep implements SagaStepInterface
+{
+    public function execute(Transaction $transaction): void
+    {
+        // Dispatch event → Listener sẽ lưu vào Outbox
+        event(new OrderPlaced($transaction, $transaction->orders->toArray()));
+    }
+
+    public function compensate(Transaction $transaction): void
+    {
+        // Không thể "undo" email đã gửi → gửi thêm email hủy đơn
+        // event(new OrderCancelled($transaction));
+        Log::info('Sending order cancellation notification');
+    }
+}
+```
+
+**Saga Flow hoàn chỉnh:**
+```
+OrderServiceController::store()
+    │
+    ├── $saga->addStep(new ReserveStockStep())       ← Step 1
+    ├── $saga->addStep(new ProcessPaymentStep())      ← Step 2
+    ├── $saga->addStep(new CreateShipmentStep())       ← Step 3
+    ├── $saga->addStep(new SendNotificationStep())     ← Step 4
+    │
+    └── $saga->execute()
+            │
+            ├── Step 1: execute() ✓ → executedSteps = [Step1]
+            ├── Step 2: execute() ✓ → executedSteps = [Step1, Step2]
+            ├── Step 3: execute() ✗ → EXCEPTION!
+            │
+            └── compensate() — thứ tự ngược:
+                ├── Step 2: compensate() → Refund payment
+                └── Step 1: compensate() → Release stock
+                    (Step 3, 4 chưa execute nên không compensate)
+```
+
+---
+
+## Component 3: Event-Driven Architecture
+
+### 3a. OrderPlaced Event
+```
+File: app/Events/OrderPlaced.php
+```
+
+```php
+class OrderPlaced
+{
+    use Dispatchable, SerializesModels;
+
+    public Transaction $transaction;   // Dữ liệu đơn hàng
+    public array $orderDetails;        // Chi tiết sản phẩm
+
+    public function __construct(Transaction $transaction, array $orderDetails = [])
+    {
+        $this->transaction  = $transaction;
+        $this->orderDetails = $orderDetails;
+    }
+}
+// Trigger: event(new OrderPlaced($transaction, $items));
+```
+
+### 3b. SaveOrderPlacedToOutbox Listener
+```
+File: app/Listeners/SaveOrderPlacedToOutbox.php
+```
+
+```php
+class SaveOrderPlacedToOutbox
+{
+    public function handle(OrderPlaced $event): void
+    {
+        // Lưu event vào outbox_messages table (cùng DB transaction)
+        OutboxMessage::create([
+            'aggregate_type' => 'Transaction',
+            'aggregate_id'   => $event->transaction->id,
+            'event_type'     => 'OrderPlaced',
+            'payload'        => [
+                'transaction_id'  => $event->transaction->id,
+                'user_id'         => $event->transaction->tr_user_id,
+                'total'           => $event->transaction->tr_total,
+                'order_details'   => $event->orderDetails,
+            ],
+            'occurred_at' => now(),
+        ]);
+    }
+}
+```
+
+### 3c. PublishOutboxMessages Job (Background Worker)
+```
+File: app/Jobs/PublishOutboxMessages.php
+```
+
+```php
+class PublishOutboxMessages implements ShouldQueue  // Chạy async trong queue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public function handle(): void
+    {
+        // ① Lấy batch 100 messages chưa published
+        $messages = OutboxMessage::unpublished()->limit(100)->get();
+
+        $redis = Redis::connection();
+        $queue = config('queue.connections.redis.queue', 'notifications');
+
+        foreach ($messages as $message) {
+            // ② Chuẩn bị event data
+            $job = [
+                'uuid'        => Str::uuid()->toString(),
+                'displayName' => 'NotificationEvent',
+                'data'        => [
+                    'event_type'     => $message->event_type,
+                    'aggregate_type' => $message->aggregate_type,
+                    'payload'        => $message->payload,
+                ],
+            ];
+
+            // ③ Push vào Redis queue
+            $redis->lpush($queue, json_encode($job));
+
+            // ④ Đánh dấu đã published
+            $message->markPublished();
+        }
+    }
+}
+```
+
+### 3d. OutboxMessage Model
+```
+File: app/Models/Models/OutboxMessage.php
+```
+
+```php
+class OutboxMessage extends Model
+{
+    protected $table    = 'outbox_messages';
+    protected $fillable = ['aggregate_type', 'aggregate_id', 'event_type', 'payload', 'occurred_at', 'published', 'published_at'];
+    protected $casts    = ['payload' => 'array', 'published' => 'boolean'];
+
+    // Scope: lấy messages chưa published
+    public function scopeUnpublished($query) {
+        return $query->where('published', false)->orderBy('occurred_at', 'asc');
+    }
+
+    // Đánh dấu đã published
+    public function markPublished() {
+        $this->update(['published' => true, 'published_at' => now()]);
+    }
+}
+```
+
+**Event-Driven + Outbox Flow:**
+```
+OrderServiceController          SaveOrderPlacedToOutbox        PublishOutboxMessages
+    │                                   │                              │
+    ├─ event(new OrderPlaced(...))      │                              │
+    │       │                           │                              │
+    │       └──────────────────────────→├─ OutboxMessage::create()     │
+    │                                   │   (cùng DB transaction)      │
+    │                                   │                              │
+    │                      ┌────────────┘                              │
+    │                      │ (Background, chạy mỗi 5 phút)            │
+    │                      │                              ┌────────────┘
+    │                      │                              ├─ OutboxMessage::unpublished()
+    │                      │                              ├─ Redis::lpush(queue, event)
+    │                      │                              └─ markPublished()
+    │                      │
+    │              Notification Service Consumer
+    │                      │
+    │                      └─ Đọc Redis queue → Gửi email/SMS
+```
+
+---
+
+## Component 4: CQRS Pattern
+
+### 4a. ProductCommandService (Write Side)
+```
+File: app/Services/CQRS/ProductCommandService.php
+```
+
+```php
+class ProductCommandService
+{
+    public function create(array $data): Product
+    {
+        DB::beginTransaction();
+        try {
+            $product = Product::create($data);
+            event(new ProductCreated($product));     // Sync read model
+            DB::commit();
+            return $product;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public function update(int $productId, array $data): Product
+    {
+        DB::beginTransaction();
+        try {
+            $product = Product::findOrFail($productId);
+            $product->update($data);
+            event(new ProductUpdated($product));     // Sync read model
+            DB::commit();
+            return $product->fresh();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public function delete(int $productId): bool { ... }
+    public function updateStock(int $productId, int $quantity): Product { ... }
+}
+```
+
+### 4b. ProductQueryService (Read Side — Elasticsearch + Fallback)
+```
+File: app/Services/CQRS/ProductQueryService.php
+```
+
+```php
+class ProductQueryService
+{
+    private $elasticsearch;
+    private $enabled = false;   // false nếu ES chưa cài
+
+    public function search(string $keyword, int $limit = 20): array
+    {
+        // ① Thử Elasticsearch trước
+        if (!$this->enabled) {
+            return $this->fallbackSearch($keyword, $limit);  // Graceful Degradation
+        }
+
+        try {
+            return $this->elasticsearch->search([
+                'index' => 'products',
+                'body'  => [
+                    'query' => ['multi_match' => [
+                        'query'  => $keyword,
+                        'fields' => ['name^3', 'description^2', 'category'],
+                        'fuzziness' => 'AUTO',
+                    ]],
+                ],
+            ]);
+        } catch (\Exception $e) {
+            // ② ES lỗi → fallback MySQL
+            return $this->fallbackSearch($keyword, $limit);
+        }
+    }
+
+    // Fallback: MySQL LIKE query
+    private function fallbackSearch(string $keyword, int $limit): array
+    {
+        return Product::where('pro_name', 'LIKE', "%{$keyword}%")
+            ->orWhere('pro_description', 'LIKE', "%{$keyword}%")
+            ->take($limit)->get()->toArray();
+    }
+}
+```
+
+**CQRS Flow:**
+```
+WRITE (Command Side):                    READ (Query Side):
+CatalogServiceController                CatalogServiceController
+    │ POST/PUT/DELETE                        │ GET
+    ▼                                        ▼
+ProductCommandService                    Cache::remember()
+    │                                        │ cache MISS
+    ├─ DB::beginTransaction                  ▼
+    ├─ Product::create/update            Product::select()->with()->paginate()
+    ├─ event(ProductCreated)                 (hoặc ProductQueryService::search())
+    ├─ DB::commit                            │
+    └─ return Product                        └─ Elasticsearch (fallback: MySQL)
+```
+
+---
+
+## Component 5: Repository Pattern (Dependency Inversion)
+
+### 5a. ProductRepositoryInterface — Contract
+```
+File: app/Lab03/Repositories/ProductRepositoryInterface.php
+```
+
+```php
+interface ProductRepositoryInterface
+{
+    public function getAllPaginated(int $perPage = 15);
+    public function getAll(): Collection;
+    public function findById(int $id): ?Product;
+    public function create(array $data): Product;
+    public function update(int $id, array $data): ?Product;
+    public function delete(int $id): bool;
+    public function searchByName(string $keyword): Collection;
+    public function getByCategoryId(int $categoryId): Collection;
+    public function exists(int $id): bool;
+}
+// → 9 methods = complete CRUD + Search + Filter contract
+```
+
+### 5b. ProductService — Business Logic Layer
+```
+File: app/Lab03/Services/ProductService.php
+```
+
+```php
+class ProductService
+{
+    protected $productRepository;  // Interface, NOT concrete class
+
+    // Constructor Injection (DI)
+    public function __construct(ProductRepositoryInterface $productRepository)
+    {
+        $this->productRepository = $productRepository;
+    }
+
+    public function createProduct(array $data): array
+    {
+        $this->validateProductData($data);       // ① Input validation
+        $this->applyBusinessRules($data);         // ② Business rules
+        $product = $this->productRepository->create($data);  // ③ Persist
+        return $this->transformProductData($product);         // ④ Transform for API
+    }
+
+    // Business Rules:
+    // - pro_price > 0 (required)
+    // - pro_sale 0-100% → tính pro_total = price - (price * sale / 100)
+    // - pro_price > 10,000,000 VND → tự động pro_hot = 1
+    // - quantity == 0 → tự động pro_active = 0
+    protected function applyBusinessRules(array &$data): void { ... }
+}
+```
+
+### 5c. Dependency Injection Binding
+```
+File: app/Lab03/Providers/Lab03ServiceProvider.php
+```
+
+```php
+class Lab03ServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        // Bind Interface → Implementation (có thể swap implementation)
+        $this->app->bind(
+            ProductRepositoryInterface::class,
+            ProductRepository::class
+        );
+    }
+}
+```
+
+**Layered Architecture:**
+```
+┌─────────────────────────────────────────────┐
+│ Presentation    │ ProductApiController       │ ← HTTP Request/Response
+├─────────────────┼───────────────────────────┤
+│ Business Logic  │ ProductService             │ ← Validation, Business Rules
+├─────────────────┼───────────────────────────┤
+│ Persistence     │ ProductRepositoryInterface │ ← Interface (DI)
+│                 │ ProductRepository          │ ← Implementation
+├─────────────────┼───────────────────────────┤
+│ Data            │ Product (Eloquent Model)   │ ← Database mapping
+│                 │ MySQL (catalog_db)          │
+└─────────────────┴───────────────────────────┘
+```
+
+---
+
+## Component 6: Infrastructure Services
+
+### 6a. ExternalApiService — Circuit Breaker cho External APIs
+```
+File: app/Services/ExternalApiService.php
+```
+
+```php
+class ExternalApiService
+{
+    // Circuit Breaker cho MoMo, PayPal, VNPay
+    public function call(string $serviceName, string $url, array $options = [])
+    {
+        $state = Cache::get("circuit_breaker:{$serviceName}:state", 'closed');
+
+        if ($state === 'open') {
+            throw new \Exception("Circuit breaker OPEN for {$serviceName}");
+        }
+
+        try {
+            $response = Http::timeout(30)->post($url, $options['data'] ?? []);
+            // Success → reset circuit nếu đang HALF_OPEN
+            return $response;
+        } catch (\Exception $e) {
+            $failures = Cache::increment("circuit_breaker:{$serviceName}:failures");
+            if ($failures >= 5) {
+                Cache::put("circuit_breaker:{$serviceName}:state", 'open');
+            }
+            throw $e;
+        }
+    }
+
+    // Retry với exponential backoff (2s → 4s → 8s)
+    public function callWithRetry(string $serviceName, string $url, array $options = [], int $maxRetries = 3)
+    {
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            try {
+                return $this->call($serviceName, $url, $options);
+            } catch (\Exception $e) {
+                if ($attempt === $maxRetries) throw $e;
+                sleep(pow(2, $attempt));  // Exponential backoff
+            }
+        }
+    }
+
+    // Admin: reset circuit breaker
+    public function reset(string $serviceName): void { ... }
+
+    // Get trạng thái tất cả circuit breakers
+    public function getStatus(string $serviceName): array { ... }
+}
+```
+
+### 6b. ServiceDiscovery — Consul Integration
+```
+File: app/Services/ServiceDiscovery.php
+```
+
+```php
+class ServiceDiscovery
+{
+    // Đăng ký service với Consul
+    public function register(): bool
+    {
+        $this->client->put('/v1/agent/service/register', ['json' => [
+            'ID'      => $this->getServiceId(),
+            'Name'    => $this->serviceName,
+            'Address' => $this->serviceHost,
+            'Port'    => $this->servicePort,
+            'Check'   => [
+                'HTTP'     => "http://{$this->serviceHost}:{$this->servicePort}/api/health",
+                'Interval' => '10s',    // Kiểm tra mỗi 10s
+                'Timeout'  => '5s',
+                'DeregisterCriticalServiceAfter' => '30s',  // Tự xóa nếu down 30s
+            ],
+        ]]);
+    }
+
+    // Tìm service theo tên (cached 30s)
+    public function discover(string $serviceName): array
+    {
+        return Cache::remember("consul:service:{$serviceName}", 30, function () use ($serviceName) {
+            $response = $this->client->get("/v1/health/service/{$serviceName}", [
+                'query' => ['passing' => 'true'],  // Chỉ healthy instances
+            ]);
+            return json_decode($response->getBody(), true);
+        });
+    }
+
+    // Load balancing: random instance
+    public function getServiceUrl(string $serviceName): ?string
+    {
+        $instances = $this->discover($serviceName);
+        $instance  = $instances[array_rand($instances)];
+        return "http://{$instance['address']}:{$instance['port']}";
+    }
+}
+```
+
+### 6c. GatewayController — Reverse Proxy
+```
+File: app/Http/Controllers/Gateway/GatewayController.php
+```
+
+```php
+class GatewayController extends Controller
+{
+    public function handle(Request $request, string $path = '')
+    {
+        $method = $request->method();
+        $role   = $request->attributes->get('role', 'user');
+
+        // ① RBAC: User không được POST/PUT/DELETE
+        if (in_array($method, ['POST', 'PUT', 'DELETE']) && $role !== 'admin') {
+            return response()->json(['error' => 'Forbidden'], 403);
+        }
+
+        // ② Forward request đến backend service
+        try {
+            $targetUrl = env('PRODUCT_SERVICE_URL') . '/api/products/' . $path;
+            $response  = Http::withHeaders([...])->timeout(5)->send($method, $targetUrl);
+
+            return response($response->body(), $response->status())
+                ->header('X-Gateway', 'ElectroShop-Gateway');
+
+        // ③ Backend down → 503
+        } catch (ConnectionException $e) {
+            return response()->json(['error' => 'Service Unavailable'], 503);
+        }
+    }
+}
+```
+
+---
+
+## Tổng kết Component Map
+
+| # | Component | File | Pattern | NFR |
+|---|-----------|------|---------|-----|
+| 1a | GatewayTokenMiddleware | `app/Http/Middleware/GatewayTokenMiddleware.php` | Token Auth | NFR-4 Security |
+| 1b | CircuitBreaker | `app/Http/Middleware/CircuitBreaker.php` | Circuit Breaker | NFR-3 Availability |
+| 1c | LogRequests | `app/Http/Middleware/LogRequests.php` | Structured Logging | NFR-5 Monitoring |
+| 2a | SagaStepInterface | `app/Services/Saga/SagaStepInterface.php` | Interface | NFR-3 |
+| 2b | OrderSaga | `app/Services/Saga/OrderSaga.php` | Saga Orchestrator | NFR-3 |
+| 2c | ReserveStockStep | `app/Services/Saga/Steps/ReserveStockStep.php` | Saga Step | NFR-3 |
+| 2d | ProcessPaymentStep | `app/Services/Saga/Steps/ProcessPaymentStep.php` | Saga Step | NFR-4 |
+| 2e | CreateShipmentStep | `app/Services/Saga/Steps/CreateShipmentStep.php` | Saga Step | NFR-3 |
+| 2f | SendNotificationStep | `app/Services/Saga/Steps/SendNotificationStep.php` | Saga Step + Event | NFR-5 |
+| 3a | OrderPlaced Event | `app/Events/OrderPlaced.php` | Domain Event | NFR-2 |
+| 3b | SaveOrderPlacedToOutbox | `app/Listeners/SaveOrderPlacedToOutbox.php` | Outbox Pattern | NFR-3 |
+| 3c | PublishOutboxMessages | `app/Jobs/PublishOutboxMessages.php` | Background Job | NFR-2 |
+| 3d | OutboxMessage | `app/Models/Models/OutboxMessage.php` | Outbox Model | NFR-3 |
+| 4a | ProductCommandService | `app/Services/CQRS/ProductCommandService.php` | CQRS Write | NFR-2 |
+| 4b | ProductQueryService | `app/Services/CQRS/ProductQueryService.php` | CQRS Read + Fallback | NFR-1, NFR-3 |
+| 5a | ProductRepositoryInterface | `app/Lab03/Repositories/ProductRepositoryInterface.php` | Repository + DI | NFR-3 Modifiability |
+| 5b | ProductService | `app/Lab03/Services/ProductService.php` | Business Logic Layer | NFR-4 |
+| 6a | ExternalApiService | `app/Services/ExternalApiService.php` | Circuit Breaker + Retry | NFR-3 |
+| 6b | ServiceDiscovery | `app/Services/ServiceDiscovery.php` | Service Discovery (Consul) | NFR-2 |
+| 6c | GatewayController | `app/Http/Controllers/Gateway/GatewayController.php` | Reverse Proxy + RBAC | NFR-4 |
 
 ---
 

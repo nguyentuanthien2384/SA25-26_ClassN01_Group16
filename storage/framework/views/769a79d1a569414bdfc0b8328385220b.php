@@ -47,6 +47,20 @@
 		<!-- modernizr css -->
 		<script src="<?php echo e(asset('js/vendor/modernizr-3.11.2.min.js')); ?>"></script>
 		<style>
+			.discount-product-area {
+				position: relative;
+				overflow: hidden;
+				z-index: 1;
+			}
+			.slider-banner-area {
+				position: relative;
+				overflow: hidden;
+				z-index: 1;
+			}
+			.main-menu .mega-menu {
+				max-height: 80vh;
+				overflow-y: auto;
+			}
 			.wishlist-badge {
 				position: relative;
 				display: inline-block;
