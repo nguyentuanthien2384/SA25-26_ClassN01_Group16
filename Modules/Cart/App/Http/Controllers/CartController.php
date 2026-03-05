@@ -16,9 +16,18 @@ use App\Http\Controllers\Controller;
 
 class CartController extends Controller
 {
-    private function clearCartCache(): void
+    private function getUserId()
     {
         $userId = get_data_user('web');
+        if (!$userId) {
+            return null;
+        }
+        return $userId;
+    }
+
+    private function clearCartCache(): void
+    {
+        $userId = $this->getUserId();
         if ($userId) {
             Cache::forget("cart:user:{$userId}");
         }
@@ -26,105 +35,117 @@ class CartController extends Controller
 
     public function index()
     {
+        $userId = $this->getUserId();
+        if (!$userId) {
+            return redirect()->route('login')->with('warning', 'Vui lòng đăng nhập');
+        }
+
         $carts = Cart::with('product')
-            ->where('user_id', get_data_user('web'))
+            ->where('user_id', $userId)
             ->orderBy('id', 'DESC')
             ->get();
         return view('layouts.cart', compact('carts'));
     }
 
-    public function add(Product $product, User $user, Request $request)
+    public function add(Product $product, Request $request)
     {
+        $userId = $this->getUserId();
+        if (!$userId) {
+            return redirect()->route('login')->with('warning', 'Vui lòng đăng nhập để thêm giỏ hàng');
+        }
+
         if ($product->quantity == 0) {
             return redirect()->back()->with('warning', "Sản phẩm tạm hết hàng");
         }
-        $buyNow = (bool) $request->query('buy_now', false);
-        $quantity = $request->quantity ? $request->quantity : 1;
-        $userId = get_data_user('web');
 
-        $cartExit = Cart::where([
-            'user_id' => $userId,
-            'pro_id' => $product->id,
-        ])->first();
+        $buyNow = (bool) $request->query('buy_now', false);
+        $quantity = max(1, (int) $request->input('quantity', 1));
+
+        $cartExit = Cart::where('user_id', $userId)
+            ->where('pro_id', $product->id)
+            ->first();
 
         if ($cartExit) {
-            Cart::where([
-                'user_id' => $userId,
-                'pro_id' => $product->id,
-            ])->increment('quantity', $quantity);
-
+            $cartExit->increment('quantity', $quantity);
             $this->clearCartCache();
 
             if ($buyNow) {
                 return redirect()->route('form.pay')->with('success', 'Thành công');
             }
             return redirect()->route('cart.index')->with('success', 'Thành công');
-        } else {
-            $datas = [
-                'user_id' => $userId,
-                'pro_id' => $product->id,
-                'name' => $product->pro_name,
-                'price' => $product->pro_sale ? $product->pro_sale : $product->pro_price,
-                'quantity' => $quantity,
-                'sale' => $product->pro_sale,
-                'image' => $product->pro_image,
-            ];
-
-            if (Cart::create($datas)) {
-                $this->clearCartCache();
-                if ($buyNow) {
-                    return redirect()->route('form.pay')->with('success', "Thêm giỏ hàng thành công");
-                }
-                return redirect()->route('cart.index')->with('success', "Thêm giỏ hàng thành công");
-            }
         }
-        return redirect()->back()->with('danger', 'thất bại');
+
+        $datas = [
+            'user_id' => $userId,
+            'pro_id' => $product->id,
+            'name' => $product->pro_name,
+            'price' => $product->pro_sale ? $product->pro_sale : $product->pro_price,
+            'quantity' => $quantity,
+            'image' => $product->pro_image,
+        ];
+
+        if (Cart::create($datas)) {
+            $this->clearCartCache();
+            if ($buyNow) {
+                return redirect()->route('form.pay')->with('success', "Thêm giỏ hàng thành công");
+            }
+            return redirect()->route('cart.index')->with('success', "Thêm giỏ hàng thành công");
+        }
+
+        return redirect()->back()->with('danger', 'Thất bại');
     }
 
     public function delete($product_id)
     {
-        Cart::where([
-            'user_id' => get_data_user('web'),
-            'pro_id' => $product_id,
-        ])->delete();
+        $userId = $this->getUserId();
+        if (!$userId) {
+            return redirect()->route('login');
+        }
+
+        Cart::where('user_id', $userId)
+            ->where('pro_id', $product_id)
+            ->delete();
 
         $this->clearCartCache();
 
-        return redirect()->back()->with('success', "Xoá thành công");
+        return redirect()->route('cart.index')->with('success', "Xoá thành công");
     }
 
     public function update(Product $product, Request $request)
     {
-        $quantity = $request->quantity ? $request->quantity : 1;
-        $userId = get_data_user('web');
+        $userId = $this->getUserId();
+        if (!$userId) {
+            return redirect()->route('login');
+        }
 
-        $cartExit = Cart::where([
-            'user_id' => $userId,
-            'pro_id' => $product->id,
-        ])->first();
+        $quantity = max(1, (int) $request->input('quantity', 1));
+
+        $cartExit = Cart::where('user_id', $userId)
+            ->where('pro_id', $product->id)
+            ->first();
 
         if ($cartExit) {
             if ($quantity > $product->quantity) {
                 return redirect()->back()->with('danger', 'Số lượng trong giỏ hàng không thể lớn hơn số lượng có sẵn của sản phẩm');
             }
-            Cart::where([
-                'user_id' => $userId,
-                'pro_id' => $product->id,
-            ])->update(['quantity' => $quantity]);
 
+            $cartExit->update(['quantity' => $quantity]);
             $this->clearCartCache();
 
             return redirect()->route('cart.index')->with('success', 'Thành công');
         }
-        return redirect()->back()->with('danger', 'thất bại');
+
+        return redirect()->back()->with('danger', 'Thất bại');
     }
 
     public function clear()
     {
-        Cart::where([
-            'user_id' => get_data_user('web'),
-        ])->delete();
+        $userId = $this->getUserId();
+        if (!$userId) {
+            return redirect()->route('login');
+        }
 
+        Cart::where('user_id', $userId)->delete();
         $this->clearCartCache();
 
         return redirect()->back()->with('success', 'Xoá thành công');
@@ -132,8 +153,13 @@ class CartController extends Controller
 
     public function getPay()
     {
+        $userId = $this->getUserId();
+        if (!$userId) {
+            return redirect()->route('login');
+        }
+
         $carts = Cart::with('product')
-            ->where('user_id', get_data_user('web'))
+            ->where('user_id', $userId)
             ->orderBy('id', 'DESC')
             ->get();
         return view('layouts.pay', compact('carts'));
@@ -141,21 +167,27 @@ class CartController extends Controller
 
     public function saveCart(Request $request, User $user, Product $product)
     {
+        $userId = $this->getUserId();
+        if (!$userId) {
+            return redirect()->route('login');
+        }
+
         $paymentMethod = $request->input('payment_method', 'cod');
         $allowedMethods = ['cod', 'momo', 'qrcode', 'paypal', 'vnpay'];
         if (!in_array($paymentMethod, $allowedMethods, true)) {
             $paymentMethod = 'cod';
         }
 
-        $orders = Cart::where('user_id', get_data_user('web'))->get();
+        $orders = Cart::where('user_id', $userId)->get();
         $totalAmount = 0;
         foreach ($orders as $order) {
             $subtotal = $order->price * $order->quantity;
             $subtotalWithVAT = $subtotal * 1.1;
             $totalAmount += $subtotalWithVAT;
         }
+
         $transactionId = Transaction::insertGetId([
-            'tr_user_id' => get_data_user('web'),
+            'tr_user_id' => $userId,
             'tr_total' => (int) $totalAmount,
             'tr_note' => $request->note,
             'tr_phone' => $request->phone,
@@ -167,7 +199,7 @@ class CartController extends Controller
         ]);
 
         if ($transactionId) {
-            $carts = Cart::where('user_id', get_data_user('web'))->get();
+            $carts = Cart::where('user_id', $userId)->get();
             foreach ($carts as $cart) {
                 $product = Product::find($cart->pro_id);
                 if ($product) {

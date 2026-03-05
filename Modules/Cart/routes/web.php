@@ -9,8 +9,8 @@ use Modules\Cart\App\Http\Controllers\CartController;
 |--------------------------------------------------------------------------
 */
 
-// Giỏ hàng
-Route::group(['prefix' => 'cart'], function(){
+// Giỏ hàng - yêu cầu đăng nhập
+Route::group(['prefix' => 'cart', 'middleware' => 'CheckLoginUser'], function(){
     Route::get('/', [CartController::class, 'index'])->name('cart.index');
     Route::get('/add/{product}', [CartController::class, 'add'])->name('cart.add');
     Route::get('/delete/{product}', [CartController::class, 'delete'])->name('cart.delete');
