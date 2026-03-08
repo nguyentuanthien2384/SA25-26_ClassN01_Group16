@@ -1,0 +1,1 @@
+a:5:{s:4:"cart";a:2:{i:15;a:2:{s:5:"price";i:600000;s:8:"quantity";i:2;}i:16;a:2:{s:5:"price";i:13500000;s:8:"quantity";i:1;}}s:6:"_token";s:40:"4oN20I1fCCiBzk9ZnLm4GmOFY7aE4MgnZr1NWGoH";s:3:"url";a:1:{s:8:"intended";s:26:"http://localhost:8000/cart";}s:9:"_previous";a:1:{s:3:"url";s:26:"http://localhost:8000/cart";}s:6:"_flash";a:2:{s:3:"old";a:0:{}s:3:"new";a:0:{}}}
